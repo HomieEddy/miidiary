@@ -11,8 +11,8 @@ See: .planning/PROJECT.md (updated 2026-05-17)
 
 Phase: 0 of 5 (Project Scaffolding)
 Plan: 0 of 3 in current phase
-Status: Ready to plan
-Last activity: 2026-05-17 — Roadmap created
+Status: Context gathered — ready to plan
+Last activity: 2026-05-17 — Phase 0 context gathered (13 decisions captured)
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -46,7 +46,11 @@ Progress: [░░░░░░░░░░] 0%
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- (None yet — project initialization)
+- Expo init: create-expo-app blank-typescript + immediate prebuild
+- Directory pre-creation: all src/ subdirs upfront, empty
+- Tab placeholders: minimal Coming Soon, (tabs) group layout, full UI-SPEC tab bar
+- Fonts: useFonts in root layout, local TTF files, all weights
+- Tests: src/tests/ui.test.tsx, theme check assertion, Jest only
 
 ### Pending Todos
 
@@ -65,5 +69,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-05-17
-Stopped at: Roadmap created for Dear Diary (5 phases, scaffold requirements added)
-Resume file: None
+Stopped at: Phase 0 context gathered — ready to plan
+Resume file: .planning/phases/00-project-scaffolding/00-CONTEXT.md

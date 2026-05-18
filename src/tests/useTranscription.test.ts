@@ -58,7 +58,7 @@ describe("useTranscription", () => {
     expect(useEntriesStore.getState().entries).toHaveLength(0);
   });
 
-  it("processRecording does not clear processing on success (TranscriptionResult handles it)", async () => {
+  it("processRecording clears processing on success", async () => {
     mockStubTranscription.mockResolvedValue("Success text");
     mockGetTempFilePath.mockReturnValue(null);
     useRecordingStore.getState().setProcessing(true);
@@ -69,6 +69,6 @@ describe("useTranscription", () => {
       await result.current.processRecording("file:///test.wav");
     });
 
-    expect(useRecordingStore.getState().isProcessing).toBe(true);
+    expect(useRecordingStore.getState().isProcessing).toBe(false);
   });
 });

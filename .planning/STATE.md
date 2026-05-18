@@ -9,34 +9,35 @@ See: .planning/PROJECT.md (updated 2026-05-17)
 
 ## Current Position
 
-Phase: 1 of 5 (Foundation & Audio Capture)
-Plan: 2 of 3 in current phase
-Status: Executing — Plan 01-02 complete
-Last activity: 2026-05-18 — Plan 01-02: Skia waveform, stub transcription, entries store, cn() utility (2 commits)
+Phase: 2 of 5 (Encrypted Storage & Basic Browse)
+Plan: 0 of 2 in current phase
+Status: Complete — Phase 1 all 3 plans executed
+Last activity: 2026-05-18 — Plan 01-03: orchestration hooks, state UI, HomeScreen pipeline (4 commits)
 
 Progress: [████████░░] 67%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 1
-- Average duration: 8 min
-- Total execution time: 0.13 hours
+- Total plans completed: 2
+- Average duration: 9 min
+- Total execution time: 0.28 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 0. Project Scaffolding | 3/3 | 8 min | 3 min |
-| 1. Foundation & Audio Capture | 2/3 | 20 min | 10 min |
+| 1. Foundation & Audio Capture | 3/3 | 28 min | 9 min |
 | 2. Encrypted Storage & Basic Browse | 0/2 | — | — |
 | 3. On-Device ML Pipeline | 0/3 | — | — |
 | 4. Browse, Review, Tasks & Polish | 0/3 | — | — |
 
 **Recent Trend:**
 - Last 5 plans:
-  1. 01-02 — Skia waveform, stub transcription, entries store, cn() (8 min, 2 commits)
-  2. 01-01 — Audio recording engine + UI (12 min, 10 commits)
+  1. 01-03 — Orchestration hooks, state UI, HomeScreen pipeline (8 min, 4 commits)
+  2. 01-02 — Skia waveform, stub transcription, entries store, cn() (8 min, 2 commits)
+  3. 01-01 — Audio recording engine + UI (12 min, 10 commits)
 - Trend: Steady
 
 *Updated after each plan completion*
@@ -56,6 +57,10 @@ Recent decisions affecting current work:
 - Audio recording: expo-audio via `new AudioModule.AudioRecorder()` + `getStatus().metering` (not `createAudioRecorder`)
 - Recording components: Presentational pattern (GlowRing takes `isActive` prop)
 - WHISPER_QUALITY: Added `web` field to satisfy RecordingOptions type
+- useAudioCapture hook: Reanimated shared value buffer (120 samples, 0.3 smoothing alpha) for waveform visualization
+- useTranscription hook: stub transcription → entriesStore → cleanup pipeline
+- ErrorBanner: auto-dismiss after 3s, press-to-retry
+- TranscriptionResult: 4s display then fade-out with spring-in animation
 
 ### Pending Todos
 
@@ -74,5 +79,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-05-18
-Stopped at: Plan 01-02 complete — ready for Plan 01-03
-Resume file: .planning/phases/01-foundation-audio-capture/01-02-PLAN.md
+Stopped at: Phase 1 complete — ready for Phase 2
+Resume file: .planning/phases/02-encrypted-storage-basic-browse/

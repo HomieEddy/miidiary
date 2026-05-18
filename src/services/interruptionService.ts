@@ -11,7 +11,8 @@ export function useInterruptionHandler() {
     setAudioModeAsync({
       allowsRecording: true,
       playsInSilentMode: true,
-      interruptionMode: 'mixWithOthers',
+      interruptionModeIOS: 'mixWithOthers',
+      interruptionModeAndroid: 'duckOthers',
     });
 
     const subscription = AppState.addEventListener('change', (nextState: AppStateStatus) => {

@@ -28,7 +28,8 @@ export class AudioCaptureService {
       await setAudioModeAsync({
         allowsRecording: true,
         playsInSilentMode: true,
-        interruptionMode: 'mixWithOthers',
+        interruptionModeIOS: 'mixWithOthers',
+        interruptionModeAndroid: 'duckOthers',
       });
       return true;
     } catch {

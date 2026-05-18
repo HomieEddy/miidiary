@@ -11,6 +11,7 @@ export function RecordingTimer() {
   const { isRecording, isPaused, duration } = useRecordingStore();
   const opacity = useSharedValue(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const startTimeRef = useRef(0);
 
   const formatTime = useCallback((ms: number): string => {
     const totalSeconds = Math.floor(ms / 1000);
@@ -21,9 +22,11 @@ export function RecordingTimer() {
 
   useEffect(() => {
     if (isRecording && !isPaused) {
-      const startTime = Date.now() - duration;
+      const now = Date.now();
+      const currentDuration = useRecordingStore.getState().duration;
+      startTimeRef.current = now - currentDuration;
       intervalRef.current = setInterval(() => {
-        const elapsed = Date.now() - startTime;
+        const elapsed = Date.now() - startTimeRef.current;
         useRecordingStore.getState().setDuration(elapsed);
       }, 100);
     } else if (!isRecording) {
@@ -39,7 +42,7 @@ export function RecordingTimer() {
         intervalRef.current = null;
       }
     };
-  }, [isRecording, isPaused, duration]);
+  }, [isRecording, isPaused]);
 
   useEffect(() => {
     opacity.value = withTiming(isRecording ? 1 : 0, { duration: 200 });
@@ -59,8 +62,8 @@ export function RecordingTimer() {
           {isPaused ? 'Call in progress — recording paused' : 'Recording'}
         </Text>
       </View>
-      <Text className="font-sans text-4xl font-bold text-foreground text-center tracking-wider">
-        {isPaused ? formatTime(duration) : formatTime(duration)}
+      <Text className={`font-sans text-4xl font-bold text-center tracking-wider ${isPaused ? 'text-muted-foreground' : 'text-foreground'}`}>
+        {formatTime(duration)}
       </Text>
     </Animated.View>
   );

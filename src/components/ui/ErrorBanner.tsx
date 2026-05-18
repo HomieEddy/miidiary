@@ -17,14 +17,15 @@ interface ErrorBannerProps {
   onRetry?: () => void;
 }
 
-export function ErrorBanner({ visible, onRetry }: ErrorBannerProps) {
-  const { errorMessage, setError } = useRecordingStore();
+export function ErrorBanner({ visible, onRetry }: ErrorBannerProps): React.ReactElement | null {
+  const errorMessage = useRecordingStore((state) => state.errorMessage);
+  const setError = useRecordingStore((state) => state.setError);
   const opacity = useSharedValue(0);
   const translateX = useSharedValue(-20);
 
   useEffect(() => {
     if (visible && errorMessage) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
 
       opacity.value = withTiming(1, {
         duration: 300,

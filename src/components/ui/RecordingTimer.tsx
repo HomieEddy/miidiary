@@ -6,9 +6,12 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useRecordingStore } from '@/stores/recordingStore';
+import { cn } from '@/utils/cn';
 
-export function RecordingTimer() {
-  const { isRecording, isPaused, duration } = useRecordingStore();
+export function RecordingTimer(): React.ReactElement | null {
+  const duration = useRecordingStore((state) => state.duration);
+  const isPaused = useRecordingStore((state) => state.isPaused);
+  const isRecording = useRecordingStore((state) => state.isRecording);
   const opacity = useSharedValue(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startTimeRef = useRef(0);
@@ -62,7 +65,10 @@ export function RecordingTimer() {
           {isPaused ? 'Call in progress — recording paused' : 'Recording'}
         </Text>
       </View>
-      <Text className={`font-sans text-4xl font-bold text-center tracking-wider ${isPaused ? 'text-muted-foreground' : 'text-foreground'}`}>
+      <Text className={cn(
+        'font-sans text-4xl font-bold text-center tracking-wider',
+        isPaused ? 'text-muted-foreground' : 'text-foreground'
+      )}>
         {formatTime(duration)}
       </Text>
     </Animated.View>

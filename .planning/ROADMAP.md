@@ -55,7 +55,7 @@ Plans:
 
 Plans:
 - [x] 01-01-PLAN.md — Audio recording engine (expo-audio 16kHz mono WAV, recordingStore, interruption handler) + recording UI (Rive RecorderButton with Reanimated spring + haptics, GlowRing, RecordingTimer, PromptText) + HomeScreen refactor from placeholder
-- [ ] 01-02-PLAN.md — Skia WaveformCanvas (gradient-filled path), stub transcription (1-3s delay + cleanup), in-memory entriesStore, cn() utility, deps (expo-file-system, clsx, tailwind-merge)
+- [x] 01-02-PLAN.md — Skia WaveformCanvas (gradient-filled path), stub transcription (1-3s delay + cleanup), in-memory entriesStore, cn() utility, deps (expo-file-system, clsx, tailwind-merge)
 - [ ] 01-03-PLAN.md — Orchestration hooks (useAudioCapture, useTranscription), state UI (ProcessingState, TranscriptionResult, ErrorBanner), HomeScreen refactor with full pipeline, shake-to-clear stub (UX-06)
 
 ### Phase 2: Encrypted Storage & Basic Browse
@@ -128,7 +128,7 @@ Phases execute in numeric order: 0 → 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 0. Project Scaffolding | 0/3 | Planned | - |
-| 1. Foundation & Audio Capture | 1/3 | In progress | 2026-05-18 |
+| 1. Foundation & Audio Capture | 2/3 | In progress | 2026-05-18 |
 | 2. Encrypted Storage & Basic Browse | 0/2 | Not started | - |
 | 3. On-Device ML Pipeline | 0/3 | Not started | - |
 | 4. Browse, Review, Tasks & Polish | 0/4 | Not started | - |

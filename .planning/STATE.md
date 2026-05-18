@@ -10,32 +10,33 @@ See: .planning/PROJECT.md (updated 2026-05-17)
 ## Current Position
 
 Phase: 1 of 5 (Foundation & Audio Capture)
-Plan: 1 of 3 in current phase
-Status: Executing — Plan 01-01 complete
-Last activity: 2026-05-18 — Plan 01-01: Audio recording engine + recording UI (10 commits)
+Plan: 2 of 3 in current phase
+Status: Executing — Plan 01-02 complete
+Last activity: 2026-05-18 — Plan 01-02: Skia waveform, stub transcription, entries store, cn() utility (2 commits)
 
-Progress: [██████░░░░] 53%
+Progress: [████████░░] 67%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
-- Average duration: N/A
-- Total execution time: 0.0 hours
+- Total plans completed: 1
+- Average duration: 8 min
+- Total execution time: 0.13 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 0. Project Scaffolding | 3/3 | 8 min | 3 min |
-| 1. Foundation & Audio Capture | 1/3 | 12 min | 12 min |
+| 1. Foundation & Audio Capture | 2/3 | 20 min | 10 min |
 | 2. Encrypted Storage & Basic Browse | 0/2 | — | — |
 | 3. On-Device ML Pipeline | 0/3 | — | — |
 | 4. Browse, Review, Tasks & Polish | 0/3 | — | — |
 
 **Recent Trend:**
 - Last 5 plans:
-  1. 01-01 — Audio recording engine + UI (12 min, 10 commits)
+  1. 01-02 — Skia waveform, stub transcription, entries store, cn() (8 min, 2 commits)
+  2. 01-01 — Audio recording engine + UI (12 min, 10 commits)
 - Trend: Steady
 
 *Updated after each plan completion*
@@ -73,5 +74,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-05-18
-Stopped at: Plan 01-01 complete — ready for Plan 01-02
-Resume file: .planning/phases/01-foundation-audio-capture/01-01-PLAN.md
+Stopped at: Plan 01-02 complete — ready for Plan 01-03
+Resume file: .planning/phases/01-foundation-audio-capture/01-02-PLAN.md

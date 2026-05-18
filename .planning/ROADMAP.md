@@ -7,7 +7,7 @@ Dear Diary transforms voice capture into organized entries — from a single tap
 ## Phases
 
 - [ ] **Phase 0: Project Scaffolding** - React Native Expo app initialized with all dependencies, theme system, and a basic render test
-- [ ] **Phase 1: Foundation & Audio Capture** - Core record → visualize → transcribe → discard loop with haptic feedback
+- [x] **Phase 1: Foundation & Audio Capture** - Core record → visualize → transcribe → discard loop with haptic feedback
 - [ ] **Phase 2: Encrypted Storage & Basic Browse** - SQLCipher database, entry persistence, and chronological entry list
 - [ ] **Phase 3: On-Device ML Pipeline** - On-device speech-to-text (EN/FR) and auto-classification (Diary/Task/Note)
 - [ ] **Phase 4: Browse, Review, Tasks & Polish** - Search, filter, edit entries, task management, motion animations, dark mode
@@ -26,14 +26,14 @@ Dear Diary transforms voice capture into organized entries — from a single tap
    4. Expo Router file-based routing works — navigating to an empty `/diary` route shows the diary screen
    5. `npx expo run:ios` / `npx expo run:android` completes a successful native prebuild without errors
    6. Basic Jest render test (`library/ui.test.tsx`) passes — verifies the app shell renders without crashing
-**Plans**: TBD
+**Plans**: 3 plans
 
-**UI hint**: no
+**Wave Structure**: 1 → 2 → 3
 
 Plans:
-- [ ] 00-01: Initialize Expo project with CNG (prebuild), install all locked dependencies, configure NativeWind v4 + Babel plugin
-- [ ] 00-02: Wire theme system (tailwind.config.js, colors.ts, typography.ts, app.json config), set up Expo Router (Home + Diary + Tasks + Digests tabs)
-- [ ] 00-03: Basic render test (Jest + @testing-library/react-native) + verify native prebuild succeeds
+- [ ] 00-01-PLAN.md — Initialize Expo project (CNG + prebuild), install all locked dependencies, configure NativeWind v4 Babel plugin + CSS entry, create src/ directory structure, bundle font TTF files
+- [ ] 00-02-PLAN.md — Wire theme system (app.json brand colors, tailwind.config.js registration, tsconfig path aliases), create root layout with useFonts font loading + SplashScreen, build Expo Router tab navigation with UI-SPEC tab bar (Solar icons, border-4, offset shadow, pink skew underline), 4 placeholder screens
+- [ ] 00-03-PLAN.md — Configure Jest (jest-expo preset, @/ path mapping), write basic render test (ui.test.tsx) verifying app shell rendering and theme class application
 
 ### Phase 1: Foundation & Audio Capture
 **Goal**: Users can capture voice recordings with tactile feedback, see live audio visualization, and have interruptions handled gracefully — audio is ephemeral, discarded after transcription
@@ -47,13 +47,16 @@ Plans:
    4. User can tap the button once to stop recording — audio is queued for transcription
    5. Raw audio file is discarded immediately after transcription completes (Phase 1 stubs the pipeline; actual STT integration in Phase 3)
    6. Incoming calls or notifications during recording are handled gracefully — no crash or data loss
-**Plans**: TBD
+**Plans**: 3 plans
+
+**Wave Structure**: 1 → 2 → 3
 
 **UI hint**: yes
 
 Plans:
-- [ ] 01-01: Audio capture service (record, stop, temp file) + recording UI (Skia waveform viz, Rive mic-to-equalizer morphing, haptics)
-- [ ] 01-02: Interruption handling (calls, notifications) + temp audio cleanup after transcription stub + audio buffer management
+- [x] 01-01-PLAN.md — Audio recording engine (expo-audio 16kHz mono WAV, recordingStore, interruption handler) + recording UI (Rive RecorderButton with Reanimated spring + haptics, GlowRing, RecordingTimer, PromptText) + HomeScreen refactor from placeholder
+- [x] 01-02-PLAN.md — Skia WaveformCanvas (gradient-filled path), stub transcription (1-3s delay + cleanup), in-memory entriesStore, cn() utility, deps (expo-file-system, clsx, tailwind-merge)
+- [x] 01-03-PLAN.md — Orchestration hooks (useAudioCapture, useTranscription), state UI (ProcessingState, TranscriptionResult, ErrorBanner), HomeScreen refactor with full pipeline, shake-to-clear stub (UX-06)
 
 ### Phase 2: Encrypted Storage & Basic Browse
 **Goal**: Users can save entries with full encryption, view all entries in a chronological list, and delete data — all offline
@@ -124,8 +127,8 @@ Phases execute in numeric order: 0 → 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 0. Project Scaffolding | 0/3 | Not started | - |
-| 1. Foundation & Audio Capture | 0/2 | Not started | - |
+| 0. Project Scaffolding | 0/3 | Planned | - |
+| 1. Foundation & Audio Capture | 3/3 | Complete | 2026-05-18 |
 | 2. Encrypted Storage & Basic Browse | 0/2 | Not started | - |
 | 3. On-Device ML Pipeline | 0/3 | Not started | - |
 | 4. Browse, Review, Tasks & Polish | 0/4 | Not started | - |

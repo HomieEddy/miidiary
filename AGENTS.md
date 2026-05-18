@@ -281,11 +281,18 @@ Examples:
 - Body: optional but REQUIRED when the change isn't self-explanatory
 - Max subject: 72 chars
 
-### 4.2 Branch Strategy
-- `master` — production, always releasable
-- `feat/<phase>-<short-desc>` — feature branches from master
-- `fix/<short-desc>` — bugfix branches
-- `refactor/<short-desc>` — refactor branches
+### 4.2 Branch Strategy (Per-Phase)
+- `master` — production, always releasable, accumulates completed phases
+- Each phase gets its own feature branch from master:
+  - `feat/phase-0-scaffolding`
+  - `feat/phase-1-audio-capture`
+  - `feat/phase-2-encrypted-storage`
+  - etc.
+- Commits accumulate on the phase branch during execution
+- The phase branch is **merged into master only after all 9 workflow steps pass** (discuss → plan → execute → test → verify → review → fix → ship → docs-update)
+- After merge, delete the phase branch and start the next phase from the updated master
+- `fix/<short-desc>` — hotfix branches from master for bugs found after phase completion
+- `refactor/<short-desc>` — refactor branches from master
 
 ### 4.3 Commit Frequency
 - One commit per logical change (not per file)

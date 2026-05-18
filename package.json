@@ -13,6 +13,7 @@
     "@realm/react": "^0.20.0",
     "@shopify/flash-list": "^2.3.1",
     "@shopify/react-native-skia": "^2.6.2",
+    "clsx": "^2.1.1",
     "expo": "~54.0.33",
     "expo-audio": "~1.1.1",
     "expo-background-fetch": "^55.0.16",
@@ -42,6 +43,7 @@
     "react-native-worklets": "^0.8.3",
     "realm": "^20.2.0",
     "rive-react-native": "^9.8.3",
+    "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.0",
     "zustand": "^5.0.13"
   },

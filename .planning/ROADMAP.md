@@ -26,14 +26,14 @@ Dear Diary transforms voice capture into organized entries — from a single tap
    4. Expo Router file-based routing works — navigating to an empty `/diary` route shows the diary screen
    5. `npx expo run:ios` / `npx expo run:android` completes a successful native prebuild without errors
    6. Basic Jest render test (`library/ui.test.tsx`) passes — verifies the app shell renders without crashing
-**Plans**: TBD
+**Plans**: 3 plans
 
-**UI hint**: no
+**Wave Structure**: 1 → 2 → 3
 
 Plans:
-- [ ] 00-01: Initialize Expo project with CNG (prebuild), install all locked dependencies, configure NativeWind v4 + Babel plugin
-- [ ] 00-02: Wire theme system (tailwind.config.js, colors.ts, typography.ts, app.json config), set up Expo Router (Home + Diary + Tasks + Digests tabs)
-- [ ] 00-03: Basic render test (Jest + @testing-library/react-native) + verify native prebuild succeeds
+- [ ] 00-01-PLAN.md — Initialize Expo project (CNG + prebuild), install all locked dependencies, configure NativeWind v4 Babel plugin + CSS entry, create src/ directory structure, bundle font TTF files
+- [ ] 00-02-PLAN.md — Wire theme system (app.json brand colors, tailwind.config.js registration, tsconfig path aliases), create root layout with useFonts font loading + SplashScreen, build Expo Router tab navigation with UI-SPEC tab bar (Solar icons, border-4, offset shadow, pink skew underline), 4 placeholder screens
+- [ ] 00-03-PLAN.md — Configure Jest (jest-expo preset, @/ path mapping), write basic render test (ui.test.tsx) verifying app shell rendering and theme class application
 
 ### Phase 1: Foundation & Audio Capture
 **Goal**: Users can capture voice recordings with tactile feedback, see live audio visualization, and have interruptions handled gracefully — audio is ephemeral, discarded after transcription
@@ -124,7 +124,7 @@ Phases execute in numeric order: 0 → 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 0. Project Scaffolding | 0/3 | Not started | - |
+| 0. Project Scaffolding | 0/3 | Planned | - |
 | 1. Foundation & Audio Capture | 0/2 | Not started | - |
 | 2. Encrypted Storage & Basic Browse | 0/2 | Not started | - |
 | 3. On-Device ML Pipeline | 0/3 | Not started | - |

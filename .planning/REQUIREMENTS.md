@@ -80,41 +80,41 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| VOIC-01 | | Pending |
-| VOIC-02 | | Pending |
-| VOIC-03 | | Pending |
-| VOIC-04 | | Pending |
-| VOIC-05 | | Pending |
-| VOIC-06 | | Pending |
-| TRAN-01 | | Pending |
-| TRAN-02 | | Pending |
-| TRAN-03 | | Pending |
-| TRAN-04 | | Pending |
-| TRAN-05 | | Pending |
-| CLAS-01 | | Pending |
-| CLAS-02 | | Pending |
-| CLAS-03 | | Pending |
-| STOR-01 | | Pending |
-| STOR-02 | | Pending |
-| STOR-03 | | Pending |
-| STOR-04 | | Pending |
-| STOR-05 | | Pending |
-| BROW-01 | | Pending |
-| BROW-02 | | Pending |
-| BROW-03 | | Pending |
-| BROW-04 | | Pending |
-| BROW-05 | | Pending |
-| UX-01 | | Pending |
-| UX-02 | | Pending |
-| UX-03 | | Pending |
-| UX-04 | | Pending |
-| TASK-01 | | Pending |
-| TASK-02 | | Pending |
+| VOIC-01 | Phase 1 | Pending |
+| VOIC-02 | Phase 1 | Pending |
+| VOIC-03 | Phase 1 | Pending |
+| VOIC-04 | Phase 1 | Pending |
+| VOIC-05 | Phase 1 | Pending |
+| VOIC-06 | Phase 1 | Pending |
+| TRAN-01 | Phase 3 | Pending |
+| TRAN-02 | Phase 3 | Pending |
+| TRAN-03 | Phase 3 | Pending |
+| TRAN-04 | Phase 3 | Pending |
+| TRAN-05 | Phase 3 | Pending |
+| CLAS-01 | Phase 3 | Pending |
+| CLAS-02 | Phase 3 | Pending |
+| CLAS-03 | Phase 3 | Pending |
+| STOR-01 | Phase 2 | Pending |
+| STOR-02 | Phase 2 | Pending |
+| STOR-03 | Phase 2 | Pending |
+| STOR-04 | Phase 2 | Pending |
+| STOR-05 | Phase 2 | Pending |
+| BROW-01 | Phase 2 | Pending |
+| BROW-02 | Phase 4 | Pending |
+| BROW-03 | Phase 4 | Pending |
+| BROW-04 | Phase 4 | Pending |
+| BROW-05 | Phase 4 | Pending |
+| UX-01 | Phase 4 | Pending |
+| UX-02 | Phase 1 | Pending |
+| UX-03 | Phase 3 | Pending |
+| UX-04 | Phase 4 | Pending |
+| TASK-01 | Phase 4 | Pending |
+| TASK-02 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 30 total
-- Mapped to phases: 0
-- Unmapped: 30
+- Mapped to phases: 30
+- Unmapped: 0
 
 ---
 

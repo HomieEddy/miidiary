@@ -21,7 +21,7 @@ export const useEntriesStore = create<EntriesState>((set, get) => ({
   addEntry: (entry) =>
     set((state) => ({
       entries: [
-        { ...entry, id: `entry-${Date.now()}-${Math.random().toString(36).slice(2, 8)}` },
+        { ...entry, id: `entry-${crypto.randomUUID()}` },
         ...state.entries,
       ],
     })),

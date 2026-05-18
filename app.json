@@ -1,31 +1,48 @@
 {
   "expo": {
-    "name": "miidiary-expo-init",
-    "slug": "miidiary-expo-init",
+    "name": "Dear Diary",
+    "slug": "dear-diary",
+    "scheme": "dear-diary",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "backgroundColor": "#FDF8F0",
+    "primaryColor": "#FF6B9E",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#FDF8F0"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "UIViewControllerBasedStatusBarAppearance": false
+      },
+      "statusBar": {
+        "backgroundColor": "#FDF8F0"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#FDF8F0"
       },
+      "backgroundColor": "#FDF8F0",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.miidiaryexpoinit"
+      "package": "com.anonymous.miidiaryexpoinit",
+      "statusBar": {
+        "backgroundColor": "#FDF8F0"
+      }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
-    }
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router"
+    ]
   }
 }

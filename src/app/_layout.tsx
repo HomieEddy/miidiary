@@ -5,6 +5,7 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
+import { BiometricGate } from "@/components/ui/BiometricGate";
 import "../../global.css";
 
 void SplashScreen.preventAutoHideAsync().catch(() => {
@@ -30,9 +31,11 @@ export default function RootLayout(): ReactElement | null {
   }
 
   return (
-    <View className="flex-1 bg-background">
-      <StatusBar style="dark" />
-      <Stack screenOptions={{ headerShown: false }} />
-    </View>
+    <BiometricGate>
+      <View className="flex-1 bg-background">
+        <StatusBar style="dark" />
+        <Stack screenOptions={{ headerShown: false }} />
+      </View>
+    </BiometricGate>
   );
 }

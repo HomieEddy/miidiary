@@ -9,6 +9,7 @@ import Rive, { RiveRef } from 'rive-react-native';
 import * as Haptics from 'expo-haptics';
 import { useRecordingStore } from '@/stores/recordingStore';
 import { SvgXml } from 'react-native-svg';
+import { colors } from '@/theme/colors';
 
 interface RecorderButtonProps {
   onStartRecording: () => void;
@@ -83,7 +84,7 @@ export function RecorderButton({ onStartRecording, onStopRecording }: RecorderBu
           ref={riveRef}
           resourceName="mic-to-equalizer"
           stateMachineName="MicStateMachine"
-          style={{ width: 144, height: 144 }}
+          className="w-[144px] h-[144px]"
           autoplay={true}
         />
       </Animated.View>
@@ -92,7 +93,7 @@ export function RecorderButton({ onStartRecording, onStopRecording }: RecorderBu
           xml={isRecording ? RECORDING_ICON : IDLE_ICON}
           width={72}
           height={72}
-          color="#FF6B9E"
+          color={colors.primary}
         />
       </View>
     </Pressable>

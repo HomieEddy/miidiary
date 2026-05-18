@@ -8,8 +8,12 @@ This project uses the GSD (Get Shit Done) workflow. Planning artifacts live in `
 - `/gsd-discuss-phase N` — Discuss phase N before planning
 - `/gsd-plan-phase N` — Plan phase N
 - `/gsd-execute-phase N` — Execute phase N
+- `/gsd-add-tests N` — Generate tests for phase N
 - `/gsd-verify-work N` — Verify phase N deliverables
+- `/gsd-code-review` — Review source files for bugs, security, quality
+- `/gsd-code-review --fix` — Auto-fix code review findings
 - `/gsd-ship` — Create PR and prepare for merge
+- `/gsd-docs-update` — Generate/update project documentation
 - `/gsd-note` — Capture an idea
 - `/gsd-add-todo` — Capture task from conversation
 
@@ -23,6 +27,105 @@ This project uses the GSD (Get Shit Done) workflow. Planning artifacts live in `
 - `.planning/STATE.md` — Project memory and session continuity
 - `theme/` — Tailwind config, color tokens, typography constants
 - `ui-export-react/` — Reference React components from Sleek design
+
+## Phase Execution Workflow (STRICT SEQUENCE)
+
+Every phase MUST run through this exact workflow in order. Do NOT skip steps or reorder. After the final step, advance to the next phase and repeat.
+
+### Per-Phase Sequence
+
+```
+Step  1 — /gsd-discuss-phase N
+  → Gather implementation decisions, capture CONTEXT.md
+
+Step  2 — /gsd-plan-phase N
+  → Create PLAN.md with task breakdown, dependency analysis
+
+Step  3 — /gsd-execute-phase N
+  → Build everything per PLAN.md with atomic commits
+
+Step  4 — /gsd-add-tests N
+  → Generate unit, integration, and E2E tests for phase
+
+Step  5 — /gsd-verify-work N
+  → Validate phase deliverables match success criteria
+
+Step  6 — /gsd-code-review
+  → Audit all changed files for bugs, security, quality
+
+Step  7 — /gsd-code-review --fix
+  → Auto-fix all issues found by code review
+
+Step  8 — /gsd-ship
+  → Create PR branch, run final checks, prepare merge
+
+Step  9 — /gsd-docs-update
+  → Update PROJECT.md, ROADMAP.md, STATE.md with phase results
+```
+
+### Completion Check
+
+After Step 9, check ROADMAP.md:
+
+- **If all phases are complete** → `/gsd-complete-milestone` to archive and wrap
+- **If more phases remain** → increment `N` by 1, return to Step 1
+- **If phase needs immediate fix** → run `/gsd-audit-fix` then return to verification
+
+### Workflow diagram
+
+```
+           ┌─────────────────────┐
+           │  /gsd-discuss-phase │
+           └────────┬────────────┘
+                    │
+           ┌────────▼────────────┐
+           │   /gsd-plan-phase   │
+           └────────┬────────────┘
+                    │
+           ┌────────▼────────────┐
+           │ /gsd-execute-phase  │
+           └────────┬────────────┘
+                    │
+           ┌────────▼────────────┐
+           │   /gsd-add-tests    │
+           └────────┬────────────┘
+                    │
+           ┌────────▼────────────┐
+           │  /gsd-verify-work   │
+           └────────┬────────────┘
+                    │
+           ┌────────▼────────────┐
+           │  /gsd-code-review   │
+           └────────┬────────────┘
+                    │
+           ┌────────▼────────────┐
+           │/gsd-code-review--fix│
+           └────────┬────────────┘
+                    │
+           ┌────────▼────────────┐
+           │     /gsd-ship       │
+           └────────┬────────────┘
+                    │
+           ┌────────▼────────────┐
+           │ /gsd-docs-update    │
+           └────────┬────────────┘
+                    │
+           ┌────────▼────────────┐
+           │  ROADMAP done?      │
+           │  ┌───┐    ┌───┐    │
+           │  │NO│    │YES│    │
+           │  └─┬─┘    └─┬─┘    │
+           └────┼────────┼──────┘
+                │        │
+      N += 1 ───┘        └─── /gsd-complete-milestone
+```
+
+### Override Rules
+
+- **Only skip if:** a step produces no output (e.g., tests already written, no review findings)
+- **Never skip:** discuss, plan, execute, ship
+- **If a step fails:** fix the issue, do NOT advance to the next step until the failure is resolved
+- **If scope creep surfaces during plan/execute:** defer to backlog via `/gsd-add-backlog`, do NOT expand current phase
 
 ## Phases
 

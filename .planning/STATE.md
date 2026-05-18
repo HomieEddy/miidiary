@@ -9,10 +9,10 @@ See: .planning/PROJECT.md (updated 2026-05-17)
 
 ## Current Position
 
-Phase: 0 of 5 (Project Scaffolding)
-Plan: 3 of 3 in current phase
+Phase: 1 of 5 (Foundation & Audio Capture)
+Plan: 0 of 3 in current phase
 Status: Planned — ready to execute
-Last activity: 2026-05-17 — Phase 0 planned (3 plans, all verified)
+Last activity: 2026-05-18 — Phase 1 planned (3 plans, all verified)
 
 Progress: [████░░░░░░] 40%
 
@@ -28,7 +28,7 @@ Progress: [████░░░░░░] 40%
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 0. Project Scaffolding | 3/3 | — | — |
-| 1. Foundation & Audio Capture | 0/2 | — | — |
+| 1. Foundation & Audio Capture | 0/3 | — | — |
 | 2. Encrypted Storage & Basic Browse | 0/2 | — | — |
 | 3. On-Device ML Pipeline | 0/3 | — | — |
 | 4. Browse, Review, Tasks & Polish | 0/3 | — | — |

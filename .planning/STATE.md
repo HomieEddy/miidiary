@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-05-17)
 
 **Core value:** Instant, private, offline voice capture that automatically organizes thoughts into the right place — so users never lose an idea.
-**Current focus:** Phase 1: Foundation & Audio Capture
+**Current focus:** Phase 2: Encrypted Storage & Basic Browse
 
 ## Current Position
 

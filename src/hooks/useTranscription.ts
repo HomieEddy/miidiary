@@ -4,8 +4,13 @@ import { useEntriesStore } from '@/stores/entriesStore';
 import { useRecordingStore } from '@/stores/recordingStore';
 import { audioCaptureService } from '@/services/audioCaptureService';
 
-export function useTranscription() {
-  const { setProcessing, setError } = useRecordingStore();
+interface UseTranscriptionResult {
+  processRecording: (audioUri: string) => Promise<void>;
+}
+
+export function useTranscription(): UseTranscriptionResult {
+  const setError = useRecordingStore((state) => state.setError);
+  const setProcessing = useRecordingStore((state) => state.setProcessing);
   const addEntry = useEntriesStore((s) => s.addEntry);
 
   const processRecording = useCallback(async (audioUri: string) => {

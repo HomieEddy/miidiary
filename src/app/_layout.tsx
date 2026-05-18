@@ -1,13 +1,17 @@
+import type { ReactElement } from "react";
 import { useEffect } from "react";
 import { View } from "react-native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
+import "../../global.css";
 
-SplashScreen.preventAutoHideAsync();
+void SplashScreen.preventAutoHideAsync().catch(() => {
+  // Ignore splash control errors in dev builds.
+});
 
-export default function RootLayout() {
+export default function RootLayout(): ReactElement | null {
   const [loaded, error] = useFonts({
     Nunito: require("../assets/fonts/Nunito.ttf"),
     Fredoka: require("../assets/fonts/Fredoka.ttf"),
@@ -17,11 +21,13 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (loaded || error) {
-      SplashScreen.hideAsync();
+      void SplashScreen.hideAsync();
     }
   }, [loaded, error]);
 
-  if (!loaded && !error) return null;
+  if (!loaded && !error) {
+    return null;
+  }
 
   return (
     <View className="flex-1 bg-background">

@@ -10,9 +10,10 @@
 - [ ] **VOIC-01**: User can start recording with a single tap from the home screen
 - [ ] **VOIC-02**: Recording begins instantly with no perceptible delay
 - [ ] **VOIC-03**: User can stop recording with a single tap
-- [ ] **VOIC-04**: App records in high-quality audio format suitable for on-device STT
+- [ ] **VOIC-04**: App records audio suitable for on-device STT — quality prioritized for transcription clarity, not playback fidelity
 - [ ] **VOIC-05**: App handles audio interruptions (calls, notifications) gracefully — no crash or data loss
 - [ ] **VOIC-06**: Recording state shown clearly via Skia-accelerated voice visualization (amplitude waveform)
+- [ ] **VOIC-07**: Raw audio file is discarded immediately after transcription completes — only text persists
 
 ### Transcription (STT)
 
@@ -21,6 +22,7 @@
 - [ ] **TRAN-03**: Transcription progress is visible to the user
 - [ ] **TRAN-04**: English speech is transcribed accurately
 - [ ] **TRAN-05**: French (Canadian/Quebec) speech is transcribed accurately
+- [ ] **TRAN-06**: Raw audio file is deleted immediately after transcription and classification complete — only text entry persists
 
 ### Auto-Classification
 
@@ -47,7 +49,7 @@
 - [ ] **BROW-01**: User can view a chronological list of all entries (powered by @shopify/flash-list)
 - [ ] **BROW-02**: User can filter entries by type (Diary / Task / Reference Note)
 - [ ] **BROW-03**: User can search entry text content
-- [ ] **BROW-04**: User can read full entry text and listen to original audio
+- [ ] **BROW-04**: User can read full entry text (audio is not persisted — text-only after transcription)
 - [ ] **BROW-05**: User can edit entry text and classification
 
 ### UX, Motion & Animations
@@ -94,6 +96,7 @@
 | Social or sharing features | Personal utility — not a social app |
 | AI chat assistant | Would distract from core capture loop |
 | Photo/video attachments | Voice-only for v1; media adds complexity |
+| Audio file persistence | Audio is ephemeral — discarded after transcription; only text is stored |
 | Web or desktop clients | Mobile-only for v1 |
 | Real-time collaboration | Personal app only |
 
@@ -103,8 +106,8 @@
 
 | Category | Count | Requirement IDs |
 |----------|-------|-----------------|
-| Voice Capture | 6 | VOIC-01–06 |
-| Transcription (STT) | 5 | TRAN-01–05 |
+| Voice Capture | 7 | VOIC-01–07 |
+| Transcription (STT) | 6 | TRAN-01–06 |
 | Auto-Classification | 3 | CLAS-01–03 |
 | Storage & Privacy | 6 | STOR-01–06 |
 | Security & Biometrics | 2 | SEC-01–02 |
@@ -113,20 +116,20 @@
 | Task Management | 2 | TASK-01–02 |
 | Background Processing | 2 | BACK-01–02 |
 | Testing & Verification | 2 | TEST-01–02 |
-| **Total** | **43** | |
+| **Total** | **45** | |
 
 ### Phase Mapping
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| VOIC-01-06 | Phase 1 | Pending |
+| VOIC-01-07 | Phase 1 | Pending |
 | UX-02 | Phase 1 | Pending |
 | UX-03 | Phase 1 | Pending |
 | UX-06 | Phase 1 | Pending |
 | STOR-01-06 | Phase 2 | Pending |
 | SEC-01-02 | Phase 2 | Pending |
 | BROW-01 | Phase 2 | Pending |
-| TRAN-01-05 | Phase 3 | Pending |
+| TRAN-01-06 | Phase 3 | Pending |
 | CLAS-01-03 | Phase 3 | Pending |
 | UX-10 | Phase 3 | Pending |
 | BACK-01-02 | Phase 3 | Pending |
@@ -138,8 +141,8 @@
 | TEST-01-02 | Phase 4 | Pending |
 
 **Coverage:**
-- v1 requirements: 43 total
-- Mapped to phases: 43
+- v1 requirements: 45 total
+- Mapped to phases: 45
 - Unmapped: 0 ✓
 
 ---

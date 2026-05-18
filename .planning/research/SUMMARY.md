@@ -37,6 +37,7 @@
 - **"Thought Shredder"**: Cinematic card-to-categories transition via Reanimated staggered layout animations
 - **Rive vector states**: Mic morphs into fluid equalizer on GPU — no React render cycle involved
 - **Skia voice viz**: Amplitude waveform renders entirely on GPU canvas
+- **Ephemeral audio**: Raw recording discarded after transcription — only text persists; no audio files accumulate on device
 - **100% local, zero account**: No cloud, no sign-up, no data leaves the device
 - **Bilingual EN/FR-CA**: Quebec French optimized via react-native-whisper multilingual model
 

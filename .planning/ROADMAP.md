@@ -2,11 +2,11 @@
 
 ## Overview
 
-Dear Diary transforms voice capture into organized entries — from a single tap to record, through on-device transcription and auto-classification, to browsing your diary entries, tasks, and reference notes — all offline, all encrypted, with zero cloud. The build progresses through 4 coarse phases: first the audio capture foundation, then encrypted persistence, followed by the on-device ML pipeline (STT + NLP), and finally the full browse/edit experience with polish.
+Dear Diary transforms voice capture into organized entries — from a single tap to record, through on-device transcription and auto-classification, to browsing your diary entries, tasks, and reference notes — all offline, all encrypted, with zero cloud. Audio is ephemeral: discarded immediately after transcription. The build progresses through 4 coarse phases: first the audio capture foundation, then encrypted persistence, followed by the on-device ML pipeline (STT + NLP), and finally the full browse/edit experience with polish.
 
 ## Phases
 
-- [ ] **Phase 1: Foundation & Audio Capture** - Project scaffold and the core record/playback loop with haptic feedback
+- [ ] **Phase 1: Foundation & Audio Capture** - Project scaffold and the core record → visualize → transcribe → discard loop with haptic feedback
 - [ ] **Phase 2: Encrypted Storage & Basic Browse** - SQLCipher database, entry persistence, and chronological entry list
 - [ ] **Phase 3: On-Device ML Pipeline** - On-device speech-to-text (EN/FR) and auto-classification (Diary/Task/Note)
 - [ ] **Phase 4: Browse, Review, Tasks & Polish** - Search, filter, edit entries, task management, motion animations, dark mode
@@ -14,43 +14,46 @@ Dear Diary transforms voice capture into organized entries — from a single tap
 ## Phase Details
 
 ### Phase 1: Foundation & Audio Capture
-**Goal**: Users can instantly capture voice recordings with tactile feedback, replay them, and have interruptions handled gracefully
+**Goal**: Users can capture voice recordings with tactile feedback, see live audio visualization, and have interruptions handled gracefully — audio is ephemeral, discarded after transcription
 **Mode**: mvp
 **Depends on**: Nothing (first phase)
-**Requirements**: VOIC-01, VOIC-02, VOIC-03, VOIC-04, VOIC-05, VOIC-06, UX-02
+**Requirements**: VOIC-01, VOIC-02, VOIC-03, VOIC-04, VOIC-05, VOIC-06, VOIC-07, UX-02, UX-03, UX-06
 **Success Criteria** (what must be TRUE):
-  1. User can open the app and see a clean home screen with a single recording button
-  2. User can tap the button once to instantly start recording (zero perceptible delay) with haptic feedback
-  3. User can see recording state clearly (waveform, timer, or visual indicator) during capture
-  4. User can tap the button once to stop recording, then replay the captured audio
-  5. Incoming calls or notifications during recording are handled gracefully — no crash or data loss
+   1. User can open the app and see a clean home screen with a single recording button
+   2. User can tap the button once to instantly start recording (zero perceptible delay) with haptic feedback
+   3. User can see recording state clearly via Skia waveform visualization during capture
+   4. User can tap the button once to stop recording — audio is queued for transcription
+   5. Raw audio file is discarded immediately after transcription completes (Phase 1 stubs the pipeline; actual STT integration in Phase 3)
+   6. Incoming calls or notifications during recording are handled gracefully — no crash or data loss
 **Plans**: TBD
 
 **UI hint**: yes
 
 Plans:
 - [ ] 01-01: Project scaffolding, Expo Router navigation, theme system, splash screen
-- [ ] 01-02: Audio capture service (record, stop, file save) + recording UI (button, waveform/timer indicator, haptics)
-- [ ] 01-03: Audio playback service + interruption handling (calls, notifications) + audio file management
+- [ ] 01-02: Audio capture service (record, stop, temp file) + recording UI (Skia waveform viz, Rive mic-to-equalizer morphing, haptics)
+- [ ] 01-03: Interruption handling (calls, notifications) + temp audio cleanup after transcription stub + audio buffer management
 
 ### Phase 2: Encrypted Storage & Basic Browse
-**Goal**: Users can save recordings with full encryption, view all entries in a chronological list, and delete data — all offline
+**Goal**: Users can save entries with full encryption, view all entries in a chronological list, and delete data — all offline
 **Mode**: mvp
 **Depends on**: Phase 1
-**Requirements**: STOR-01, STOR-02, STOR-03, STOR-04, STOR-05, BROW-01
+**Requirements**: STOR-01, STOR-02, STOR-03, STOR-04, STOR-05, STOR-06, SEC-01, SEC-02, BROW-01
 **Success Criteria** (what must be TRUE):
-  1. All entries survive app restart — persisted in an encrypted local database
-  2. Encryption keys are stored in platform secure storage (iOS Keychain / Android Keystore)
-  3. No data is ever sent to external servers — app functions fully in airplane mode with no degraded behavior
-  4. User can view a chronological list of all saved entries
-  5. User can delete individual entries or wipe all data from settings
+   1. All entries survive app restart — persisted in an encrypted Realm database
+   2. Encryption keys are stored in iOS Keychain / Android Keystore via react-native-keychain
+   3. No data is ever sent to external servers — app functions fully in airplane mode with no degraded behavior
+   4. User can view a chronological flash-list of all saved entry titles (text only, no audio)
+   5. User can delete individual entries or wipe all data from settings
+   6. Realm queries on timestamp and category return in under 10ms via deterministic single-key indexing
+   7. App is locked behind biometric authentication on launch (expo-local-authentication)
 **Plans**: TBD
 
 **UI hint**: yes
 
 Plans:
-- [ ] 02-01: SQLCipher encrypted database setup (Drizzle ORM schemas, expo-secure-store key management, migrations)
-- [ ] 02-02: Entry repository CRUD + chronological list screen + delete flow + offline validation
+- [ ] 02-01: Realm encrypted database setup (Realm schema with deterministic indexing on timestamp/category, MMKV + Keychain key management)
+- [ ] 02-02: Entry repository CRUD + chronological list screen (flash-list) + delete flow + offline validation + biometric unlock
 
 ### Phase 3: On-Device ML Pipeline
 **Goal**: Recorded speech is automatically transcribed and classified into Diary/Task/Note — all on-device, all offline, in English and French
@@ -71,25 +74,27 @@ Plans:
 - [ ] 03-03: Pipeline orchestration (Entry Service: coordinate record → STT → NLP → persist with per-stage error isolation)
 
 ### Phase 4: Browse, Review, Tasks & Polish
-**Goal**: Users can search, filter, edit entries, manage tasks, and experience a polished app with smooth animations and dark mode
+**Goal**: Users can search, filter, edit entries, manage tasks, and experience a polished app with smooth animations, Thought Shredder transition, and dark mode
 **Mode**: mvp
 **Depends on**: Phase 2, Phase 3
-**Requirements**: BROW-02, BROW-03, BROW-04, BROW-05, TASK-01, TASK-02, UX-01, UX-04
+**Requirements**: BROW-02, BROW-03, BROW-04, BROW-05, UX-01, UX-04, UX-05, UX-07, UX-08, UX-09, TASK-01, TASK-02, TEST-01, TEST-02
 **Success Criteria** (what must be TRUE):
-  1. User can filter entries by type (Diary / Task / Reference Note) using tab navigation
-  2. User can search entry text content with fast on-device results
-  3. User can open any entry to read full text and replay the original audio recording
-  4. User can edit entry text and change the classification
-  5. User can view entries classified as Tasks in a dedicated task view and mark them complete/incomplete
-  6. App has smooth motion animations throughout (transitions, list interactions) and automatically adapts to system dark/light mode
+   1. User can filter entries by type (Diary / Task / Reference Note) using tab navigation (with success haptic on swipe)
+   2. User can search entry text content with fast on-device results
+   3. User can open any entry to read full text (audio is not persisted — text-only after transcription)
+   4. User can edit entry text and change the classification
+   5. User can view entries classified as Tasks in a dedicated task view and mark them complete/incomplete
+   6. "Thought Shredder" transition plays on recording stop: card downscales, cracks along pause cuts, staggered layout animation separates into categories
+   7. App has smooth motion animations throughout (Reanimated native worklet thread — locked at max refresh even under ML load), progressive skeletal shimmer reveals, and dark/light mode adaptation
 **Plans**: TBD
 
 **UI hint**: yes
 
 Plans:
-- [ ] 04-01: Browse & search screen (category tabs, FTS5 search, entry detail view with audio replay)
-- [ ] 04-02: Edit & task management (inline text editing, classification override, task complete/incomplete toggle)
-- [ ] 04-03: Animation polish & theming (react-native-reanimated motion animations, system dark/light mode adaptation)
+- [ ] 04-01: Browse & search screen (category tabs with Realm FTS, Reanimated category tab bar, flash-list entry list, entry detail)
+- [ ] 04-02: Edit & task management (inline text editing, classification override, task complete/incomplete toggle, pinch-to-merge with haptics)
+- [ ] 04-03: Thought Shredder transition + animation polish (Reanimated staggered layout & spring worklets, Moti exit animations, NativeWind skeletal shimmer, Rive state machine integration, dark/light mode)
+- [ ] 04-04: Integration tests (Jest + RTL: sentence slicing, bilingual token mapping) + E2E tests (Detox: swipe gestures, shake-to-clear, mock audio pipelines)
 
 ## Progress
 
@@ -101,4 +106,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Foundation & Audio Capture | 0/3 | Not started | - |
 | 2. Encrypted Storage & Basic Browse | 0/2 | Not started | - |
 | 3. On-Device ML Pipeline | 0/3 | Not started | - |
-| 4. Browse, Review, Tasks & Polish | 0/3 | Not started | - |
+| 4. Browse, Review, Tasks & Polish | 0/4 | Not started | - |

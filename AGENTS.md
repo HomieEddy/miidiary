@@ -129,7 +129,8 @@ After Step 9, check ROADMAP.md:
 
 ## Phases
 
-1. **Foundation & Audio Capture** — Expo scaffold, NativeWind, recording UI, Skia waveform, Rive mic, haptics, interruption handling
+0. **Project Scaffolding** — Expo CNG init, all locked dependencies, theme system, Expo Router tabs, basic render test
+1. **Foundation & Audio Capture** — NativeWind, recording UI, Skia waveform, Rive mic, haptics, interruption handling
 2. **Encrypted Storage & Basic Browse** — Realm, MMKV + Keychain, biometric unlock, flash-list, chronological list
 3. **On-Device ML Pipeline** — react-native-whisper STT (EN/FR-CA), auto-classification (Diary/Task/Note)
 4. **Browse, Review, Tasks & Polish** — Thought Shredder, search, edit, task mgmt, dark mode, Detox E2E

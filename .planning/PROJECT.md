@@ -16,6 +16,10 @@ Instant, private, offline voice capture that automatically organizes thoughts in
 
 ### Active
 
+- [ ] Expo CNG project scaffold with all locked dependencies installed and linking
+- [ ] Theme system wired (tailwind.config.js, colors, typography, fonts)
+- [ ] Expo Router tab navigation (Home, Diary, Tasks, Digests)
+- [ ] Basic render test passing
 - [ ] Single-button voice capture with instant recording start
 - [ ] 100% local on-device speech-to-text processing
 - [ ] Automatic contextual classification (Diary / Task / Reference Note)
@@ -74,4 +78,4 @@ The app targets users who think aloud: journalers, note-takers, task-capturers w
 
 ---
 
-*Last updated: 2026-05-17 after architecture specification*
+*Last updated: 2026-05-17 — added Phase 0 scaffolding requirements*

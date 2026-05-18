@@ -5,6 +5,13 @@
 
 ## v1 Requirements
 
+### Scaffolding
+
+- [ ] **SCAFFOLD-01**: Expo CNG project is initialized with `expo prebuild` — all locked native modules install and link without errors
+- [ ] **SCAFFOLD-02**: All locked dependencies from the architecture lock table (NativeWind, Reanimated, Moti, Skia, Rive, flash-list, Realm, MMKV, Keychain, Zustand, Solar icons via SvgXml, expo-router, expo-haptics, expo-local-authentication, expo-task-manager, expo-background-fetch, Nunito/Fredoka/Playfair/JetBrains Mono fonts) are installed and importable
+- [ ] **SCAFFOLD-03**: Theme system is wired — `theme/tailwind.config.js`, `theme/colors.ts`, `theme/typography.ts` configured, app.json uses correct brand colors, fonts load on launch
+- [ ] **SCAFFOLD-04**: Expo Router file-based layout is set up with 4 tab screens (Home, Diary, Tasks, Digests) — navigation works without errors
+
 ### Voice Capture
 
 - [ ] **VOIC-01**: User can start recording with a single tap from the home screen
@@ -106,6 +113,7 @@
 
 | Category | Count | Requirement IDs |
 |----------|-------|-----------------|
+| Scaffolding | 4 | SCAFFOLD-01–04 |
 | Voice Capture | 7 | VOIC-01–07 |
 | Transcription (STT) | 6 | TRAN-01–06 |
 | Auto-Classification | 3 | CLAS-01–03 |
@@ -116,12 +124,13 @@
 | Task Management | 2 | TASK-01–02 |
 | Background Processing | 2 | BACK-01–02 |
 | Testing & Verification | 2 | TEST-01–02 |
-| **Total** | **45** | |
+| **Total** | **49** | |
 
 ### Phase Mapping
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
+| SCAFFOLD-01-04 | Phase 0 | Pending |
 | VOIC-01-07 | Phase 1 | Pending |
 | UX-02 | Phase 1 | Pending |
 | UX-03 | Phase 1 | Pending |
@@ -141,11 +150,11 @@
 | TEST-01-02 | Phase 4 | Pending |
 
 **Coverage:**
-- v1 requirements: 45 total
-- Mapped to phases: 45
+- v1 requirements: 49 total
+- Mapped to phases: 49
 - Unmapped: 0 ✓
 
 ---
 
 *Requirements defined: 2026-05-17*
-*Last updated: 2026-05-17 after architecture specification*
+*Last updated: 2026-05-17 — added Phase 0 Scaffolding (4 requirements)*

@@ -2,21 +2,43 @@
 
 ## Overview
 
-Dear Diary transforms voice capture into organized entries — from a single tap to record, through on-device transcription and auto-classification, to browsing your diary entries, tasks, and reference notes — all offline, all encrypted, with zero cloud. Audio is ephemeral: discarded immediately after transcription. The build progresses through 4 coarse phases: first the audio capture foundation, then encrypted persistence, followed by the on-device ML pipeline (STT + NLP), and finally the full browse/edit experience with polish.
+Dear Diary transforms voice capture into organized entries — from a single tap to record, through on-device transcription and auto-classification, to browsing your diary entries, tasks, and reference notes — all offline, all encrypted, with zero cloud. Audio is ephemeral: discarded immediately after transcription. The build progresses through 5 phases: starting with project scaffolding and dependency setup, then the audio capture foundation, encrypted persistence, the on-device ML pipeline (STT + NLP), and finally the full browse/edit experience with polish.
 
 ## Phases
 
-- [ ] **Phase 1: Foundation & Audio Capture** - Project scaffold and the core record → visualize → transcribe → discard loop with haptic feedback
+- [ ] **Phase 0: Project Scaffolding** - React Native Expo app initialized with all dependencies, theme system, and a basic render test
+- [ ] **Phase 1: Foundation & Audio Capture** - Core record → visualize → transcribe → discard loop with haptic feedback
 - [ ] **Phase 2: Encrypted Storage & Basic Browse** - SQLCipher database, entry persistence, and chronological entry list
 - [ ] **Phase 3: On-Device ML Pipeline** - On-device speech-to-text (EN/FR) and auto-classification (Diary/Task/Note)
 - [ ] **Phase 4: Browse, Review, Tasks & Polish** - Search, filter, edit entries, task management, motion animations, dark mode
 
 ## Phase Details
 
+### Phase 0: Project Scaffolding
+**Goal**: A clean, runnable React Native Expo app with every locked dependency installed, the theme system wired up, Expo Router navigation in place, and a basic render test passing
+**Mode**: mvp
+**Depends on**: Nothing
+**Requirements**: SCAFFOLD-01, SCAFFOLD-02, SCAFFOLD-03, SCAFFOLD-04
+**Success Criteria** (what must be TRUE):
+   1. `npx expo start` launches the app on iOS simulator or Android emulator with no errors
+   2. Home screen renders with correct theme (background #FDF8F0, proper font loading)
+   3. All locked dependencies listed in the architecture lock table are installed and importable (no missing native module errors)
+   4. Expo Router file-based routing works — navigating to an empty `/diary` route shows the diary screen
+   5. `npx expo run:ios` / `npx expo run:android` completes a successful native prebuild without errors
+   6. Basic Jest render test (`library/ui.test.tsx`) passes — verifies the app shell renders without crashing
+**Plans**: TBD
+
+**UI hint**: no
+
+Plans:
+- [ ] 00-01: Initialize Expo project with CNG (prebuild), install all locked dependencies, configure NativeWind v4 + Babel plugin
+- [ ] 00-02: Wire theme system (tailwind.config.js, colors.ts, typography.ts, app.json config), set up Expo Router (Home + Diary + Tasks + Digests tabs)
+- [ ] 00-03: Basic render test (Jest + @testing-library/react-native) + verify native prebuild succeeds
+
 ### Phase 1: Foundation & Audio Capture
 **Goal**: Users can capture voice recordings with tactile feedback, see live audio visualization, and have interruptions handled gracefully — audio is ephemeral, discarded after transcription
 **Mode**: mvp
-**Depends on**: Nothing (first phase)
+**Depends on**: Phase 0
 **Requirements**: VOIC-01, VOIC-02, VOIC-03, VOIC-04, VOIC-05, VOIC-06, VOIC-07, UX-02, UX-03, UX-06
 **Success Criteria** (what must be TRUE):
    1. User can open the app and see a clean home screen with a single recording button
@@ -30,9 +52,8 @@ Dear Diary transforms voice capture into organized entries — from a single tap
 **UI hint**: yes
 
 Plans:
-- [ ] 01-01: Project scaffolding, Expo Router navigation, theme system, splash screen
-- [ ] 01-02: Audio capture service (record, stop, temp file) + recording UI (Skia waveform viz, Rive mic-to-equalizer morphing, haptics)
-- [ ] 01-03: Interruption handling (calls, notifications) + temp audio cleanup after transcription stub + audio buffer management
+- [ ] 01-01: Audio capture service (record, stop, temp file) + recording UI (Skia waveform viz, Rive mic-to-equalizer morphing, haptics)
+- [ ] 01-02: Interruption handling (calls, notifications) + temp audio cleanup after transcription stub + audio buffer management
 
 ### Phase 2: Encrypted Storage & Basic Browse
 **Goal**: Users can save entries with full encryption, view all entries in a chronological list, and delete data — all offline
@@ -99,11 +120,12 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4
+Phases execute in numeric order: 0 → 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation & Audio Capture | 0/3 | Not started | - |
+| 0. Project Scaffolding | 0/3 | Not started | - |
+| 1. Foundation & Audio Capture | 0/2 | Not started | - |
 | 2. Encrypted Storage & Basic Browse | 0/2 | Not started | - |
 | 3. On-Device ML Pipeline | 0/3 | Not started | - |
 | 4. Browse, Review, Tasks & Polish | 0/4 | Not started | - |

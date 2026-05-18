@@ -5,11 +5,11 @@
 See: .planning/PROJECT.md (updated 2026-05-17)
 
 **Core value:** Instant, private, offline voice capture that automatically organizes thoughts into the right place — so users never lose an idea.
-**Current focus:** Phase 1: Foundation & Audio Capture
+**Current focus:** Phase 0: Project Scaffolding
 
 ## Current Position
 
-Phase: 1 of 4 (Foundation & Audio Capture)
+Phase: 0 of 5 (Project Scaffolding)
 Plan: 0 of 3 in current phase
 Status: Ready to plan
 Last activity: 2026-05-17 — Roadmap created
@@ -27,7 +27,8 @@ Progress: [░░░░░░░░░░] 0%
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 1. Foundation & Audio Capture | 0/3 | — | — |
+| 0. Project Scaffolding | 0/3 | — | — |
+| 1. Foundation & Audio Capture | 0/2 | — | — |
 | 2. Encrypted Storage & Basic Browse | 0/2 | — | — |
 | 3. On-Device ML Pipeline | 0/3 | — | — |
 | 4. Browse, Review, Tasks & Polish | 0/3 | — | — |
@@ -64,5 +65,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-05-17
-Stopped at: Roadmap created for Dear Diary (4 phases, 30 requirements mapped)
+Stopped at: Roadmap created for Dear Diary (5 phases, scaffold requirements added)
 Resume file: None

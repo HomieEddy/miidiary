@@ -5,7 +5,7 @@ import { useRecordingStore } from '@/stores/recordingStore';
 import { audioCaptureService } from '@/services/audioCaptureService';
 
 export function useTranscription() {
-  const { setProcessing, setError, setStatus } = useRecordingStore();
+  const { setProcessing, setError } = useRecordingStore();
   const addEntry = useEntriesStore((s) => s.addEntry);
 
   const processRecording = useCallback(async (audioUri: string) => {
@@ -18,6 +18,8 @@ export function useTranscription() {
         createdAt: new Date().toISOString(),
       });
 
+      setProcessing(false);
+
       try {
         const tempPath = audioCaptureService.getTempFilePath();
         if (tempPath && tempPath !== audioUri) {
@@ -25,8 +27,8 @@ export function useTranscription() {
         }
       } catch { /* best-effort */ }
     } catch (err) {
-      setError('Transcription failed');
       setProcessing(false);
+      setError('Transcription failed');
     }
   }, [addEntry, setProcessing, setError]);
 

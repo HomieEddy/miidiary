@@ -7,18 +7,18 @@
 
 ### Scaffolding
 
-- [ ] **SCAFFOLD-01**: Expo CNG project is initialized with `expo prebuild` — all locked native modules install and link without errors
-- [ ] **SCAFFOLD-02**: All locked dependencies from the architecture lock table (NativeWind, Reanimated, Moti, Skia, Rive, flash-list, Realm, MMKV, Keychain, Zustand, Solar icons via SvgXml, expo-router, expo-haptics, expo-local-authentication, expo-task-manager, expo-background-fetch, Nunito/Fredoka/Playfair/JetBrains Mono fonts) are installed and importable
-- [ ] **SCAFFOLD-03**: Theme system is wired — `theme/tailwind.config.js`, `theme/colors.ts`, `theme/typography.ts` configured, app.json uses correct brand colors, fonts load on launch
-- [ ] **SCAFFOLD-04**: Expo Router file-based layout is set up with 4 tab screens (Home, Diary, Tasks, Digests) — navigation works without errors
+- [x] **SCAFFOLD-01**: Expo CNG project is initialized with `expo prebuild` — all locked native modules install and link without errors
+- [x] **SCAFFOLD-02**: All locked dependencies from the architecture lock table (NativeWind, Reanimated, Moti, Skia, Rive, flash-list, Realm, MMKV, Keychain, Zustand, Solar icons via SvgXml, expo-router, expo-haptics, expo-local-authentication, expo-task-manager, expo-background-fetch, Nunito/Fredoka/Playfair/JetBrains Mono fonts) are installed and importable
+- [x] **SCAFFOLD-03**: Theme system is wired — `theme/tailwind.config.js`, `theme/colors.ts`, `theme/typography.ts` configured, app.json uses correct brand colors, fonts load on launch
+- [x] **SCAFFOLD-04**: Expo Router file-based layout is set up with 4 tab screens (Home, Diary, Tasks, Digests) — navigation works without errors
 
 ### Voice Capture
 
-- [ ] **VOIC-01**: User can start recording with a single tap from the home screen
-- [ ] **VOIC-02**: Recording begins instantly with no perceptible delay
-- [ ] **VOIC-03**: User can stop recording with a single tap
-- [ ] **VOIC-04**: App records audio suitable for on-device STT — quality prioritized for transcription clarity, not playback fidelity
-- [ ] **VOIC-05**: App handles audio interruptions (calls, notifications) gracefully — no crash or data loss
+- [x] **VOIC-01**: User can start recording with a single tap from the home screen
+- [x] **VOIC-02**: Recording begins instantly with no perceptible delay
+- [x] **VOIC-03**: User can stop recording with a single tap
+- [x] **VOIC-04**: App records audio suitable for on-device STT — quality prioritized for transcription clarity, not playback fidelity
+- [x] **VOIC-05**: App handles audio interruptions (calls, notifications) gracefully — no crash or data loss
 - [ ] **VOIC-06**: Recording state shown clearly via Skia-accelerated voice visualization (amplitude waveform)
 - [ ] **VOIC-07**: Raw audio file is discarded immediately after transcription completes — only text persists
 
@@ -62,8 +62,8 @@
 ### UX, Motion & Animations
 
 - [ ] **UX-01**: "Thought Shredder" transition on recording stop — card downscales, cracks along pause cuts, staggered layout animation separates entries into categories
-- [ ] **UX-02**: Recording button has satisfying tactile feedback (Reanimated spring + expo-haptics impact)
-- [ ] **UX-03**: Microphone state transitions to fluid equalizer via Rive vector engine on GPU
+- [x] **UX-02**: Recording button has satisfying tactile feedback (Reanimated spring + expo-haptics impact)
+- [x] **UX-03**: Microphone state transitions to fluid equalizer via Rive vector engine on GPU
 - [ ] **UX-04**: Horizontal swipe for category change fires success haptic pattern
 - [ ] **UX-05**: Pinch-to-merge core completion fires medium impact haptic pulse
 - [ ] **UX-06**: Shake-to-clear buffer reset fires heavy impact haptic signal
@@ -130,10 +130,11 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SCAFFOLD-01-04 | Phase 0 | Pending |
-| VOIC-01-07 | Phase 1 | Pending |
-| UX-02 | Phase 1 | Pending |
-| UX-03 | Phase 1 | Pending |
+| SCAFFOLD-01-04 | Phase 0 | Complete |
+| VOIC-01-05 | Phase 1 (Plan 01-01) | Complete |
+| VOIC-06-07 | Phase 1 (Plans 01-02/03) | Pending |
+| UX-02 | Phase 1 (Plan 01-01) | Complete |
+| UX-03 | Phase 1 (Plan 01-01) | Complete |
 | UX-06 | Phase 1 | Pending |
 | STOR-01-06 | Phase 2 | Pending |
 | SEC-01-02 | Phase 2 | Pending |
@@ -157,4 +158,4 @@
 ---
 
 *Requirements defined: 2026-05-17*
-*Last updated: 2026-05-17 — added Phase 0 Scaffolding (4 requirements)*
+*Last updated: 2026-05-18 — Plan 01-01 completed (VOIC-01-05, UX-02, UX-03)*

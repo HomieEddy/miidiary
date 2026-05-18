@@ -1,48 +1,30 @@
-import { View, Text } from 'react-native';
+import { useCallback } from 'react';
+import { View } from 'react-native';
 import { GlowRing } from '@/components/ui/GlowRing';
 import { RecorderButton } from '@/components/ui/RecorderButton';
 import { RecordingTimer } from '@/components/ui/RecordingTimer';
 import { PromptText } from '@/components/ui/PromptText';
-import { useRecordingStore } from '@/stores/recordingStore';
-import { audioCaptureService } from '@/services/audioCaptureService';
-import { useInterruptionHandler } from '@/services/interruptionService';
+import { WaveformCanvas } from '@/components/ui/WaveformCanvas';
+import { ProcessingState } from '@/components/ui/ProcessingState';
+import { TranscriptionResult } from '@/components/ui/TranscriptionResult';
+import { ErrorBanner } from '@/components/ui/ErrorBanner';
+import { useAudioCapture } from '@/hooks/useAudioCapture';
+import { useTranscription } from '@/hooks/useTranscription';
 
 export default function HomeScreen() {
   const {
-    isRecording,
-    isProcessing,
-    setRecording,
-    setProcessing,
-    setError,
-    setMetering,
-  } = useRecordingStore();
+    isRecording, isProcessing, status, amplitudes,
+    startRecording, stopRecording, retry,
+  } = useAudioCapture();
 
-  useInterruptionHandler();
+  const { processRecording } = useTranscription();
 
-  const handleStartRecording = async () => {
-    setRecording(true);
-    audioCaptureService.onMetering((value: number) => {
-      setMetering(value);
-    });
-    const success = await audioCaptureService.startRecording();
-    if (!success) {
-      setRecording(false);
-      setError('Recording failed');
-    }
-  };
-
-  const handleStopRecording = async () => {
-    const uri = await audioCaptureService.stopRecording();
+  const handleStopRecording = useCallback(async () => {
+    const uri = await stopRecording();
     if (uri) {
-      setRecording(false);
-      setProcessing(true);
-      // Plan 01-02: transcription stub will be wired here via useTranscription hook
-      // For now, mark processing as complete immediately
-      setProcessing(false);
-    } else {
-      setError('Recording failed');
+      processRecording(uri);
     }
-  };
+  }, [stopRecording, processRecording]);
 
   return (
     <View className="flex-1 bg-background pb-16">
@@ -50,7 +32,7 @@ export default function HomeScreen() {
         <View className="items-center justify-center mb-6">
           <GlowRing isActive={isRecording} />
           <RecorderButton
-            onStartRecording={handleStartRecording}
+            onStartRecording={startRecording}
             onStopRecording={handleStopRecording}
           />
         </View>
@@ -59,28 +41,39 @@ export default function HomeScreen() {
           <PromptText />
         </View>
 
-        <View className="mb-8">
+        <View className="mb-4">
           <RecordingTimer />
         </View>
 
-        <View className="h-20 self-center justify-center">
-          {isRecording && (
-            <Text className="font-sans text-sm text-muted-foreground text-center">
-              Waveform coming in next phase
-            </Text>
-          )}
+        {isRecording && (
+          <View className="self-center mb-4">
+            <WaveformCanvas amplitudes={amplitudes} />
+          </View>
+        )}
+
+        <View className="mb-4">
+          <ProcessingState visible={isProcessing && status !== 'recording'} />
         </View>
 
-        <View className="mt-4">
-          {isProcessing && (
-            <View className="bg-muted/50 rounded-2xl px-6 py-4 self-center">
-              <Text className="font-sans text-base text-muted-foreground">
-                Processing transcription...
-              </Text>
-            </View>
-          )}
+        <View className="mb-4">
+          <TranscriptionResult
+            visible={!isRecording && !isProcessing && status === 'idle'}
+          />
         </View>
+
+        <ErrorBanner
+          visible={status === 'error'}
+          onRetry={retry}
+        />
       </View>
     </View>
   );
 }
+
+// UX-06: Shake-to-clear buffer reset — STUB (built but not active until Phase 3)
+// Phase 3 activates this with expo-haptics ImpactFeedbackStyle.Heavy
+// useEffect(() => {
+//   // React Native shake listener subscription
+//   // On shake: reset(), Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
+//   // return () => unsubscription
+// }, []);

@@ -1,11 +1,11 @@
 import { renderHook, act } from "@testing-library/react-native";
 import { useTranscription } from "@/hooks/useTranscription";
 import { useRecordingStore } from "@/stores/recordingStore";
-import { useEntriesStore } from "@/stores/entriesStore";
 
 const mockStubTranscription = jest.fn();
 const mockCleanupTempFile = jest.fn();
 const mockGetTempFilePath = jest.fn();
+const mockCreateEntry = jest.fn();
 
 jest.mock("@/services/transcriptionStub", () => ({
   stubTranscription: (...args: unknown[]) => mockStubTranscription(...args),
@@ -18,16 +18,22 @@ jest.mock("@/services/audioCaptureService", () => ({
   },
 }));
 
+jest.mock("@/services/entriesRepository", () => ({
+  entriesRepository: {
+    createEntry: (...args: unknown[]) => mockCreateEntry(...args),
+  },
+}));
+
 describe("useTranscription", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useRecordingStore.getState().reset();
-    useEntriesStore.getState().clearAll();
   });
 
-  it("processRecording adds entry on successful transcription", async () => {
+  it("processRecording persists entry on successful transcription", async () => {
     mockStubTranscription.mockResolvedValue("Transcribed text");
     mockGetTempFilePath.mockReturnValue(null);
+    mockCreateEntry.mockResolvedValue({ id: "entry-1" });
 
     const { result } = renderHook(() => useTranscription());
 
@@ -36,10 +42,9 @@ describe("useTranscription", () => {
     });
 
     expect(mockStubTranscription).toHaveBeenCalledWith("file:///test.wav");
-    const entries = useEntriesStore.getState().entries;
-    expect(entries).toHaveLength(1);
-    expect(entries[0].text).toBe("Transcribed text");
-    expect(entries[0].category).toBe("note");
+    expect(mockCreateEntry).toHaveBeenCalledWith(
+      expect.objectContaining({ text: "Transcribed text", category: "note" }),
+    );
   });
 
   it("processRecording sets error state on transcription failure", async () => {
@@ -55,12 +60,13 @@ describe("useTranscription", () => {
       "Transcription failed",
     );
     expect(useRecordingStore.getState().isProcessing).toBe(false);
-    expect(useEntriesStore.getState().entries).toHaveLength(0);
+    expect(mockCreateEntry).not.toHaveBeenCalled();
   });
 
   it("processRecording clears processing on success", async () => {
     mockStubTranscription.mockResolvedValue("Success text");
     mockGetTempFilePath.mockReturnValue(null);
+    mockCreateEntry.mockResolvedValue({ id: "entry-1" });
     useRecordingStore.getState().setProcessing(true);
 
     const { result } = renderHook(() => useTranscription());
@@ -72,3 +78,4 @@ describe("useTranscription", () => {
     expect(useRecordingStore.getState().isProcessing).toBe(false);
   });
 });
+

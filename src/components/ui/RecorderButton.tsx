@@ -1,11 +1,11 @@
-import { useRef, useCallback } from 'react';
+import type { ReactElement } from 'react';
+import { useCallback } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
 } from 'react-native-reanimated';
-import Rive, { RiveRef } from 'rive-react-native';
 import * as Haptics from 'expo-haptics';
 import { useRecordingStore } from '@/stores/recordingStore';
 import { SvgXml } from 'react-native-svg';
@@ -16,10 +16,10 @@ interface RecorderButtonProps {
   onStopRecording: () => void;
 }
 
-export function RecorderButton({ onStartRecording, onStopRecording }: RecorderButtonProps) {
-  const riveRef = useRef<RiveRef>(null);
+export function RecorderButton({ onStartRecording, onStopRecording }: RecorderButtonProps): ReactElement {
   const scale = useSharedValue(1);
-  const { isRecording, isProcessing } = useRecordingStore();
+  const isProcessing = useRecordingStore((state) => state.isProcessing);
+  const isRecording = useRecordingStore((state) => state.isRecording);
 
   const buttonStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -39,12 +39,6 @@ export function RecorderButton({ onStartRecording, onStopRecording }: RecorderBu
         scale.value = withSpring(1.0);
       });
 
-      try {
-        riveRef.current?.setInputState('MicStateMachine', 'isRecording', true);
-      } catch {
-        // Rive state machine input may not be available at call time
-      }
-
       onStartRecording();
     } else {
       await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -56,12 +50,6 @@ export function RecorderButton({ onStartRecording, onStopRecording }: RecorderBu
       }, () => {
         scale.value = withSpring(1.0);
       });
-
-      try {
-        riveRef.current?.setInputState('MicStateMachine', 'isRecording', false);
-      } catch {
-        // Rive state machine input may not be available at call time
-      }
 
       onStopRecording();
     }
@@ -80,13 +68,7 @@ export function RecorderButton({ onStartRecording, onStopRecording }: RecorderBu
       className="w-[144px] h-[144px] items-center justify-center"
     >
       <Animated.View style={buttonStyle} className="w-[144px] h-[144px]">
-        <Rive
-          ref={riveRef}
-          resourceName="mic-to-equalizer"
-          stateMachineName="MicStateMachine"
-          className="w-[144px] h-[144px]"
-          autoplay={true}
-        />
+        <View className="w-[144px] h-[144px] rounded-full bg-card border-4 border-border" />
       </Animated.View>
       <View className="absolute" pointerEvents="none">
         <SvgXml

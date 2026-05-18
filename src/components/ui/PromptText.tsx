@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import { Text } from 'react-native';
 import { useEffect } from 'react';
 import Animated, {
@@ -7,8 +8,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useRecordingStore } from '@/stores/recordingStore';
 
-export function PromptText() {
-  const { isRecording } = useRecordingStore();
+export function PromptText(): ReactElement {
+  const isRecording = useRecordingStore((state) => state.isRecording);
   const opacity = useSharedValue(1);
 
   useEffect(() => {

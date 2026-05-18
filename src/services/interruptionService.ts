@@ -3,16 +3,17 @@ import { AppState, type AppStateStatus } from 'react-native';
 import { setAudioModeAsync } from 'expo-audio';
 import { useRecordingStore } from '@/stores/recordingStore';
 
-export function useInterruptionHandler() {
+export function useInterruptionHandler(): void {
   const appState = useRef(AppState.currentState);
-  const { isRecording, setPaused, resume } = useRecordingStore();
+  const isRecording = useRecordingStore((state) => state.isRecording);
+  const resume = useRecordingStore((state) => state.resume);
+  const setPaused = useRecordingStore((state) => state.setPaused);
 
   useEffect(() => {
-    setAudioModeAsync({
+    void setAudioModeAsync({
       allowsRecording: true,
       playsInSilentMode: true,
-      interruptionModeIOS: 'mixWithOthers',
-      interruptionModeAndroid: 'duckOthers',
+      interruptionMode: 'duckOthers',
     });
 
     const subscription = AppState.addEventListener('change', (nextState: AppStateStatus) => {

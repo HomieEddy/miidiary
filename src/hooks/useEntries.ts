@@ -24,7 +24,12 @@ interface UseEntriesResult {
   confirmWipeAll: () => Promise<boolean>;
 }
 
-export function useEntries(): UseEntriesResult {
+interface UseEntriesOptions {
+  autoLoad?: boolean;
+}
+
+export function useEntries(options?: UseEntriesOptions): UseEntriesResult {
+  const autoLoad = options?.autoLoad ?? true;
   const [entries, setEntries] = useState<EntryRecord[]>([]);
   const [isDeleteMode, setIsDeleteMode] = useState(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
@@ -38,8 +43,12 @@ export function useEntries(): UseEntriesResult {
   }, []);
 
   useEffect(() => {
+    if (!autoLoad) {
+      return;
+    }
+
     void loadEntries();
-  }, [loadEntries]);
+  }, [autoLoad, loadEntries]);
 
   const sections = useMemo(() => groupEntriesByDay(entries), [entries]);
   const flatItems = useMemo(() => flattenEntrySections(sections), [sections]);
@@ -69,10 +78,14 @@ export function useEntries(): UseEntriesResult {
       return;
     }
 
-    await entriesRepository.deleteOne(deleteTargetId);
-    await loadEntries();
-    setDeleteTargetId(null);
-    setShowDeleteConfirm(false);
+    try {
+      await entriesRepository.deleteOne(deleteTargetId);
+      await loadEntries();
+      setDeleteTargetId(null);
+      setShowDeleteConfirm(false);
+    } catch {
+      setShowDeleteConfirm(false);
+    }
   }, [deleteTargetId, loadEntries]);
 
   const requestWipeAll = useCallback(() => {
@@ -90,18 +103,32 @@ export function useEntries(): UseEntriesResult {
   }, []);
 
   const confirmWipeAll = useCallback(async (): Promise<boolean> => {
-    const allowed = await reauthenticateForDestructiveAction();
+    let allowed = false;
+
+    try {
+      allowed = await reauthenticateForDestructiveAction();
+    } catch {
+      setShowWipeConfirmStepOne(false);
+      setShowWipeConfirmStepTwo(false);
+      return false;
+    }
 
     if (!allowed) {
       return false;
     }
 
-    await entriesRepository.wipeAll();
-    await loadEntries();
-    setShowWipeConfirmStepOne(false);
-    setShowWipeConfirmStepTwo(false);
-    setIsDeleteMode(false);
-    return true;
+    try {
+      await entriesRepository.wipeAll();
+      await loadEntries();
+      setShowWipeConfirmStepOne(false);
+      setShowWipeConfirmStepTwo(false);
+      setIsDeleteMode(false);
+      return true;
+    } catch {
+      setShowWipeConfirmStepOne(false);
+      setShowWipeConfirmStepTwo(false);
+      return false;
+    }
   }, [loadEntries]);
 
   return {

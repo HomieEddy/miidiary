@@ -180,7 +180,7 @@ export default function DiaryScreen(): ReactElement {
           <View className="bg-card border-4 border-border rounded-2xl p-5 shadow-paper w-full">
             <Text className="font-heading text-xl text-foreground">Final wipe confirmation</Text>
             <Text className="font-sans text-sm text-muted-foreground mt-2">
-              Step 2 of 2. Biometric verification is required.
+              Step 2 of 2. Local device authentication is required (biometric or passcode fallback).
             </Text>
             <View className="flex-row gap-2 mt-4">
               <Pressable

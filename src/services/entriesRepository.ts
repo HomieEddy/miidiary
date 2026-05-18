@@ -30,7 +30,8 @@ function toEntryRecord(item: RealmEntry): EntryRecord {
 async function createEntry(input: CreateEntryInput): Promise<EntryRecord> {
   const realm = await getRealmInstance();
   const now = new Date();
-  const createdAt = input.createdAt ? new Date(input.createdAt) : now;
+  const candidateCreatedAt = input.createdAt ? new Date(input.createdAt) : now;
+  const createdAt = Number.isNaN(candidateCreatedAt.getTime()) ? now : candidateCreatedAt;
   const id = `entry-${crypto.randomUUID()}`;
 
   const payload: RealmEntry = {

@@ -63,6 +63,21 @@ describe("entriesRepository", () => {
     expect(entry.queryKey).toContain("note|");
   });
 
+  it("falls back to now when createdAt is invalid", async () => {
+    const before = Date.now();
+    const entry = await entriesRepository.createEntry({
+      text: "Invalid date fallback",
+      category: "note",
+      createdAt: "not-a-date",
+    });
+    const after = Date.now();
+
+    const createdMs = Date.parse(entry.createdAt);
+    expect(Number.isNaN(createdMs)).toBe(false);
+    expect(createdMs).toBeGreaterThanOrEqual(before - 1000);
+    expect(createdMs).toBeLessThanOrEqual(after + 1000);
+  });
+
   it("listChronological returns newest-first deterministically", async () => {
     await entriesRepository.createEntry({
       text: "Older",
@@ -108,5 +123,25 @@ describe("entriesRepository", () => {
     mockGetRealmInstance.mockResolvedValue(buildRealmMock());
     const entries = await entriesRepository.listChronological();
     expect(entries[0]?.text).toBe("Persisted");
+  });
+
+  it("keeps category+timestamp query in a bounded fast path for STOR-06 benchmark", async () => {
+    const base = Date.parse("2026-05-18T10:00:00.000Z");
+
+    for (let index = 0; index < 500; index += 1) {
+      await entriesRepository.createEntry({
+        text: `Entry ${index}`,
+        category: index % 2 === 0 ? "note" : "task",
+        createdAt: new Date(base + index * 1000).toISOString(),
+      });
+    }
+
+    const start = performance.now();
+    const notes = await entriesRepository.listChronological("note");
+    const elapsedMs = performance.now() - start;
+
+    expect(notes.length).toBeGreaterThan(0);
+    // Keep this as a bounded fast-path check to reduce CI timing flakiness.
+    expect(elapsedMs).toBeLessThan(50);
   });
 });

@@ -70,10 +70,3 @@ export default function HomeScreen() {
   );
 }
 
-// UX-06: Shake-to-clear buffer reset — STUB (built but not active until Phase 3)
-// Phase 3 activates this with expo-haptics ImpactFeedbackStyle.Heavy
-// useEffect(() => {
-//   // React Native shake listener subscription
-//   // On shake: reset(), Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
-//   // return () => unsubscription
-// }, []);

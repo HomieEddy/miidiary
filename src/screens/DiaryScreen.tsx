@@ -1,6 +1,8 @@
 import type { ReactElement } from "react";
+import { useCallback } from "react";
 import { Pressable, Text, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
+import { useFocusEffect } from "@react-navigation/native";
 import { DeleteModeToolbar } from "@/components/ui/DeleteModeToolbar";
 import { useEntries } from "@/hooks/useEntries";
 import { cn } from "@/utils/cn";
@@ -31,6 +33,7 @@ export default function DiaryScreen(): ReactElement {
     showDeleteConfirm,
     showWipeConfirmStepOne,
     showWipeConfirmStepTwo,
+    loadEntries,
     enterDeleteMode,
     exitDeleteMode,
     requestDeleteOne,
@@ -41,6 +44,12 @@ export default function DiaryScreen(): ReactElement {
     continueWipeAll,
     confirmWipeAll,
   } = useEntries();
+
+  useFocusEffect(
+    useCallback(() => {
+      void loadEntries();
+    }, [loadEntries]),
+  );
 
   return (
     <View className="min-h-screen bg-background text-foreground pb-32 font-sans px-6 pt-10">

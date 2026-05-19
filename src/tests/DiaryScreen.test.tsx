@@ -23,6 +23,7 @@ const mockUseEntriesState = {
   showDeleteConfirm: false,
   showWipeConfirmStepOne: false,
   showWipeConfirmStepTwo: false,
+  loadEntries: jest.fn(),
   enterDeleteMode: jest.fn(),
   exitDeleteMode: jest.fn(),
   requestDeleteOne: jest.fn(),
@@ -51,6 +52,12 @@ jest.mock("@shopify/flash-list", () => {
 
 jest.mock("@/hooks/useEntries", () => ({
   useEntries: () => mockUseEntriesState,
+}));
+
+jest.mock("@react-navigation/native", () => ({
+  useFocusEffect: (effect: () => void | (() => void)) => {
+    effect();
+  },
 }));
 
 import DiaryScreen from "@/screens/DiaryScreen";

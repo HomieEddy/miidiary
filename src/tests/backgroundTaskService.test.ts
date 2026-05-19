@@ -55,6 +55,26 @@ describe("backgroundTaskService", () => {
     );
   });
 
+  it("does not register task when background fetch is restricted", async () => {
+    const service = loadService();
+    mockGetStatusAsync.mockResolvedValue(1);
+
+    await service.initializeBackgroundProcessing();
+
+    expect(mockRegisterTaskAsync).not.toHaveBeenCalled();
+  });
+
+  it("registers only once for repeated initialize calls", async () => {
+    const service = loadService();
+    mockGetStatusAsync.mockResolvedValue(2);
+    mockIsTaskRegisteredAsync.mockResolvedValue(false);
+
+    await service.initializeBackgroundProcessing();
+    await service.initializeBackgroundProcessing();
+
+    expect(mockRegisterTaskAsync).toHaveBeenCalledTimes(1);
+  });
+
   it("returns NewData when pending recordings processor runs", async () => {
     const service = loadService();
     const mockProcessPendingRecordings = jest.fn().mockResolvedValue(undefined);

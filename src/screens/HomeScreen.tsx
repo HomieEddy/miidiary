@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { useCallback, useEffect } from 'react';
-import { Image, ScrollView, Text, View } from 'react-native';
+import { AppState, Image, ScrollView, Text, View } from 'react-native';
 import { GlowRing } from '@/components/ui/GlowRing';
 import { HomePreviewSections } from '@/components/ui/HomePreviewSections';
 import { RecorderButton } from '@/components/ui/RecorderButton';
@@ -27,6 +27,18 @@ export default function HomeScreen(): ReactElement {
 
   useEffect(() => {
     void processPendingRecordings();
+  }, [processPendingRecordings]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        void processPendingRecordings();
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
   }, [processPendingRecordings]);
 
   useEffect(() => {

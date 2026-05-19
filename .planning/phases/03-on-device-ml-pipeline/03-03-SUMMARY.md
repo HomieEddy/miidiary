@@ -21,7 +21,8 @@ Started pipeline reliability hardening by tracking pending audio URIs through pr
 3. Finalized pending-processing completion on both success and failure paths.
 4. Added replay of pending recordings on app mount/resume pathway.
 5. Added BackgroundFetch + TaskManager service wiring to run pending replay and model sync hooks.
-6. Added test coverage for pending-processing registration and background task behavior.
+6. Added AppState active-resume hook to replay pending recordings when app returns to foreground.
+7. Added test coverage for pending-processing registration and background task behavior (including restricted and idempotent registration paths).
 
 ## Key Files
 
@@ -40,11 +41,14 @@ Started pipeline reliability hardening by tracking pending audio URIs through pr
 Command:
 
 npm run test -- src/tests/backgroundTaskService.test.ts src/tests/useTranscription.test.ts src/tests/useAudioCapture.test.ts src/tests/transcriptionService.test.ts src/tests/classificationService.test.ts -i
+npm run test -- src/tests/backgroundTaskService.test.ts src/tests/useTranscription.test.ts src/tests/useAudioCapture.test.ts -i
 
 Result:
 
 - 5 test suites passed
 - 25 tests passed
+- 3 test suites passed
+- 18 tests passed
 
 ## Remaining Work
 

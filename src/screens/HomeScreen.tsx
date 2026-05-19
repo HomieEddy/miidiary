@@ -11,6 +11,11 @@ import { TranscriptionResult } from '@/components/ui/TranscriptionResult';
 import { ErrorBanner } from '@/components/ui/ErrorBanner';
 import { useAudioCapture } from '@/hooks/useAudioCapture';
 import { useTranscription } from '@/hooks/useTranscription';
+import {
+  initializeBackgroundProcessing,
+  setBackgroundProcessors,
+} from '@/services/backgroundTaskService';
+import { modelManager } from '@/services/modelManager';
 
 export default function HomeScreen(): ReactElement {
   const {
@@ -22,6 +27,14 @@ export default function HomeScreen(): ReactElement {
 
   useEffect(() => {
     void processPendingRecordings();
+  }, [processPendingRecordings]);
+
+  useEffect(() => {
+    setBackgroundProcessors({
+      processPendingRecordings,
+      syncModels: () => modelManager.syncModelsForBackground(),
+    });
+    void initializeBackgroundProcessing();
   }, [processPendingRecordings]);
 
   const handleStopRecording = useCallback(async () => {

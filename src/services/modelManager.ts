@@ -47,6 +47,22 @@ export class ModelManager {
     this.selectionCache.clear();
   }
 
+  async syncModelsForBackground(): Promise<boolean> {
+    const requestedLanguages: SttLanguage[] = ["en", "fr-CA"];
+    let syncedAny = false;
+
+    for (const language of requestedLanguages) {
+      try {
+        await this.resolveModel(language);
+        syncedAny = true;
+      } catch {
+        // Best-effort: model may not be available locally yet.
+      }
+    }
+
+    return syncedAny;
+  }
+
   private pickModelPath(language: SttLanguage): { path: string; index: number } | null {
     const candidates = MODEL_CANDIDATES[language];
     for (let index = 0; index < candidates.length; index += 1) {

@@ -33,6 +33,7 @@ export function useAudioCapture(): UseAudioCaptureResult {
   const amplitudes = useSharedValue<number[]>(new Array(BUFFER_SIZE).fill(0));
   const durationRef = useRef(0);
   const smoothedAmplitude = useRef(0);
+  const amplitudeBufferRef = useRef<number[]>(new Array(BUFFER_SIZE).fill(0));
 
   const startRecording = useCallback(async () => {
     const success = await audioCaptureService.startRecording();
@@ -52,9 +53,10 @@ export function useAudioCapture(): UseAudioCaptureResult {
 
       setMetering(smoothed);
 
-      const buf = [...amplitudes.value];
+      const buf = [...amplitudeBufferRef.current];
       buf.shift();
       buf.push(smoothed);
+      amplitudeBufferRef.current = buf;
       amplitudes.value = buf;
     });
 

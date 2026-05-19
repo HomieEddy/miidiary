@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { Image, ScrollView, Text, View } from 'react-native';
 import { GlowRing } from '@/components/ui/GlowRing';
 import { HomePreviewSections } from '@/components/ui/HomePreviewSections';
@@ -18,7 +18,11 @@ export default function HomeScreen(): ReactElement {
     startRecording, stopRecording, retry,
   } = useAudioCapture();
 
-  const { processRecording } = useTranscription();
+  const { processRecording, processPendingRecordings } = useTranscription();
+
+  useEffect(() => {
+    void processPendingRecordings();
+  }, [processPendingRecordings]);
 
   const handleStopRecording = useCallback(async () => {
     const uri = await stopRecording();

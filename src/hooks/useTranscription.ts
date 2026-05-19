@@ -7,6 +7,7 @@ import { entriesRepository } from '@/services/entriesRepository';
 
 interface UseTranscriptionResult {
   processRecording: (audioUri: string) => Promise<void>;
+  processPendingRecordings: () => Promise<void>;
 }
 
 function resolveErrorDetail(err: unknown): string {
@@ -84,5 +85,13 @@ export function useTranscription(): UseTranscriptionResult {
     }
   }, [setProcessing, setProcessingStage, setError]);
 
-  return { processRecording };
+  const processPendingRecordings = useCallback(async () => {
+    const pendingUris = audioCaptureService.getPendingProcessingUris();
+
+    for (const uri of pendingUris) {
+      await processRecording(uri);
+    }
+  }, [processRecording]);
+
+  return { processRecording, processPendingRecordings };
 }

@@ -6,6 +6,7 @@ const mockTranscribeAudio = jest.fn();
 const mockClassifyEntry = jest.fn();
 const mockCleanupTempFile = jest.fn();
 const mockGetTempFilePath = jest.fn();
+const mockGetPendingProcessingUris = jest.fn();
 const mockMarkProcessingComplete = jest.fn();
 const mockCreateEntry = jest.fn();
 
@@ -24,6 +25,7 @@ jest.mock("@/services/classificationService", () => ({
 jest.mock("@/services/audioCaptureService", () => ({
   audioCaptureService: {
     getTempFilePath: (...args: unknown[]) => mockGetTempFilePath(...args),
+    getPendingProcessingUris: (...args: unknown[]) => mockGetPendingProcessingUris(...args),
     cleanupTempFile: (...args: unknown[]) => mockCleanupTempFile(...args),
     markProcessingComplete: (...args: unknown[]) => mockMarkProcessingComplete(...args),
   },
@@ -38,6 +40,7 @@ jest.mock("@/services/entriesRepository", () => ({
 describe("useTranscription", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetPendingProcessingUris.mockReturnValue([]);
     useRecordingStore.getState().reset();
   });
 
@@ -169,6 +172,32 @@ describe("useTranscription", () => {
     });
 
     expect(useRecordingStore.getState().processingStage).toBe("idle");
+  });
+
+  it("replays pending recordings on demand", async () => {
+    mockGetPendingProcessingUris.mockReturnValue([
+      "file:///pending-1.wav",
+      "file:///pending-2.wav",
+    ]);
+    mockTranscribeAudio.mockResolvedValue({ text: "Recovered text" });
+    mockClassifyEntry.mockResolvedValue({
+      category: "note",
+      confidence: 0.72,
+      rationale: "Model matched 2 weighted feature(s) for note.",
+      source: "model",
+    });
+    mockGetTempFilePath.mockReturnValue(null);
+    mockCreateEntry.mockResolvedValue({ id: "entry-1" });
+
+    const { result } = renderHook(() => useTranscription());
+
+    await act(async () => {
+      await result.current.processPendingRecordings();
+    });
+
+    expect(mockTranscribeAudio).toHaveBeenCalledTimes(2);
+    expect(mockMarkProcessingComplete).toHaveBeenCalledWith("file:///pending-1.wav");
+    expect(mockMarkProcessingComplete).toHaveBeenCalledWith("file:///pending-2.wav");
   });
 });
 

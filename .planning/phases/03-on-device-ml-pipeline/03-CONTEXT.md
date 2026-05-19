@@ -29,6 +29,13 @@ Requirements: TRAN-01, TRAN-02, TRAN-03, TRAN-04, TRAN-05, TRAN-06, CLAS-01, CLA
 - O-02: Classification approach (prompted lightweight model vs deterministic heuristic fallback order).
 - O-03: Progress UX contract granularity (coarse stage labels vs percentage per stage).
 - O-04: Background completion semantics for interrupted app state (strict best effort vs guaranteed resume queue).
+
+## Discuss Outcomes (2026-05-18)
+
+- O-01 resolved: Use language-specific STT models for initial implementation.
+- O-02 resolved: Use lightweight on-device model with keyword heuristic fallback.
+- O-03 resolved: Use stage-based progress labels.
+- O-04 pending: Background completion semantics to finalize during plan-phase risk handling.
 </decisions>
 
 <specifics>

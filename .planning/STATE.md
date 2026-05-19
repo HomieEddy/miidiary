@@ -11,8 +11,8 @@ See: .planning/PROJECT.md (updated 2026-05-17)
 
 Phase: 2 of 5 (Encrypted Storage & Basic Browse)
 Plan: 0 of 2 in current phase
-Status: Complete — Phase 1 all 3 plans executed
-Last activity: 2026-05-18 — Plan 01-03: orchestration hooks, state UI, HomeScreen pipeline (4 commits)
+Status: Phase 2 shipped - PR #2
+Last activity: 2026-05-18 - Shipped Phase 2 to PR #2 (feat/phase-2-encrypted-storage -> master)
 
 Progress: [████████░░] 67%
 

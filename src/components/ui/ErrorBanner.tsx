@@ -17,14 +17,28 @@ interface ErrorBannerProps {
   onRetry?: () => void;
 }
 
+function resolveErrorMessage(message: string | null): string {
+  if (!message) {
+    return 'Something went wrong while processing your recording.';
+  }
+
+  const trimmed = message.trim();
+  if (trimmed.length <= 1 || !/[A-Za-z0-9]/.test(trimmed)) {
+    return 'Something went wrong while processing your recording.';
+  }
+
+  return trimmed;
+}
+
 export function ErrorBanner({ visible, onRetry }: ErrorBannerProps): React.ReactElement | null {
   const errorMessage = useRecordingStore((state) => state.errorMessage);
+  const resolvedErrorMessage = resolveErrorMessage(errorMessage);
   const setError = useRecordingStore((state) => state.setError);
   const opacity = useSharedValue(0);
   const translateX = useSharedValue(-20);
 
   useEffect(() => {
-    if (visible && errorMessage) {
+    if (visible) {
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
 
       opacity.value = withTiming(1, {
@@ -41,23 +55,23 @@ export function ErrorBanner({ visible, onRetry }: ErrorBannerProps): React.React
 
       return () => clearTimeout(timer);
     }
-  }, [visible, errorMessage, opacity, translateX, setError]);
+  }, [visible, opacity, translateX, setError]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
     transform: [{ translateX: translateX.value }],
   }));
 
-  if (!visible || !errorMessage) return null;
+  if (!visible) return null;
 
   return (
-    <Pressable onPress={() => { setError(null); onRetry?.(); }}>
+    <Pressable className="w-full" onPress={() => { setError(null); onRetry?.(); }}>
       <Animated.View style={animatedStyle}>
-        <View className="bg-destructive/10 border-l-4 border-destructive rounded-xl px-4 py-3 mx-8 flex-row items-center gap-3">
+        <View className="bg-destructive/10 border-l-4 border-destructive rounded-xl px-4 py-3 mx-8 flex-row items-start gap-3">
           <SvgXml xml={WARNING_ICON} width={20} height={20} color="#EF476F" />
-          <View className="flex-1">
+          <View className="shrink min-w-[220px]">
             <Text className="font-sans text-xs font-bold text-destructive">
-              {errorMessage}
+              {resolvedErrorMessage}
             </Text>
             <Text className="font-sans text-xs font-medium text-destructive/80 mt-0.5">
               Tap to try again

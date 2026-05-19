@@ -1,3 +1,4 @@
+import * as Crypto from 'expo-crypto';
 import { create } from 'zustand';
 
 export type EntryCategory = 'diary' | 'task' | 'note';
@@ -21,7 +22,7 @@ export const useEntriesStore = create<EntriesState>((set, get) => ({
   addEntry: (entry) =>
     set((state) => ({
       entries: [
-        { ...entry, id: `entry-${crypto.randomUUID()}` },
+        { ...entry, id: `entry-${Crypto.randomUUID()}` },
         ...state.entries,
       ],
     })),

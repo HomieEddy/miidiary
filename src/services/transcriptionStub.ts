@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system';
+import { File } from 'expo-file-system';
 
 /**
  * Simulates transcription with 1-3s delay, then cleans up the audio file.
@@ -14,9 +14,9 @@ export async function stubTranscription(audioUri: string): Promise<string> {
 
   // Audio cleanup: delete temp file immediately after stub (VOIC-07, D-01 ephemeral requirement)
   try {
-    const fileInfo = await FileSystem.getInfoAsync(audioUri);
-    if (fileInfo.exists) {
-      await FileSystem.deleteAsync(audioUri, { idempotent: true });
+    const file = new File(audioUri);
+    if (file.exists) {
+      file.delete();
     }
   } catch {
     // Best-effort cleanup — file may have been cleaned up already

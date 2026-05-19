@@ -5,7 +5,17 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
 import { useFonts } from "expo-font";
+import {
+  configureReanimatedLogger,
+  ReanimatedLogLevel,
+} from "react-native-reanimated";
+import { BiometricGate } from "@/components/ui/BiometricGate";
 import "../../global.css";
+
+configureReanimatedLogger({
+  level: ReanimatedLogLevel.warn,
+  strict: false,
+});
 
 void SplashScreen.preventAutoHideAsync().catch(() => {
   // Ignore splash control errors in dev builds.
@@ -30,9 +40,11 @@ export default function RootLayout(): ReactElement | null {
   }
 
   return (
-    <View className="flex-1 bg-background">
-      <StatusBar style="dark" />
-      <Stack screenOptions={{ headerShown: false }} />
-    </View>
+    <BiometricGate>
+      <View className="flex-1 bg-background">
+        <StatusBar style="dark" />
+        <Stack screenOptions={{ headerShown: false }} />
+      </View>
+    </BiometricGate>
   );
 }

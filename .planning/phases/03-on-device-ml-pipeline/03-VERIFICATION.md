@@ -2,7 +2,7 @@
 phase: 03-on-device-ml-pipeline
 verified: 2026-05-19T00:00:00Z
 status: gaps_found
-score: 9/12 phase requirements verified
+score: 10/12 phase requirements verified
 ---
 
 # Phase 3: On-Device ML Pipeline Verification Report
@@ -19,13 +19,14 @@ score: 9/12 phase requirements verified
 4. Classification metadata is persisted foundation for override workflow (`CLAS-03` foundation).
 5. Pending-processing cleanup now closes reliably on both success and error paths in transcription orchestration.
 6. Pending recordings are now replayed on app mount for recovery after interruption/restart scenarios.
-7. Targeted phase tests pass for transcription/classification/useTranscription/useAudioCapture + pending-processing service coverage.
+7. Background task registration now wires pending replay and model sync hooks (`BACK-01`, `BACK-02` baseline).
+8. Targeted phase tests pass for transcription/classification/useTranscription/useAudioCapture + pending-processing service coverage.
 
 ## Gaps Remaining
 
 1. EN/FR-CA transcription accuracy acceptance criteria are not yet empirically validated (`TRAN-04`, `TRAN-05`).
 2. Ephemeral audio guarantee is stronger, but still partial under interruption/background resume conditions (`TRAN-06` partial).
-3. Background task completion hooks are not fully implemented (`BACK-01`, `BACK-02`).
+3. Background task hooks are implemented, but true model download pipeline and production background timing validation are still incomplete (`BACK-01`, `BACK-02` partial).
 4. End-to-end interruption recovery and background resume tests are still missing.
 
 ## Evidence
@@ -37,6 +38,7 @@ score: 9/12 phase requirements verified
 - 508939e - feat(03-03): track pending audio processing state
 - 7380eaa - feat(03-03): finalize pending-processing completion
 - 6de8d95 - feat(03-03): replay pending recordings on app resume
+- 304dcfc - docs(03): refresh verification after pending replay
 - 8dadedc - test(03-03): add pending-processing service coverage
 - 5a9ac19 - fix(03): address code-review findings
 
@@ -46,11 +48,12 @@ score: 9/12 phase requirements verified
 - npm run test -- src/tests/audioCaptureService.test.ts src/tests/useAudioCapture.test.ts src/tests/useTranscription.test.ts -i
 - npm run test -- src/tests/transcriptionService.test.ts src/tests/classificationService.test.ts src/tests/useTranscription.test.ts src/tests/useAudioCapture.test.ts src/tests/audioCaptureService.test.ts -i
 - npm run test -- src/tests/useTranscription.test.ts src/tests/useAudioCapture.test.ts src/tests/audioCaptureService.test.ts src/tests/transcriptionService.test.ts src/tests/classificationService.test.ts -i
+- npm run test -- src/tests/backgroundTaskService.test.ts src/tests/useTranscription.test.ts src/tests/useAudioCapture.test.ts src/tests/transcriptionService.test.ts src/tests/classificationService.test.ts -i
 
 ### Test Result Snapshot
 
 - Targeted suites: PASS
-- Most recent combined run (phase verification scope): 5 suites passed, 24 tests passed
+- Most recent combined run (phase verification scope): 5 suites passed, 25 tests passed
 
 ## Verdict
 

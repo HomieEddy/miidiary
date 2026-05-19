@@ -73,6 +73,9 @@ export function useAudioCapture(): UseAudioCaptureResult {
     }
 
     if (!uri) {
+      setRecording(false);
+      setProcessing(false);
+      setProcessingStage('idle');
       setError('Recording failed');
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       return undefined;

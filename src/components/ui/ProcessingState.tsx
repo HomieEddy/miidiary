@@ -17,7 +17,7 @@ export function ProcessingState({ visible }: ProcessingStateProps) {
   const processingStage = useRecordingStore((state) => state.processingStage);
 
   const stageLabel: Record<typeof processingStage, string> = {
-    idle: 'Processing transcription...',
+    idle: 'Preparing transcription...',
     preparing: 'Preparing model...',
     transcribing: 'Transcribing audio...',
     classifying: 'Classifying entry...',

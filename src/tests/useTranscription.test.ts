@@ -68,6 +68,7 @@ describe("useTranscription", () => {
         classification: expect.objectContaining({ source: "model" }),
       }),
     );
+    expect(mockCleanupTempFile).toHaveBeenCalledWith("file:///test.wav");
     expect(mockMarkProcessingComplete).toHaveBeenCalledWith("file:///test.wav");
   });
 
@@ -122,6 +123,27 @@ describe("useTranscription", () => {
     });
 
     expect(useRecordingStore.getState().isProcessing).toBe(false);
+  });
+
+  it("cleans up both audio URI and temp path when different", async () => {
+    mockTranscribeAudio.mockResolvedValue({ text: "Cleanup text" });
+    mockClassifyEntry.mockResolvedValue({
+      category: "note",
+      confidence: 0.72,
+      rationale: "Model matched 2 weighted feature(s) for note.",
+      source: "model",
+    });
+    mockGetTempFilePath.mockReturnValue("file:///temp.wav");
+    mockCreateEntry.mockResolvedValue({ id: "entry-1" });
+
+    const { result } = renderHook(() => useTranscription());
+
+    await act(async () => {
+      await result.current.processRecording("file:///test.wav");
+    });
+
+    expect(mockCleanupTempFile).toHaveBeenCalledWith("file:///test.wav");
+    expect(mockCleanupTempFile).toHaveBeenCalledWith("file:///temp.wav");
   });
 
   it("updates processing stage from transcription callbacks", async () => {

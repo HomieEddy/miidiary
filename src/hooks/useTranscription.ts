@@ -63,9 +63,15 @@ export function useTranscription(): UseTranscriptionResult {
       setProcessing(false);
 
       try {
+        const cleanupTargets = new Set<string>();
+        cleanupTargets.add(audioUri);
         const tempPath = audioCaptureService.getTempFilePath();
-        if (tempPath && tempPath !== audioUri) {
-          await audioCaptureService.cleanupTempFile(tempPath);
+        if (tempPath) {
+          cleanupTargets.add(tempPath);
+        }
+
+        for (const target of cleanupTargets) {
+          await audioCaptureService.cleanupTempFile(target);
         }
       } catch { /* best-effort */ }
     } catch (err) {

@@ -91,6 +91,7 @@ export class AudioCaptureService {
       }
       return uri;
     } catch {
+      await this.cleanupAfterError();
       return null;
     }
   }

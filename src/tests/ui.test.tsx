@@ -105,7 +105,7 @@ describe("App Shell", () => {
     expect(getByText("Tap to record a thought")).toBeTruthy();
   });
 
-  it("has bg-background class on root container", () => {
+  it("renders app shell root container", () => {
     const { root } = render(<HomeScreen />);
     expect(root).toBeTruthy();
   });

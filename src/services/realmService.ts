@@ -19,6 +19,7 @@ async function resolveEncryptionKey(): Promise<Uint8Array> {
 
   if ((metadata && !existingKey) || (!metadata && existingKey)) {
     await resetRealmKey();
+    setRealmKeyMetadata(null);
     throw new Error("Realm key metadata mismatch");
   }
 

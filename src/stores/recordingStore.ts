@@ -50,10 +50,10 @@ export const useRecordingStore = create<RecordingState>((set, get) => ({
 
   setRecording: (val) => set({ isRecording: val, status: val ? 'recording' : 'idle' }),
 
-  setPaused: (val) => set({
+  setPaused: (val) => set((state) => ({
     isPaused: val,
-    status: val ? 'call-paused' : 'recording',
-  }),
+    status: val ? 'call-paused' : state.isRecording ? 'recording' : 'idle',
+  })),
 
   setProcessing: (val) => set({
     isProcessing: val,

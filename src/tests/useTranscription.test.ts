@@ -57,10 +57,25 @@ describe("useTranscription", () => {
     });
 
     expect(useRecordingStore.getState().errorMessage).toBe(
-      "Transcription failed",
+      "Transcription failed: STT failed",
     );
     expect(useRecordingStore.getState().isProcessing).toBe(false);
     expect(mockCreateEntry).not.toHaveBeenCalled();
+  });
+
+  it("processRecording uses fallback detail for non-informative errors", async () => {
+    mockStubTranscription.mockRejectedValue(new Error("!"));
+
+    const { result } = renderHook(() => useTranscription());
+
+    await act(async () => {
+      await result.current.processRecording("file:///test.wav");
+    });
+
+    expect(useRecordingStore.getState().errorMessage).toBe(
+      "Transcription failed: Unknown error",
+    );
+    expect(useRecordingStore.getState().isProcessing).toBe(false);
   });
 
   it("processRecording clears processing on success", async () => {

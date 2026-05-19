@@ -8,6 +8,28 @@ interface UseTranscriptionResult {
   processRecording: (audioUri: string) => Promise<void>;
 }
 
+function resolveErrorDetail(err: unknown): string {
+  if (err instanceof Error) {
+    const candidate = err.message.trim();
+    if (candidate.length > 1 && /[A-Za-z0-9]/.test(candidate)) {
+      return candidate;
+    }
+    if (err.name && err.name !== 'Error') {
+      return err.name;
+    }
+    return 'Unknown error';
+  }
+
+  if (typeof err === 'string') {
+    const candidate = err.trim();
+    if (candidate.length > 1 && /[A-Za-z0-9]/.test(candidate)) {
+      return candidate;
+    }
+  }
+
+  return 'Unknown error';
+}
+
 export function useTranscription(): UseTranscriptionResult {
   const setError = useRecordingStore((state) => state.setError);
   const setProcessing = useRecordingStore((state) => state.setProcessing);
@@ -32,7 +54,8 @@ export function useTranscription(): UseTranscriptionResult {
       } catch { /* best-effort */ }
     } catch (err) {
       setProcessing(false);
-      setError('Transcription failed');
+      const message = resolveErrorDetail(err);
+      setError(`Transcription failed: ${message}`);
     }
   }, [setProcessing, setError]);
 

@@ -1,6 +1,6 @@
 import { AudioModule, requestRecordingPermissionsAsync, setAudioModeAsync } from 'expo-audio';
 import { WHISPER_QUALITY } from '@/utils/recordingPresets';
-import * as FileSystem from 'expo-file-system';
+import { File } from 'expo-file-system';
 
 export const RECORDING_STATES = {
   IDLE: 'idle',
@@ -96,9 +96,9 @@ export class AudioCaptureService {
 
   async cleanupTempFile(uri: string): Promise<void> {
     try {
-      const fileInfo = await FileSystem.getInfoAsync(uri);
-      if (fileInfo.exists) {
-        await FileSystem.deleteAsync(uri, { idempotent: true });
+      const file = new File(uri);
+      if (file.exists) {
+        file.delete();
       }
     } catch {
       // Silently ignore cleanup errors

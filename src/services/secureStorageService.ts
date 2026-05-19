@@ -1,4 +1,4 @@
-import { MMKV } from "react-native-mmkv";
+import { createMMKV } from "react-native-mmkv";
 
 const REALM_KEY_METADATA_KEY = "realm.key.metadata.v1";
 
@@ -7,7 +7,7 @@ export interface RealmKeyMetadata {
   version: number;
 }
 
-export const secureStorage = new MMKV({ id: "miidiary.secure" });
+export const secureStorage = createMMKV({ id: "miidiary.secure" });
 
 export function getRealmKeyMetadata(): RealmKeyMetadata | null {
   const raw = secureStorage.getString(REALM_KEY_METADATA_KEY);

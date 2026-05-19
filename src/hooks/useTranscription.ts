@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { stubTranscription } from '@/services/transcriptionStub';
+import { transcriptionService } from '@/services/transcriptionService';
 import { useRecordingStore } from '@/stores/recordingStore';
 import { audioCaptureService } from '@/services/audioCaptureService';
 import { entriesRepository } from '@/services/entriesRepository';
@@ -33,17 +33,24 @@ function resolveErrorDetail(err: unknown): string {
 export function useTranscription(): UseTranscriptionResult {
   const setError = useRecordingStore((state) => state.setError);
   const setProcessing = useRecordingStore((state) => state.setProcessing);
+  const setProcessingStage = useRecordingStore((state) => state.setProcessingStage);
 
   const processRecording = useCallback(async (audioUri: string) => {
     try {
-      const text = await stubTranscription(audioUri);
+      const result = await transcriptionService.transcribeAudio({
+        audioUri,
+        onStageChange: ({ stage }) => {
+          setProcessingStage(stage);
+        },
+      });
 
       await entriesRepository.createEntry({
-        text,
+        text: result.text,
         category: 'note',
         createdAt: new Date().toISOString(),
       });
 
+      setProcessingStage('finalizing');
       setProcessing(false);
 
       try {
@@ -53,11 +60,12 @@ export function useTranscription(): UseTranscriptionResult {
         }
       } catch { /* best-effort */ }
     } catch (err) {
+      setProcessingStage('idle');
       setProcessing(false);
       const message = resolveErrorDetail(err);
       setError(`Transcription failed: ${message}`);
     }
-  }, [setProcessing, setError]);
+  }, [setProcessing, setProcessingStage, setError]);
 
   return { processRecording };
 }

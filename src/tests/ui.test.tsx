@@ -71,8 +71,10 @@ jest.mock("@/services/audioCaptureService", () => ({
   },
 }));
 
-jest.mock("@/services/transcriptionStub", () => ({
-  stubTranscription: jest.fn(),
+jest.mock("@/services/transcriptionService", () => ({
+  transcriptionService: {
+    transcribeAudio: jest.fn(),
+  },
 }));
 
 jest.mock("@/theme/colors", () => ({

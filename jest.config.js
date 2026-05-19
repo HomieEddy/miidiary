@@ -7,6 +7,7 @@ module.exports = {
   ],
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
+    "^whisper\\.rn$": "<rootDir>/node_modules/whisper.rn/lib/commonjs/index.js",
   },
   testPathIgnorePatterns: ["/node_modules/", "/android/", "/ios/"],
   testMatch: ["**/src/tests/**/*.test.{ts,tsx}"],

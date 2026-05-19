@@ -28,6 +28,7 @@ export function useAudioCapture(): UseAudioCaptureResult {
   const setError = useRecordingStore((state) => state.setError);
   const setMetering = useRecordingStore((state) => state.setMetering);
   const setProcessing = useRecordingStore((state) => state.setProcessing);
+  const setProcessingStage = useRecordingStore((state) => state.setProcessingStage);
   const setRecording = useRecordingStore((state) => state.setRecording);
 
   const amplitudes = useSharedValue<number[]>(new Array(BUFFER_SIZE).fill(0));
@@ -79,9 +80,10 @@ export function useAudioCapture(): UseAudioCaptureResult {
 
     setRecording(false);
     setProcessing(true);
+    setProcessingStage('preparing');
 
     return uri;
-  }, [setRecording, setProcessing, setError, setDuration]);
+  }, [setRecording, setProcessing, setProcessingStage, setError, setDuration]);
 
   const retry = useCallback(() => {
     reset();

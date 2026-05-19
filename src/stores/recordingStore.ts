@@ -1,11 +1,19 @@
 import { create } from 'zustand';
 
 export type RecordingStatus = 'idle' | 'recording' | 'processing' | 'call-paused' | 'error';
+export type ProcessingStage =
+  | 'idle'
+  | 'preparing'
+  | 'transcribing'
+  | 'classifying'
+  | 'persisting'
+  | 'finalizing';
 
 interface RecordingState {
   isRecording: boolean;
   isPaused: boolean;
   isProcessing: boolean;
+  processingStage: ProcessingStage;
   duration: number;
   metering: number;
   status: RecordingStatus;
@@ -15,6 +23,7 @@ interface RecordingState {
   setRecording: (val: boolean) => void;
   setPaused: (val: boolean) => void;
   setProcessing: (val: boolean) => void;
+  setProcessingStage: (stage: ProcessingStage) => void;
   setDuration: (ms: number) => void;
   setMetering: (val: number) => void;
   setStatus: (s: RecordingStatus) => void;
@@ -28,6 +37,7 @@ const initialState = {
   isRecording: false,
   isPaused: false,
   isProcessing: false,
+  processingStage: 'idle' as ProcessingStage,
   duration: 0,
   metering: 0,
   status: 'idle' as RecordingStatus,
@@ -47,8 +57,11 @@ export const useRecordingStore = create<RecordingState>((set, get) => ({
 
   setProcessing: (val) => set({
     isProcessing: val,
+    processingStage: val ? get().processingStage === 'idle' ? 'preparing' : get().processingStage : 'idle',
     status: val ? 'processing' : 'idle',
   }),
+
+  setProcessingStage: (stage) => set({ processingStage: stage }),
 
   setDuration: (ms) => set({ duration: ms }),
 

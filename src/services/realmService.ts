@@ -47,7 +47,7 @@ export async function getRealmInstance(): Promise<Realm> {
     realmInstance = await Realm.open({
       path: "miidiary.realm",
       schema: [EntryRealmSchema],
-      schemaVersion: 1,
+      schemaVersion: 2,
       encryptionKey,
       onMigration: () => {
         // Migration rules are explicit and additive only.

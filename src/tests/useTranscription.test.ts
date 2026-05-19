@@ -3,6 +3,7 @@ import { useTranscription } from "@/hooks/useTranscription";
 import { useRecordingStore } from "@/stores/recordingStore";
 
 const mockTranscribeAudio = jest.fn();
+const mockClassifyEntry = jest.fn();
 const mockCleanupTempFile = jest.fn();
 const mockGetTempFilePath = jest.fn();
 const mockCreateEntry = jest.fn();
@@ -10,6 +11,12 @@ const mockCreateEntry = jest.fn();
 jest.mock("@/services/transcriptionService", () => ({
   transcriptionService: {
     transcribeAudio: (...args: unknown[]) => mockTranscribeAudio(...args),
+  },
+}));
+
+jest.mock("@/services/classificationService", () => ({
+  classificationService: {
+    classifyEntry: (...args: unknown[]) => mockClassifyEntry(...args),
   },
 }));
 
@@ -34,6 +41,12 @@ describe("useTranscription", () => {
 
   it("processRecording persists entry on successful transcription", async () => {
     mockTranscribeAudio.mockResolvedValue({ text: "Transcribed text" });
+    mockClassifyEntry.mockResolvedValue({
+      category: "note",
+      confidence: 0.72,
+      rationale: "Model matched 2 weighted feature(s) for note.",
+      source: "model",
+    });
     mockGetTempFilePath.mockReturnValue(null);
     mockCreateEntry.mockResolvedValue({ id: "entry-1" });
 
@@ -47,7 +60,11 @@ describe("useTranscription", () => {
       expect.objectContaining({ audioUri: "file:///test.wav" }),
     );
     expect(mockCreateEntry).toHaveBeenCalledWith(
-      expect.objectContaining({ text: "Transcribed text", category: "note" }),
+      expect.objectContaining({
+        text: "Transcribed text",
+        category: "note",
+        classification: expect.objectContaining({ source: "model" }),
+      }),
     );
   });
 
@@ -84,6 +101,12 @@ describe("useTranscription", () => {
 
   it("processRecording clears processing on success", async () => {
     mockTranscribeAudio.mockResolvedValue({ text: "Success text" });
+    mockClassifyEntry.mockResolvedValue({
+      category: "task",
+      confidence: 0.61,
+      rationale: "Heuristic matched action-oriented keywords.",
+      source: "heuristic",
+    });
     mockGetTempFilePath.mockReturnValue(null);
     mockCreateEntry.mockResolvedValue({ id: "entry-1" });
     useRecordingStore.getState().setProcessing(true);
@@ -105,6 +128,12 @@ describe("useTranscription", () => {
       return { text: "Stage text" };
     });
     mockGetTempFilePath.mockReturnValue(null);
+    mockClassifyEntry.mockResolvedValue({
+      category: "note",
+      confidence: 0.72,
+      rationale: "Model matched 2 weighted feature(s) for note.",
+      source: "model",
+    });
     mockCreateEntry.mockResolvedValue({ id: "entry-1" });
 
     const { result } = renderHook(() => useTranscription());

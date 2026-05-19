@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { transcriptionService } from '@/services/transcriptionService';
+import { classificationService } from '@/services/classificationService';
 import { useRecordingStore } from '@/stores/recordingStore';
 import { audioCaptureService } from '@/services/audioCaptureService';
 import { entriesRepository } from '@/services/entriesRepository';
@@ -44,9 +45,17 @@ export function useTranscription(): UseTranscriptionResult {
         },
       });
 
+      setProcessingStage('classifying');
+      const classification = await classificationService.classifyEntry({
+        text: result.text,
+      });
+
+      setProcessingStage('persisting');
+
       await entriesRepository.createEntry({
         text: result.text,
-        category: 'note',
+        category: classification.category,
+        classification,
         createdAt: new Date().toISOString(),
       });
 

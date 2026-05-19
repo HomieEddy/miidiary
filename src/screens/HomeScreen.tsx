@@ -74,7 +74,9 @@ export default function HomeScreen(): ReactElement {
           />
         </View>
 
-        <ErrorBanner visible={status === 'error'} onRetry={retry} />
+        <View className="mt-4 px-6 w-full">
+          <ErrorBanner visible={status === 'error'} onRetry={retry} />
+        </View>
       </View>
 
       <HomePreviewSections />

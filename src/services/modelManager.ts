@@ -1,4 +1,4 @@
-import { File, Paths } from "expo-file-system";
+import { Directory, File, Paths } from "expo-file-system";
 
 export type SttLanguage = "en" | "fr-CA";
 
@@ -18,6 +18,15 @@ const MODEL_CANDIDATES: Record<SttLanguage, string[]> = {
     `${Paths.document.uri}models/ggml-base.bin`,
   ],
 };
+
+const MODEL_DOWNLOAD_SOURCES: Record<string, string> = {
+  "ggml-base.en.bin": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin",
+  "ggml-tiny.en.bin": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.en.bin",
+  "ggml-small.bin": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin",
+  "ggml-base.bin": "https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin",
+};
+
+const MODELS_DIRECTORY_URI = `${Paths.document.uri}models`;
 
 export class ModelManager {
   private readonly selectionCache = new Map<SttLanguage, ModelSelection>();
@@ -56,7 +65,15 @@ export class ModelManager {
         await this.resolveModel(language);
         syncedAny = true;
       } catch {
-        // Best-effort: model may not be available locally yet.
+        const downloaded = await this.downloadBestCandidate(language);
+        syncedAny = syncedAny || downloaded;
+        if (downloaded) {
+          try {
+            await this.resolveModel(language);
+          } catch {
+            // Best-effort: keep sync resilient even when downloaded file is unusable.
+          }
+        }
       }
     }
 
@@ -77,6 +94,45 @@ export class ModelManager {
     }
 
     return null;
+  }
+
+  private async downloadBestCandidate(language: SttLanguage): Promise<boolean> {
+    const candidates = MODEL_CANDIDATES[language];
+    const modelsDirectory = new Directory(MODELS_DIRECTORY_URI);
+
+    try {
+      if (!modelsDirectory.exists) {
+        modelsDirectory.create({ idempotent: true, intermediates: true });
+      }
+    } catch {
+      return false;
+    }
+
+    for (const candidatePath of candidates) {
+      const candidateFile = new File(candidatePath);
+      if (candidateFile.exists) {
+        return true;
+      }
+
+      const fileName = candidatePath.split("/").pop();
+      if (!fileName) {
+        continue;
+      }
+
+      const sourceUrl = MODEL_DOWNLOAD_SOURCES[fileName];
+      if (!sourceUrl) {
+        continue;
+      }
+
+      try {
+        await File.downloadFileAsync(sourceUrl, candidateFile, { idempotent: true });
+        return true;
+      } catch {
+        // Continue trying lower-priority model candidates.
+      }
+    }
+
+    return false;
   }
 }
 

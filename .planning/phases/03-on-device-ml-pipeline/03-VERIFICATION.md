@@ -22,11 +22,12 @@ score: 11/12 phase requirements verified
 7. Background task registration now wires pending replay and model sync hooks (`BACK-01`, `BACK-02` baseline).
 8. Foreground resume now replays pending recordings via AppState active transition handling.
 9. Model manager now attempts background download of missing Whisper binaries via `File.downloadFileAsync` and falls back safely.
-10. Targeted phase tests pass for transcription/classification/useTranscription/useAudioCapture + pending-processing service coverage.
+10. WER-based EN/FR transcription validation harness is available for empirical acceptance scoring (`TRAN-04`, `TRAN-05` measurement tooling).
+11. Targeted phase tests pass for transcription/classification/useTranscription/useAudioCapture + pending-processing service coverage.
 
 ## Gaps Remaining
 
-1. EN/FR-CA transcription accuracy acceptance criteria are not yet empirically validated on representative real-world audio (`TRAN-04`, `TRAN-05`).
+1. EN/FR-CA transcription accuracy acceptance criteria are not yet empirically validated on representative real-world audio captures (`TRAN-04`, `TRAN-05`).
 2. End-to-end on-device validation for background execution windows and interruption-resume behavior is still missing.
 
 ## Evidence
@@ -42,6 +43,7 @@ score: 11/12 phase requirements verified
 - 2bc21e0 - feat(03-03): add background task hooks for pending replay
 - 63ebf46 - docs(03): update summary and verification after background hooks
 - 4ef53b8 - feat(03-03): harden pending replay on app resume
+- 87f8e91 - feat(03-03): add model download fallback sync
 - 8dadedc - test(03-03): add pending-processing service coverage
 - 5a9ac19 - fix(03): address code-review findings
 
@@ -54,6 +56,7 @@ score: 11/12 phase requirements verified
 - npm run test -- src/tests/backgroundTaskService.test.ts src/tests/useTranscription.test.ts src/tests/useAudioCapture.test.ts src/tests/transcriptionService.test.ts src/tests/classificationService.test.ts -i
 - npm run test -- src/tests/backgroundTaskService.test.ts src/tests/useTranscription.test.ts src/tests/useAudioCapture.test.ts -i
 - npm run test -- src/tests/modelManager.test.ts src/tests/backgroundTaskService.test.ts src/tests/transcriptionService.test.ts src/tests/useTranscription.test.ts -i
+- npm run test -- src/tests/transcriptionValidationService.test.ts src/tests/modelManager.test.ts src/tests/backgroundTaskService.test.ts -i
 
 ### Test Result Snapshot
 

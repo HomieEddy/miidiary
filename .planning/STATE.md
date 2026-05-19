@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-05-17)
 
 **Core value:** Instant, private, offline voice capture that automatically organizes thoughts into the right place — so users never lose an idea.
-**Current focus:** Phase 2: Encrypted Storage & Basic Browse
+**Current focus:** Phase 3: On-Device ML Pipeline
 
 ## Current Position
 
-Phase: 2 of 5 (Encrypted Storage & Basic Browse)
-Plan: 0 of 2 in current phase
-Status: Phase 2 shipped - PR #2
-Last activity: 2026-05-18 - Shipped Phase 2 to PR #2 (feat/phase-2-encrypted-storage -> master)
+Phase: 3 of 5 (On-Device ML Pipeline)
+Plan: 0 of 3 in current phase
+Status: Phase 2 merged - PR #2
+Last activity: 2026-05-18 - Phase 2 merged via PR #2 into master
 
 Progress: [████████░░] 67%
 
@@ -79,5 +79,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-05-18
-Stopped at: Phase 1 complete — ready for Phase 2
-Resume file: .planning/phases/02-encrypted-storage-basic-browse/
+Stopped at: Phase 2 merged - ready for Phase 3
+Resume file: .planning/phases/03-on-device-ml-pipeline/

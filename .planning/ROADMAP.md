@@ -8,7 +8,7 @@ Dear Diary transforms voice capture into organized entries — from a single tap
 
 - [ ] **Phase 0: Project Scaffolding** - React Native Expo app initialized with all dependencies, theme system, and a basic render test
 - [x] **Phase 1: Foundation & Audio Capture** - Core record → visualize → transcribe → discard loop with haptic feedback
-- [ ] **Phase 2: Encrypted Storage & Basic Browse** - SQLCipher database, entry persistence, and chronological entry list
+- [x] **Phase 2: Encrypted Storage & Basic Browse** - SQLCipher database, entry persistence, and chronological entry list
 - [ ] **Phase 3: On-Device ML Pipeline** - On-device speech-to-text (EN/FR) and auto-classification (Diary/Task/Note)
 - [ ] **Phase 4: Browse, Review, Tasks & Polish** - Search, filter, edit entries, task management, motion animations, dark mode
 
@@ -71,13 +71,15 @@ Plans:
    5. User can delete individual entries or wipe all data from settings
    6. Realm queries on timestamp and category return in under 10ms via deterministic single-key indexing
    7. App is locked behind biometric authentication on launch (expo-local-authentication)
-**Plans**: TBD
+**Plans**: 2 plans
 
 **UI hint**: yes
 
 Plans:
 - [ ] 02-01: Realm encrypted database setup (Realm schema with deterministic indexing on timestamp/category, MMKV + Keychain key management)
 - [ ] 02-02: Entry repository CRUD + chronological list screen (flash-list) + delete flow + offline validation + biometric unlock
+- [x] 02-01: Realm encrypted database setup (Realm schema with deterministic indexing on timestamp/category, MMKV + Keychain key management)
+- [x] 02-02: Entry repository CRUD + chronological list screen (flash-list) + delete flow + offline validation + biometric unlock
 
 ### Phase 3: On-Device ML Pipeline
 **Goal**: Recorded speech is automatically transcribed and classified into Diary/Task/Note — all on-device, all offline, in English and French
@@ -129,6 +131,6 @@ Phases execute in numeric order: 0 → 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 0. Project Scaffolding | 0/3 | Planned | - |
 | 1. Foundation & Audio Capture | 3/3 | Complete | 2026-05-18 |
-| 2. Encrypted Storage & Basic Browse | 0/2 | Not started | - |
+| 2. Encrypted Storage & Basic Browse | 2/2 | Complete | 2026-05-18 |
 | 3. On-Device ML Pipeline | 0/3 | Not started | - |
 | 4. Browse, Review, Tasks & Polish | 0/4 | Not started | - |

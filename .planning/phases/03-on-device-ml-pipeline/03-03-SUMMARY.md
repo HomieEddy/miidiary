@@ -23,6 +23,8 @@ Started pipeline reliability hardening by tracking pending audio URIs through pr
 5. Added BackgroundFetch + TaskManager service wiring to run pending replay and model sync hooks.
 6. Added AppState active-resume hook to replay pending recordings when app returns to foreground.
 7. Added test coverage for pending-processing registration and background task behavior (including restricted and idempotent registration paths).
+8. Added background model download orchestration for missing Whisper binaries using modern `File.downloadFileAsync` fallback paths.
+9. Added dedicated model manager tests covering resolve, download sync, and failure fallback behavior.
 
 ## Key Files
 
@@ -35,6 +37,7 @@ Started pipeline reliability hardening by tracking pending audio URIs through pr
 - src/tests/useAudioCapture.test.ts
 - src/tests/useTranscription.test.ts
 - src/tests/backgroundTaskService.test.ts
+- src/tests/modelManager.test.ts
 
 ## Verification
 
@@ -42,6 +45,7 @@ Command:
 
 npm run test -- src/tests/backgroundTaskService.test.ts src/tests/useTranscription.test.ts src/tests/useAudioCapture.test.ts src/tests/transcriptionService.test.ts src/tests/classificationService.test.ts -i
 npm run test -- src/tests/backgroundTaskService.test.ts src/tests/useTranscription.test.ts src/tests/useAudioCapture.test.ts -i
+npm run test -- src/tests/modelManager.test.ts src/tests/backgroundTaskService.test.ts src/tests/transcriptionService.test.ts src/tests/useTranscription.test.ts -i
 
 Result:
 
@@ -49,9 +53,11 @@ Result:
 - 25 tests passed
 - 3 test suites passed
 - 18 tests passed
+- 4 test suites passed
+- 21 tests passed
 
 ## Remaining Work
 
 - Complete terminal cleanup/retention policy for pending processing set.
-- Add true model download orchestration for missing local model binaries.
 - Add on-device E2E validation for background fetch execution windows and interruption-resume behavior.
+- Add download integrity checks (checksum/versioning) for model binaries.

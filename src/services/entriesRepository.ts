@@ -1,3 +1,4 @@
+import * as Crypto from "expo-crypto";
 import { buildEntryQueryKey } from "@/models/EntryRealm";
 import { getRealmInstance } from "@/services/realmService";
 import type { CreateEntryInput, EntryCategory, EntryRecord } from "@/types/entry";
@@ -32,7 +33,7 @@ async function createEntry(input: CreateEntryInput): Promise<EntryRecord> {
   const now = new Date();
   const candidateCreatedAt = input.createdAt ? new Date(input.createdAt) : now;
   const createdAt = Number.isNaN(candidateCreatedAt.getTime()) ? now : candidateCreatedAt;
-  const id = `entry-${crypto.randomUUID()}`;
+  const id = `entry-${Crypto.randomUUID()}`;
 
   const payload: RealmEntry = {
     id,

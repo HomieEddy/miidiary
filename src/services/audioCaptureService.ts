@@ -16,6 +16,7 @@ export class AudioCaptureService {
   private recorder: InstanceType<typeof AudioModule.AudioRecorder> | null = null;
   private tempFilePath: string | null = null;
   private meteringCallback: ((value: number) => void) | null = null;
+  private readonly pendingProcessing = new Set<string>();
 
   onMetering(cb: (value: number) => void) {
     this.meteringCallback = cb;
@@ -119,6 +120,18 @@ export class AudioCaptureService {
 
   getTempFilePath(): string | null {
     return this.tempFilePath;
+  }
+
+  markPendingProcessing(uri: string): void {
+    this.pendingProcessing.add(uri);
+  }
+
+  markProcessingComplete(uri: string): void {
+    this.pendingProcessing.delete(uri);
+  }
+
+  getPendingProcessingUris(): string[] {
+    return [...this.pendingProcessing.values()];
   }
 }
 

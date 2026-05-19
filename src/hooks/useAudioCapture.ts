@@ -81,6 +81,7 @@ export function useAudioCapture(): UseAudioCaptureResult {
     setRecording(false);
     setProcessing(true);
     setProcessingStage('preparing');
+    audioCaptureService.markPendingProcessing(uri);
 
     return uri;
   }, [setRecording, setProcessing, setProcessingStage, setError, setDuration]);

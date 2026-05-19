@@ -5,6 +5,7 @@ import { useRecordingStore } from "@/stores/recordingStore";
 const mockStartRecording = jest.fn();
 const mockStopRecording = jest.fn();
 const mockOnMetering = jest.fn();
+const mockMarkPendingProcessing = jest.fn();
 const mockNotificationAsync = jest.fn();
 
 jest.mock("@/services/audioCaptureService", () => ({
@@ -12,6 +13,7 @@ jest.mock("@/services/audioCaptureService", () => ({
     startRecording: (...args: unknown[]) => mockStartRecording(...args),
     stopRecording: (...args: unknown[]) => mockStopRecording(...args),
     onMetering: (...args: unknown[]) => mockOnMetering(...args),
+    markPendingProcessing: (...args: unknown[]) => mockMarkPendingProcessing(...args),
   },
 }));
 
@@ -81,6 +83,7 @@ describe("useAudioCapture", () => {
     expect(uri).toBe("file:///recording.wav");
     expect(useRecordingStore.getState().isRecording).toBe(false);
     expect(useRecordingStore.getState().isProcessing).toBe(true);
+    expect(mockMarkPendingProcessing).toHaveBeenCalledWith("file:///recording.wav");
   });
 
   it("stopRecording sets error when URI is null", async () => {

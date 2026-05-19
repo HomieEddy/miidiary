@@ -6,6 +6,7 @@ const mockTranscribeAudio = jest.fn();
 const mockClassifyEntry = jest.fn();
 const mockCleanupTempFile = jest.fn();
 const mockGetTempFilePath = jest.fn();
+const mockMarkProcessingComplete = jest.fn();
 const mockCreateEntry = jest.fn();
 
 jest.mock("@/services/transcriptionService", () => ({
@@ -24,6 +25,7 @@ jest.mock("@/services/audioCaptureService", () => ({
   audioCaptureService: {
     getTempFilePath: (...args: unknown[]) => mockGetTempFilePath(...args),
     cleanupTempFile: (...args: unknown[]) => mockCleanupTempFile(...args),
+    markProcessingComplete: (...args: unknown[]) => mockMarkProcessingComplete(...args),
   },
 }));
 
@@ -66,6 +68,7 @@ describe("useTranscription", () => {
         classification: expect.objectContaining({ source: "model" }),
       }),
     );
+    expect(mockMarkProcessingComplete).toHaveBeenCalledWith("file:///test.wav");
   });
 
   it("processRecording sets error state on transcription failure", async () => {
@@ -82,6 +85,7 @@ describe("useTranscription", () => {
     );
     expect(useRecordingStore.getState().isProcessing).toBe(false);
     expect(mockCreateEntry).not.toHaveBeenCalled();
+    expect(mockMarkProcessingComplete).toHaveBeenCalledWith("file:///test.wav");
   });
 
   it("processRecording uses fallback detail for non-informative errors", async () => {

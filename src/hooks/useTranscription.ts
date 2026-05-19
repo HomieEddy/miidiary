@@ -73,6 +73,8 @@ export function useTranscription(): UseTranscriptionResult {
       setProcessing(false);
       const message = resolveErrorDetail(err);
       setError(`Transcription failed: ${message}`);
+    } finally {
+      audioCaptureService.markProcessingComplete(audioUri);
     }
   }, [setProcessing, setProcessingStage, setError]);
 

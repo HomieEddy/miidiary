@@ -44,6 +44,7 @@ score: 11/12 phase requirements verified
 - 63ebf46 - docs(03): update summary and verification after background hooks
 - 4ef53b8 - feat(03-03): harden pending replay on app resume
 - 87f8e91 - feat(03-03): add model download fallback sync
+- 8f03173 - test(03): add EN/FR transcription accuracy harness
 - 8dadedc - test(03-03): add pending-processing service coverage
 - 5a9ac19 - fix(03): address code-review findings
 
@@ -57,11 +58,12 @@ score: 11/12 phase requirements verified
 - npm run test -- src/tests/backgroundTaskService.test.ts src/tests/useTranscription.test.ts src/tests/useAudioCapture.test.ts -i
 - npm run test -- src/tests/modelManager.test.ts src/tests/backgroundTaskService.test.ts src/tests/transcriptionService.test.ts src/tests/useTranscription.test.ts -i
 - npm run test -- src/tests/transcriptionValidationService.test.ts src/tests/modelManager.test.ts src/tests/backgroundTaskService.test.ts -i
+- npm run test -- src/tests/transcriptionService.test.ts src/tests/classificationService.test.ts src/tests/useTranscription.test.ts src/tests/useAudioCapture.test.ts src/tests/audioCaptureService.test.ts src/tests/backgroundTaskService.test.ts src/tests/modelManager.test.ts src/tests/transcriptionValidationService.test.ts -i
 
 ### Test Result Snapshot
 
 - Targeted suites: PASS
-- Most recent combined run (phase verification scope): 5 suites passed, 25 tests passed
+- Most recent combined run (phase verification scope): 8 suites passed, 36 tests passed
 
 ## Verdict
 

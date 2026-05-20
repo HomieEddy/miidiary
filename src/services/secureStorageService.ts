@@ -31,7 +31,7 @@ export function getRealmKeyMetadata(): RealmKeyMetadata | null {
 
 export function setRealmKeyMetadata(metadata: RealmKeyMetadata | null): void {
   if (metadata === null) {
-    secureStorage.delete(REALM_KEY_METADATA_KEY);
+    secureStorage.remove(REALM_KEY_METADATA_KEY);
     return;
   }
 

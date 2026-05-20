@@ -1,0 +1,18 @@
+{
+  "cases": [
+    {
+      "id": "en-1",
+      "language": "en",
+      "audioPath": ".planning/fixtures/audio/en-sample.m4a",
+      "expectedTranscript": "I am hungry today and I work till noon",
+      "transcribedText": ""
+    },
+    {
+      "id": "fr-ca-1",
+      "language": "fr-CA",
+      "audioPath": ".planning/fixtures/audio/fr-ca-sample.m4a",
+      "expectedTranscript": "J'ai faim aujourd'hui et je travaille jusqu'à midi",
+      "transcribedText": ""
+    }
+  ]
+}

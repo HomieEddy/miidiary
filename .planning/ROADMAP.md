@@ -10,7 +10,7 @@ Dear Diary transforms voice capture into organized entries — from a single tap
 - [x] **Phase 1: Foundation & Audio Capture** - Core record → visualize → transcribe → discard loop with haptic feedback
 - [x] **Phase 2: Encrypted Storage & Basic Browse** - SQLCipher database, entry persistence, and chronological entry list
 - [x] **Phase 3: On-Device ML Pipeline** - On-device speech-to-text (EN/FR) and auto-classification (Diary/Task/Note)
-- [ ] **Phase 4: Browse, Review, Tasks & Polish** - Search, filter, edit entries, task management, motion animations, dark mode
+- [x] **Phase 4: Browse, Review, Tasks & Polish** - Search, filter, edit entries, task management, motion animations, dark mode
 
 ## Phase Details
 
@@ -115,10 +115,10 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 04-01-PLAN.md — Data layer: isCompleted schema migration, searchEntries/toggleComplete/updateEntry, useEntries delete-mode removal
-- [ ] 04-02-PLAN.md — Browse screen: search reveal, long-press contextual menu, EntryDetailSheet (view + edit)
-- [ ] 04-03-PLAN.md — Task completion checkbox + Thought Shredder animation + dark mode + shimmer skeletons
-- [ ] 04-04-PLAN.md — Jest tests (search, completion, edit, bilingual FR-CA) + Detox E2E setup
+- [x] 04-01-PLAN.md — Data layer: isCompleted schema migration, searchEntries/toggleComplete/updateEntry, useEntries delete-mode removal
+- [x] 04-02-PLAN.md — Browse screen: search reveal, long-press contextual menu, EntryDetailSheet (view + edit)
+- [x] 04-03-PLAN.md — Task completion checkbox + Thought Shredder animation + dark mode + shimmer skeletons
+- [x] 04-04-PLAN.md — Jest tests (search, completion, edit, bilingual FR-CA) + Detox E2E setup
 
 ## Progress
 
@@ -131,4 +131,4 @@ Phases execute in numeric order: 0 → 1 → 2 → 3 → 4
 | 1. Foundation & Audio Capture | 3/3 | Complete | 2026-05-18 |
 | 2. Encrypted Storage & Basic Browse | 2/2 | Complete | 2026-05-18 |
 | 3. On-Device ML Pipeline | 0/3 | Not started | - |
-| 4. Browse, Review, Tasks & Polish | 0/4 | Not started | - |
+| 4. Browse, Review, Tasks & Polish | 4/4 | Complete | 2026-05-20 |

@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-05-17)
 
 **Core value:** Instant, private, offline voice capture that automatically organizes thoughts into the right place — so users never lose an idea.
-**Current focus:** Phase 4: Browse, Review, Tasks & Polish
+**Current focus:** Phase 4 complete — ready for verify-work / code-review / ship
 
 ## Current Position
 
-Phase: 3 of 5 (On-Device ML Pipeline) — **COMPLETE**
-Plan: 3 of 3 in Phase 3
-Status: Phase 3 shipped — PR #3 open to master
-Last activity: 2026-05-20 - /gsd-ship completed, PR #3 created and ready for review/merge
+Phase: 4 of 5 (Browse, Review, Tasks & Polish) — **COMPLETE**
+Plan: 4 of 4 in Phase 4
+Status: Phase 4 plans executed on feature branch
+Last activity: 2026-05-20 - Phase 4 plans 04-01 to 04-04 executed with summaries
 
-Progress: [██████████░░] 80%
+Progress: [████████████] 100%
 
 ## Performance Metrics
 
@@ -31,7 +31,7 @@ Progress: [██████████░░] 80%
 | 1. Foundation & Audio Capture | 3/3 | 28 min | 9 min |
 | 2. Encrypted Storage & Basic Browse | 2/2 | ~18 min | 9 min |
 | 3. On-Device ML Pipeline | 3/3 | ~25 min | 8 min |
-| 4. Browse, Review, Tasks & Polish | 0/3 | — | — |
+| 4. Browse, Review, Tasks & Polish | 4/4 | ~45 min | 11 min |
 
 **Recent Trend:**
 - Last 5 plans:
@@ -91,4 +91,4 @@ None yet.
 Last session: 2026-05-20
 Stopped at: Phase 3 complete — all 3 plans executed, code reviewed, hardened with model lifecycle improvements
 Resume file: .planning/phases/04-browse-review-tasks-polish/
-Next step: /gsd-docs-update → review/merge PR #3 → /gsd-discuss-phase 4
+Next step: /gsd-code-review 4 → /gsd-verify-work 4 → /gsd-ship

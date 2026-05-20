@@ -1,4 +1,5 @@
 import { initWhisper, type WhisperContext } from "whisper.rn";
+import { NativeModules, Platform } from "react-native";
 import { modelManager, type SttLanguage } from "@/services/modelManager";
 
 export type TranscriptionStage = "preparing" | "transcribing" | "finalizing";
@@ -26,6 +27,10 @@ type ContextCacheItem = {
   modelPath: string;
 };
 
+type AudioPcmDecoderModule = {
+  decodeToPcm16Base64: (audioUri: string) => Promise<string>;
+};
+
 function emitStage(
   onStageChange: ((update: TranscriptionStageUpdate) => void) | undefined,
   stage: TranscriptionStage,
@@ -38,6 +43,30 @@ function normalizeLanguage(language: SttLanguage | undefined): SttLanguage {
   return language ?? "en";
 }
 
+function isWavUri(audioUri: string): boolean {
+  return audioUri.trim().toLowerCase().endsWith(".wav");
+}
+
+function isBlankTranscription(text: string): boolean {
+  const normalized = text.trim().toLowerCase();
+
+  return (
+    normalized.length === 0 ||
+    normalized === "[blank_audio]" ||
+    normalized === "[silence]" ||
+    normalized === "(silence)"
+  );
+}
+
+function getAudioPcmDecoder(): AudioPcmDecoderModule {
+  const decoder = NativeModules.AudioPcmDecoder as AudioPcmDecoderModule | undefined;
+  if (!decoder) {
+    throw new Error("Android audio decoder is unavailable in this build.");
+  }
+
+  return decoder;
+}
+
 export class TranscriptionService {
   private readonly contextCache = new Map<string, ContextCacheItem>();
 
@@ -46,29 +75,44 @@ export class TranscriptionService {
 
     emitStage(input.onStageChange, "preparing", 0);
     const selectedModel = await modelManager.resolveModel(language);
-    const context = await this.getOrCreateContext(selectedModel.modelPath);
+    let context: WhisperContext;
+    let activeModel = selectedModel;
+    try {
+      context = await this.getOrCreateContext(activeModel.modelPath);
+    } catch {
+      modelManager.markModelUnavailable(activeModel.modelPath);
+      activeModel = await modelManager.resolveModel(language);
+      context = await this.getOrCreateContext(activeModel.modelPath);
+    }
 
     emitStage(input.onStageChange, "transcribing", 10);
-    const task = context.transcribe(input.audioUri, {
-      language,
-      onProgress: (progress) => {
-        const bounded = Math.min(100, Math.max(0, progress));
-        emitStage(input.onStageChange, "transcribing", bounded);
-      },
-    });
+    const onProgress = (progress: number) => {
+      const bounded = Math.min(100, Math.max(0, progress));
+      emitStage(input.onStageChange, "transcribing", bounded);
+    };
+
+    const task = isWavUri(input.audioUri)
+      ? context.transcribe(input.audioUri, {
+          language,
+          onProgress,
+        })
+      : context.transcribeData(await this.decodeCompressedAudio(input.audioUri), {
+          language,
+          onProgress,
+        });
     const result = await task.promise;
 
     emitStage(input.onStageChange, "finalizing", 100);
     const text = result.result.trim();
-    if (!text) {
-      throw new Error("Transcription produced empty text");
+    if (isBlankTranscription(text)) {
+      throw new Error("No speech detected. Try speaking closer to the microphone.");
     }
 
     return {
       text,
       language: result.language || language,
-      modelPath: selectedModel.modelPath,
-      usedModelFallback: selectedModel.fallbackUsed,
+      modelPath: activeModel.modelPath,
+      usedModelFallback: activeModel.fallbackUsed,
     };
   }
 
@@ -96,6 +140,19 @@ export class TranscriptionService {
     this.contextCache.set(modelPath, { context, modelPath });
 
     return context;
+  }
+
+  private async decodeCompressedAudio(audioUri: string): Promise<string> {
+    if (Platform.OS !== "android") {
+      throw new Error("Compressed recording transcription is only supported on Android.");
+    }
+
+    const pcmBase64 = await getAudioPcmDecoder().decodeToPcm16Base64(audioUri);
+    if (!pcmBase64.trim()) {
+      throw new Error("Unable to decode recorded audio for transcription.");
+    }
+
+    return pcmBase64;
   }
 }
 

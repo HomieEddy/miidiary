@@ -8,6 +8,30 @@ import {
 import { getRealmKey, resetRealmKey, setRealmKey } from "@/services/keychainService";
 
 let realmInstance: Realm | null = null;
+const REALM_PATH = "miidiary.realm";
+
+function buildRealmConfig(encryptionKey: Uint8Array): Realm.Configuration {
+  return {
+    path: REALM_PATH,
+    schema: [EntryRealmSchema],
+    schemaVersion: 2,
+    encryptionKey,
+    onMigration: () => {
+      // Migration rules are explicit and additive only.
+    },
+  };
+}
+
+async function resetEncryptedRealmState(): Promise<void> {
+  await resetRealmKey();
+  setRealmKeyMetadata(null);
+
+  try {
+    Realm.deleteFile({ path: REALM_PATH });
+  } catch {
+    // Best-effort cleanup; key reset still allows retry with a fresh key.
+  }
+}
 
 async function resolveEncryptionKey(): Promise<Uint8Array> {
   const metadata = getRealmKeyMetadata();
@@ -18,8 +42,7 @@ async function resolveEncryptionKey(): Promise<Uint8Array> {
   }
 
   if ((metadata && !existingKey) || (!metadata && existingKey)) {
-    await resetRealmKey();
-    throw new Error("Realm key metadata mismatch");
+    await resetEncryptedRealmState();
   }
 
   const generated = Crypto.getRandomBytes(64);
@@ -44,20 +67,26 @@ export async function getRealmInstance(): Promise<Realm> {
   }
 
   try {
-    realmInstance = await Realm.open({
-      path: "miidiary.realm",
-      schema: [EntryRealmSchema],
-      schemaVersion: 1,
-      encryptionKey,
-      onMigration: () => {
-        // Migration rules are explicit and additive only.
-      },
-    });
+    realmInstance = await Realm.open(buildRealmConfig(encryptionKey));
 
     return realmInstance;
   } catch {
     realmInstance = null;
-    throw new Error("Unable to open encrypted Realm");
+
+    await resetEncryptedRealmState();
+
+    try {
+      const regeneratedKey = await resolveEncryptionKey();
+      if (regeneratedKey.length !== 64) {
+        throw new Error("Invalid Realm encryption key length");
+      }
+
+      realmInstance = await Realm.open(buildRealmConfig(regeneratedKey));
+      return realmInstance;
+    } catch {
+      realmInstance = null;
+      throw new Error("Unable to open encrypted Realm");
+    }
   }
 }
 

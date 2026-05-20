@@ -28,6 +28,7 @@ export function useAudioCapture(): UseAudioCaptureResult {
   const setError = useRecordingStore((state) => state.setError);
   const setMetering = useRecordingStore((state) => state.setMetering);
   const setProcessing = useRecordingStore((state) => state.setProcessing);
+  const setProcessingStage = useRecordingStore((state) => state.setProcessingStage);
   const setRecording = useRecordingStore((state) => state.setRecording);
 
   const amplitudes = useSharedValue<number[]>(new Array(BUFFER_SIZE).fill(0));
@@ -36,10 +37,16 @@ export function useAudioCapture(): UseAudioCaptureResult {
   const amplitudeBufferRef = useRef<number[]>(new Array(BUFFER_SIZE).fill(0));
 
   const startRecording = useCallback(async () => {
+    if (isProcessing) {
+      setProcessing(false);
+      setProcessingStage('idle');
+      setError(null);
+    }
+
     const success = await audioCaptureService.startRecording();
     if (!success) {
       setRecording(false);
-      setError('Recording failed');
+      setError(`Recording failed: ${audioCaptureService.getLastError() ?? 'Unable to start the microphone.'}`);
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       return;
     }
@@ -61,9 +68,19 @@ export function useAudioCapture(): UseAudioCaptureResult {
     });
 
     durationRef.current = Date.now();
-  }, [setRecording, setError, setMetering, amplitudes]);
+  }, [
+    isProcessing,
+    setProcessing,
+    setProcessingStage,
+    setRecording,
+    setError,
+    setMetering,
+    amplitudes,
+  ]);
 
   const stopRecording = useCallback(async (): Promise<string | undefined> => {
+    setRecording(false);
+
     const uri = await audioCaptureService.stopRecording();
 
     if (durationRef.current) {
@@ -72,16 +89,19 @@ export function useAudioCapture(): UseAudioCaptureResult {
     }
 
     if (!uri) {
-      setError('Recording failed');
+      setProcessing(false);
+      setProcessingStage('idle');
+      setError(`Recording failed: ${audioCaptureService.getLastError() ?? 'Unable to save recorded audio.'}`);
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
       return undefined;
     }
 
-    setRecording(false);
     setProcessing(true);
+    setProcessingStage('preparing');
+    audioCaptureService.markPendingProcessing(uri);
 
     return uri;
-  }, [setRecording, setProcessing, setError, setDuration]);
+  }, [setRecording, setProcessing, setProcessingStage, setError, setDuration]);
 
   const retry = useCallback(() => {
     reset();

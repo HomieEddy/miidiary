@@ -6,6 +6,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { colors } from '@/theme/colors';
 import { useEffect } from 'react';
+import { useRecordingStore } from '@/stores/recordingStore';
 
 interface ProcessingStateProps {
   visible: boolean;
@@ -13,6 +14,16 @@ interface ProcessingStateProps {
 
 export function ProcessingState({ visible }: ProcessingStateProps) {
   const opacity = useSharedValue(0);
+  const processingStage = useRecordingStore((state) => state.processingStage);
+
+  const stageLabel: Record<typeof processingStage, string> = {
+    idle: 'Preparing transcription...',
+    preparing: 'Preparing model...',
+    transcribing: 'Transcribing audio...',
+    classifying: 'Classifying entry...',
+    persisting: 'Saving entry...',
+    finalizing: 'Finalizing...',
+  };
 
   useEffect(() => {
     opacity.value = withTiming(visible ? 1 : 0, {
@@ -31,7 +42,7 @@ export function ProcessingState({ visible }: ProcessingStateProps) {
       <View className="bg-muted/50 rounded-2xl px-6 py-4 self-center flex-row items-center gap-3">
         <ActivityIndicator size="small" color={colors.primary} />
         <Text className="font-sans text-base font-medium text-muted-foreground">
-          Processing transcription...
+          {stageLabel[processingStage]}
         </Text>
       </View>
     </Animated.View>

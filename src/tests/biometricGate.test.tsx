@@ -14,7 +14,7 @@ jest.mock("expo-local-authentication", () => ({
 
 import { BiometricGate } from "@/components/ui/BiometricGate";
 
-function Wrapper({ children }: PropsWithChildren): JSX.Element {
+function Wrapper({ children }: PropsWithChildren): React.ReactElement {
   return <BiometricGate>{children}</BiometricGate>;
 }
 

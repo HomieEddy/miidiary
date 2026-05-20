@@ -1,5 +1,11 @@
 export type EntryCategory = "diary" | "task" | "note";
 
+export interface EntryClassificationMetadata {
+  confidence: number;
+  rationale: string;
+  source: "model" | "heuristic";
+}
+
 export interface EntryRecord {
   id: string;
   text: string;
@@ -9,10 +15,14 @@ export interface EntryRecord {
   title: string;
   previewText: string;
   queryKey: string;
+  classificationConfidence: number | null;
+  classificationRationale: string | null;
+  classificationSource: "model" | "heuristic" | null;
 }
 
 export interface CreateEntryInput {
   text: string;
   category: EntryCategory;
   createdAt?: string;
+  classification?: EntryClassificationMetadata;
 }

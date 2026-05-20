@@ -12,10 +12,14 @@ export const RECORDING_STATES = {
 
 export type RecordingStatus = (typeof RECORDING_STATES)[keyof typeof RECORDING_STATES];
 
+const STOP_RECORDING_TIMEOUT_MS = 5_000;
+
 export class AudioCaptureService {
   private recorder: InstanceType<typeof AudioModule.AudioRecorder> | null = null;
   private tempFilePath: string | null = null;
+  private lastError: string | null = null;
   private meteringCallback: ((value: number) => void) | null = null;
+  private readonly pendingProcessing = new Set<string>();
 
   onMetering(cb: (value: number) => void) {
     this.meteringCallback = cb;
@@ -24,20 +28,25 @@ export class AudioCaptureService {
   async requestPermissions(): Promise<boolean> {
     try {
       const { granted } = await requestRecordingPermissionsAsync();
-      if (!granted) return false;
+      if (!granted) {
+        this.lastError = 'Microphone permission was denied.';
+        return false;
+      }
       await setAudioModeAsync({
         allowsRecording: true,
         playsInSilentMode: true,
         interruptionMode: 'duckOthers',
       });
       return true;
-    } catch {
+    } catch (error) {
+      this.lastError = `Microphone permission setup failed: ${this.describeError(error)}`;
       return false;
     }
   }
 
   async startRecording(): Promise<boolean> {
     try {
+      this.lastError = null;
       const granted = await this.requestPermissions();
       if (!granted) return false;
 
@@ -49,7 +58,8 @@ export class AudioCaptureService {
       this.pollMetering();
 
       return true;
-    } catch {
+    } catch (error) {
+      this.lastError = `Native recorder failed to start: ${this.describeError(error)}`;
       this.cleanupAfterError();
       return false;
     }
@@ -80,17 +90,22 @@ export class AudioCaptureService {
   }
 
   async stopRecording(): Promise<string | null> {
-    try {
-      await this.recorder?.stop();
-      const uri = this.recorder?.uri ?? null;
-      this.recorder = null;
-      if (this.pollingInterval) {
-        clearInterval(this.pollingInterval);
-        this.pollingInterval = null;
-      }
-      return uri;
-    } catch {
+    const recorder = this.recorder;
+    const uri = recorder?.uri || this.tempFilePath;
+
+    if (!recorder) {
       return null;
+    }
+
+    try {
+      await this.withTimeout(recorder.stop(), STOP_RECORDING_TIMEOUT_MS);
+      return uri ?? null;
+    } catch (error) {
+      this.lastError = `Native recorder failed to stop: ${this.describeError(error)}`;
+      return null;
+    } finally {
+      this.clearPolling();
+      this.recorder = null;
     }
   }
 
@@ -106,10 +121,7 @@ export class AudioCaptureService {
   }
 
   private async cleanupAfterError() {
-    if (this.pollingInterval) {
-      clearInterval(this.pollingInterval);
-      this.pollingInterval = null;
-    }
+    this.clearPolling();
     this.recorder = null;
     if (this.tempFilePath) {
       await this.cleanupTempFile(this.tempFilePath);
@@ -119,6 +131,60 @@ export class AudioCaptureService {
 
   getTempFilePath(): string | null {
     return this.tempFilePath;
+  }
+
+  getLastError(): string | null {
+    return this.lastError;
+  }
+
+  markPendingProcessing(uri: string): void {
+    this.pendingProcessing.add(uri);
+  }
+
+  markProcessingComplete(uri: string): void {
+    this.pendingProcessing.delete(uri);
+  }
+
+  getPendingProcessingUris(): string[] {
+    return [...this.pendingProcessing.values()];
+  }
+
+  private clearPolling(): void {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
+    }
+  }
+
+  private async withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+    let timeout: ReturnType<typeof setTimeout> | null = null;
+
+    try {
+      return await Promise.race([
+        promise,
+        new Promise<T>((_, reject) => {
+          timeout = setTimeout(() => {
+            reject(new Error('Timed out while stopping recording'));
+          }, timeoutMs);
+        }),
+      ]);
+    } finally {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+    }
+  }
+
+  private describeError(error: unknown): string {
+    if (error instanceof Error && error.message.trim()) {
+      return error.message.trim();
+    }
+
+    if (typeof error === 'string' && error.trim()) {
+      return error.trim();
+    }
+
+    return 'unknown error';
   }
 }
 

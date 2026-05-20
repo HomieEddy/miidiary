@@ -1,6 +1,8 @@
 import React from "react";
-import { render } from "@testing-library/react-native";
+import { render, waitFor } from "@testing-library/react-native";
 import { View, Text } from "react-native";
+
+const mockPrepareDefaultModel = jest.fn();
 
 jest.mock("react-native-reanimated", () => {
   const RN = require("react-native");
@@ -61,6 +63,11 @@ jest.mock("@/services/interruptionService", () => ({
   useInterruptionHandler: () => {},
 }));
 
+jest.mock("@/services/backgroundTaskService", () => ({
+  initializeBackgroundProcessing: jest.fn(async () => undefined),
+  setBackgroundProcessors: jest.fn(),
+}));
+
 jest.mock("@/services/audioCaptureService", () => ({
   audioCaptureService: {
     startRecording: jest.fn(),
@@ -68,11 +75,28 @@ jest.mock("@/services/audioCaptureService", () => ({
     onMetering: jest.fn(),
     cleanupTempFile: jest.fn(),
     getTempFilePath: jest.fn(),
+    getPendingProcessingUris: jest.fn(() => []),
+    markProcessingComplete: jest.fn(),
   },
 }));
 
-jest.mock("@/services/transcriptionStub", () => ({
-  stubTranscription: jest.fn(),
+jest.mock("@/services/transcriptionService", () => ({
+  transcriptionService: {
+    transcribeAudio: jest.fn(),
+  },
+}));
+
+jest.mock("@/services/entriesRepository", () => ({
+  entriesRepository: {
+    createEntry: jest.fn(),
+  },
+}));
+
+jest.mock("@/services/modelManager", () => ({
+  modelManager: {
+    prepareDefaultModel: (...args: unknown[]) => mockPrepareDefaultModel(...args),
+    syncModelsForBackground: jest.fn(async () => true),
+  },
 }));
 
 jest.mock("@/theme/colors", () => ({
@@ -93,23 +117,43 @@ jest.mock("@/theme/colors", () => ({
 import HomeScreen from "@/screens/HomeScreen";
 
 describe("App Shell", () => {
-  it("renders HomeScreen without crashing", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockPrepareDefaultModel.mockResolvedValue({
+      language: "en",
+      modelPath: "file:///model.bin",
+      fallbackUsed: false,
+    });
+  });
+
+  it("renders HomeScreen without crashing", async () => {
     const { root } = render(<HomeScreen />);
+    await waitFor(() => expect(root).toBeTruthy());
     expect(root).toBeTruthy();
   });
 
-  it("shows the prompt text in idle state", () => {
+  it("shows the prompt text in idle state", async () => {
     const { getByText } = render(<HomeScreen />);
+    await waitFor(() => expect(getByText("Tap to record a thought")).toBeTruthy());
     expect(getByText("Tap to record a thought")).toBeTruthy();
   });
 
-  it("has bg-background class on root container", () => {
+  it("shows model preparation helper on launch", async () => {
+    mockPrepareDefaultModel.mockReturnValue(new Promise(() => undefined));
+
+    const { getByText } = render(<HomeScreen />);
+    expect(getByText("Preparing voice model")).toBeTruthy();
+  });
+
+  it("renders app shell root container", async () => {
     const { root } = render(<HomeScreen />);
+    await waitFor(() => expect(root).toBeTruthy());
     expect(root).toBeTruthy();
   });
 
-  it("renders the RecorderButton with correct accessibility label", () => {
+  it("renders the RecorderButton with correct accessibility label", async () => {
     const { getByLabelText } = render(<HomeScreen />);
+    await waitFor(() => expect(getByLabelText("Record audio")).toBeTruthy());
     expect(getByLabelText("Record audio")).toBeTruthy();
   });
 });

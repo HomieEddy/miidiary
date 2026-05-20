@@ -13,6 +13,9 @@ type RealmEntry = {
   title: string;
   previewText: string;
   queryKey: string;
+  classificationConfidence: number | null;
+  classificationRationale: string | null;
+  classificationSource: "model" | "heuristic" | null;
 };
 
 function toEntryRecord(item: RealmEntry): EntryRecord {
@@ -25,6 +28,9 @@ function toEntryRecord(item: RealmEntry): EntryRecord {
     title: item.title,
     previewText: item.previewText,
     queryKey: item.queryKey,
+    classificationConfidence: item.classificationConfidence,
+    classificationRationale: item.classificationRationale,
+    classificationSource: item.classificationSource,
   };
 }
 
@@ -44,6 +50,9 @@ async function createEntry(input: CreateEntryInput): Promise<EntryRecord> {
     title: deriveEntryTitle(input.text),
     previewText: deriveEntryPreview(input.text),
     queryKey: buildEntryQueryKey(input.category, createdAt, id),
+    classificationConfidence: input.classification?.confidence ?? null,
+    classificationRationale: input.classification?.rationale ?? null,
+    classificationSource: input.classification?.source ?? null,
   };
 
   realm.write(() => {

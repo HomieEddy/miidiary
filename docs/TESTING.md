@@ -88,6 +88,41 @@ describe("Component Name", () => {
 - For components that depend on Zustand stores or Realm, mock the service layer rather than importing real stores.
 - Avoid testing implementation details — focus on rendered output and user-facing behavior.
 
+## Test File Inventory
+
+All test files live in `src/tests/`. Current coverage by phase:
+
+| Test File | Phase | What It Covers |
+|-----------|-------|----------------|
+| `ui.test.tsx` | 0 | App shell renders, theme classes applied |
+| `cn.test.ts` | 1 | `cn()` utility (clsx + tailwind-merge) |
+| `audioCaptureService.test.ts` | 1/3 | Recording engine, pending-processing lifecycle, interruption handling |
+| `useAudioCapture.test.ts` | 1/3 | Hook orchestration, state transitions, waveform buffer |
+| `entryGrouping.test.ts` | 1 | Entry grouping utility |
+| `entryTextDerivation.test.ts` | 1 | Entry text derivation utility |
+| `realmService.test.ts` | 2 | Encrypted Realm CRUD, key management, indexing |
+| `entriesRepository.test.ts` | 2 | Repository layer: save/query/delete |
+| `entriesStore.test.ts` | 2 | Zustand entries store state transitions |
+| `recordingStore.test.ts` | 2 | Zustand recording store state |
+| `secureStorageService.test.ts` | 2 | MMKV + Keychain secure storage |
+| `biometricGate.test.tsx` | 2 | Biometric unlock gate component |
+| `DiaryScreen.test.tsx` | 2 | Diary screen flash-list renders entries |
+| `DigestsScreen.test.tsx` | 2 | Digests screen renders |
+| `transcriptionService.test.ts` | 3 | Whisper STT pipeline, bilingual, progress stages |
+| `useTranscription.test.ts` | 3 | Transcription hook orchestration, pending replay, cleanup |
+| `classificationService.test.ts` | 3 | Diary/Task/Note classifier, keyword fallback |
+| `modelManager.test.ts` | 3 | Model lifecycle: resolve, download, fallback, caching |
+| `backgroundTaskService.test.ts` | 3 | BackgroundFetch/TaskManager registration, replay hooks |
+| `transcriptionValidationService.test.ts` | 3 | WER-based EN/FR accuracy harness |
+| `RecorderButton.test.tsx` | 3 | RecorderButton states: idle/recording/processing |
+
+### Running a focused suite
+
+```bash
+# Phase 3 ML pipeline tests only
+npm run test -- src/tests/transcriptionService.test.ts src/tests/classificationService.test.ts src/tests/useTranscription.test.ts src/tests/modelManager.test.ts -i
+```
+
 ## Coverage Requirements
 
 No minimum coverage thresholds are currently configured. Coverage collection is disabled (`collectCoverage: false` in `jest.config.js`).

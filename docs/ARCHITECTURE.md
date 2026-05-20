@@ -112,12 +112,12 @@ A typical capture session follows this path through the system:
 | RootLayout | Expo Router root layout -- loads fonts (Nunito, Fredoka, Playfair Display, JetBrains Mono) and manages SplashScreen lifecycle | src/app/_layout.tsx |
 | TabLayout | Custom bottom tab bar with Solar SVG icons, border-4 styling, and pink skew underline indicator | src/app/(tabs)/_layout.tsx |
 | Screens (Home, Diary, Tasks, Digests) | Thin screen components that compose hooks and primitives -- target max 150 lines each | src/screens/*.tsx |
-| useAudioCapture | Hook orchestrating microphone, Skia visualization, Rive state machine, and haptics | Planned for Phase 1 |
-| useTranscription | Hook bridging audio buffer to Whisper STT with progress reporting | Planned for Phase 3 |
-| useEntries | Hook providing Realm query results to screens with reactive updates | Planned for Phase 2 |
-| Realm Entry Schema | Realm object schema for encrypted persistence with deterministic indexing on timestamp and category | Planned for Phase 2 |
-| Recording Store (Zustand) | Transient state for live recording -- non-reactive variables bypass React tree to avoid redraws | Planned for Phase 1 |
-| Entries Store (Zustand) | UI-facing state for entry list, search queries, and filter selections | Planned for Phase 2 |
+| useAudioCapture | Hook orchestrating microphone, Skia visualization, Rive state machine, and haptics | src/hooks/useAudioCapture.ts |
+| useTranscription | Hook bridging audio buffer to Whisper STT with stage-based progress reporting and pending replay | src/hooks/useTranscription.ts |
+| useEntries | Hook providing Realm query results to screens with reactive updates | src/hooks/useEntries.ts |
+| Realm Entry Schema | Realm object schema for encrypted persistence with deterministic indexing on timestamp and category | src/models/EntryRealm.ts |
+| Recording Store (Zustand) | Transient state for live recording -- non-reactive variables bypass React tree to avoid redraws | src/stores/recordingStore.ts |
+| Entries Store (Zustand) | UI-facing state for entry list, search queries, and filter selections | src/stores/entriesStore.ts |
 | Theme tokens | Design system constants consumed by both Tailwind classes and runtime code | theme/colors.ts, theme/typography.ts, theme/tailwind.config.js |
 | Solar Icon constants | Inline SVG XML strings for Solar icon set, rendered via react-native-svg SvgXml | src/assets/icons/solar.ts |
 

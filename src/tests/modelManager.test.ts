@@ -142,7 +142,7 @@ describe("modelManager", () => {
     mockDownloadFileAsync.mockRejectedValue(new Error("network fail"));
 
     await expect(modelManager.prepareDefaultModel()).rejects.toThrow(
-      "Unable to prepare Whisper model for en: ggml-base.en.bin download failed (network fail)",
+      "Unable to prepare Whisper model for auto: ggml-base.bin download failed (network fail)",
     );
   });
 

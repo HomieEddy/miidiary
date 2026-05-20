@@ -1,6 +1,6 @@
 import { Directory, File, Paths } from "expo-file-system";
 
-export type SttLanguage = "en" | "fr-CA";
+export type SttLanguage = "auto" | "en" | "fr-CA";
 
 export type ModelSelection = {
   language: SttLanguage;
@@ -19,9 +19,13 @@ const VALID_MODEL_HEADERS = new Set([
   "GGUF",
   "gguf",
 ]);
-const DEFAULT_LANGUAGE: SttLanguage = "en";
+const DEFAULT_LANGUAGE: SttLanguage = "auto";
 
 const MODEL_CANDIDATES: Record<SttLanguage, string[]> = {
+  auto: [
+    `${Paths.document.uri}models/ggml-small.bin`,
+    `${Paths.document.uri}models/ggml-base.bin`,
+  ],
   en: [
     `${Paths.document.uri}models/ggml-tiny.en.bin`,
     `${Paths.document.uri}models/ggml-base.en.bin`,

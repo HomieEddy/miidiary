@@ -40,7 +40,19 @@ function emitStage(
 }
 
 function normalizeLanguage(language: SttLanguage | undefined): SttLanguage {
-  return language ?? "en";
+  return language ?? "auto";
+}
+
+function getWhisperLanguageOption(language: SttLanguage): string {
+  if (language === "auto") {
+    return "auto";
+  }
+
+  if (language === "fr-CA") {
+    return "fr";
+  }
+
+  return language;
 }
 
 function isWavUri(audioUri: string): boolean {
@@ -90,16 +102,16 @@ export class TranscriptionService {
       const bounded = Math.min(100, Math.max(0, progress));
       emitStage(input.onStageChange, "transcribing", bounded);
     };
+    const whisperLanguage = getWhisperLanguageOption(language);
+    const transcribeOptions = {
+      language: whisperLanguage,
+      translate: false,
+      onProgress,
+    };
 
     const task = isWavUri(input.audioUri)
-      ? context.transcribe(input.audioUri, {
-          language,
-          onProgress,
-        })
-      : context.transcribeData(await this.decodeCompressedAudio(input.audioUri), {
-          language,
-          onProgress,
-        });
+      ? context.transcribe(input.audioUri, transcribeOptions)
+      : context.transcribeData(await this.decodeCompressedAudio(input.audioUri), transcribeOptions);
     const result = await task.promise;
 
     emitStage(input.onStageChange, "finalizing", 100);

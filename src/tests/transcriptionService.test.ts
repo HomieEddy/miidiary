@@ -120,6 +120,20 @@ describe("transcriptionService", () => {
     expect(events[events.length - 1]).toBe("finalizing");
   });
 
+  it("uses multilingual auto-detection when no language is requested", async () => {
+    const service = new TranscriptionService();
+
+    await service.transcribeAudio({
+      audioUri: "file:///recording.wav",
+    });
+
+    expect(mockResolveModel).toHaveBeenCalledWith("auto");
+    expect(mockTranscribe).toHaveBeenCalledWith(
+      "file:///recording.wav",
+      expect.objectContaining({ language: "auto", translate: false }),
+    );
+  });
+
   it("uses fallback model metadata when model manager indicates fallback", async () => {
     mockResolveModel.mockResolvedValue({
       language: "fr-CA",
@@ -133,6 +147,11 @@ describe("transcriptionService", () => {
       language: "fr-CA",
     });
 
+    expect(mockResolveModel).toHaveBeenCalledWith("fr-CA");
+    expect(mockTranscribe).toHaveBeenCalledWith(
+      "file:///recording.wav",
+      expect.objectContaining({ language: "fr", translate: false }),
+    );
     expect(result.language).toBe("en");
     expect(result.usedModelFallback).toBe(true);
     expect(result.modelPath).toBe("file:///models/ggml-base.bin");

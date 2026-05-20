@@ -3,7 +3,6 @@ import { useCallback } from "react";
 import { Pressable, Text, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import { useFocusEffect } from "@react-navigation/native";
-import { DeleteModeToolbar } from "@/components/ui/DeleteModeToolbar";
 import { useEntries } from "@/hooks/useEntries";
 import { cn } from "@/utils/cn";
 
@@ -29,16 +28,9 @@ function formatTime(value: string): string {
 export default function DiaryScreen(): ReactElement {
   const {
     flatItems,
-    isDeleteMode,
-    showDeleteConfirm,
     showWipeConfirmStepOne,
     showWipeConfirmStepTwo,
     loadEntries,
-    enterDeleteMode,
-    exitDeleteMode,
-    requestDeleteOne,
-    cancelDeleteOne,
-    confirmDeleteOne,
     requestWipeAll,
     cancelWipeAll,
     continueWipeAll,
@@ -58,9 +50,14 @@ export default function DiaryScreen(): ReactElement {
         Chronological thoughts, grouped by day.
       </Text>
 
-      {isDeleteMode ? (
-        <DeleteModeToolbar onCancel={exitDeleteMode} onWipeAll={requestWipeAll} />
-      ) : null}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Open wipe all"
+        className="self-start mb-4 bg-destructive border-2 border-border rounded-xl px-3 py-2 active:translate-y-1 active:translate-x-1 active:shadow-none"
+        onPress={requestWipeAll}
+      >
+        <Text className="font-sans text-xs font-bold text-white">Wipe all</Text>
+      </Pressable>
 
       <FlashList
         data={flatItems}
@@ -82,7 +79,6 @@ export default function DiaryScreen(): ReactElement {
               accessibilityRole="button"
               accessibilityLabel={`Entry ${entry.id}`}
               className="bg-card border-4 border-border rounded-2xl p-4 shadow-paper mb-3"
-              onLongPress={enterDeleteMode}
             >
               <View className="flex-row items-start justify-between gap-3">
                 <View className="flex-1">
@@ -107,53 +103,11 @@ export default function DiaryScreen(): ReactElement {
                     {formatTime(entry.createdAt)}
                   </Text>
                 </View>
-
-                {isDeleteMode ? (
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={`Delete entry ${entry.id}`}
-                    className="w-8 h-8 rounded-full border-2 border-border bg-destructive items-center justify-center active:translate-y-1 active:translate-x-1 active:shadow-none"
-                    onPress={() => requestDeleteOne(entry.id)}
-                  >
-                    <Text className="text-white font-bold">X</Text>
-                  </Pressable>
-                ) : null}
               </View>
             </Pressable>
           );
         }}
       />
-
-      {showDeleteConfirm ? (
-        <View className="absolute inset-0 bg-black/40 items-center justify-center px-6">
-          <View className="bg-card border-4 border-border rounded-2xl p-5 shadow-paper w-full">
-            <Text className="font-heading text-xl text-foreground">Delete this entry?</Text>
-            <Text className="font-sans text-sm text-muted-foreground mt-2">
-              This removes only the selected entry.
-            </Text>
-            <View className="flex-row gap-2 mt-4">
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Cancel delete"
-                className="flex-1 bg-muted border-2 border-border rounded-xl p-3"
-                onPress={cancelDeleteOne}
-              >
-                <Text className="font-sans text-center font-bold text-foreground">Cancel</Text>
-              </Pressable>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Confirm delete"
-                className="flex-1 bg-destructive border-2 border-border rounded-xl p-3"
-                onPress={() => {
-                  void confirmDeleteOne();
-                }}
-              >
-                <Text className="font-sans text-center font-bold text-white">Delete</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      ) : null}
 
       {showWipeConfirmStepOne ? (
         <View className="absolute inset-0 bg-black/40 items-center justify-center px-6">

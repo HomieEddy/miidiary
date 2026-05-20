@@ -7,17 +7,13 @@ import type { EntryRecord } from "@/types/entry";
 interface UseEntriesResult {
   entries: EntryRecord[];
   flatItems: ReturnType<typeof flattenEntrySections>;
-  isDeleteMode: boolean;
-  deleteTargetId: string | null;
-  showDeleteConfirm: boolean;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
+  searchResults: EntryRecord[] | null;
   showWipeConfirmStepOne: boolean;
   showWipeConfirmStepTwo: boolean;
   loadEntries: () => Promise<void>;
-  enterDeleteMode: () => void;
-  exitDeleteMode: () => void;
-  requestDeleteOne: (entryId: string) => void;
-  cancelDeleteOne: () => void;
-  confirmDeleteOne: () => Promise<void>;
+  toggleComplete: (id: string) => Promise<void>;
   requestWipeAll: () => void;
   cancelWipeAll: () => void;
   continueWipeAll: () => void;
@@ -31,9 +27,8 @@ interface UseEntriesOptions {
 export function useEntries(options?: UseEntriesOptions): UseEntriesResult {
   const autoLoad = options?.autoLoad ?? true;
   const [entries, setEntries] = useState<EntryRecord[]>([]);
-  const [isDeleteMode, setIsDeleteMode] = useState(false);
-  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [searchQuery, setSearchQueryState] = useState("");
+  const [searchResults, setSearchResults] = useState<EntryRecord[] | null>(null);
   const [showWipeConfirmStepOne, setShowWipeConfirmStepOne] = useState(false);
   const [showWipeConfirmStepTwo, setShowWipeConfirmStepTwo] = useState(false);
 
@@ -53,40 +48,32 @@ export function useEntries(options?: UseEntriesOptions): UseEntriesResult {
   const sections = useMemo(() => groupEntriesByDay(entries), [entries]);
   const flatItems = useMemo(() => flattenEntrySections(sections), [sections]);
 
-  const enterDeleteMode = useCallback(() => {
-    setIsDeleteMode(true);
+  const setSearchQuery = useCallback((query: string) => {
+    setSearchQueryState(query);
   }, []);
 
-  const exitDeleteMode = useCallback(() => {
-    setIsDeleteMode(false);
-    setDeleteTargetId(null);
-    setShowDeleteConfirm(false);
-  }, []);
-
-  const requestDeleteOne = useCallback((entryId: string) => {
-    setDeleteTargetId(entryId);
-    setShowDeleteConfirm(true);
-  }, []);
-
-  const cancelDeleteOne = useCallback(() => {
-    setDeleteTargetId(null);
-    setShowDeleteConfirm(false);
-  }, []);
-
-  const confirmDeleteOne = useCallback(async () => {
-    if (!deleteTargetId) {
+  useEffect(() => {
+    const trimmed = searchQuery.trim();
+    if (!trimmed) {
+      setSearchResults(null);
       return;
     }
 
-    try {
-      await entriesRepository.deleteOne(deleteTargetId);
-      await loadEntries();
-      setDeleteTargetId(null);
-      setShowDeleteConfirm(false);
-    } catch {
-      setShowDeleteConfirm(false);
-    }
-  }, [deleteTargetId, loadEntries]);
+    const timeout = setTimeout(() => {
+      void entriesRepository.searchEntries(trimmed).then((results) => {
+        setSearchResults(results);
+      });
+    }, 150);
+
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [searchQuery]);
+
+  const toggleComplete = useCallback(async (id: string) => {
+    await entriesRepository.toggleComplete(id);
+    await loadEntries();
+  }, [loadEntries]);
 
   const requestWipeAll = useCallback(() => {
     setShowWipeConfirmStepOne(true);
@@ -122,7 +109,6 @@ export function useEntries(options?: UseEntriesOptions): UseEntriesResult {
       await loadEntries();
       setShowWipeConfirmStepOne(false);
       setShowWipeConfirmStepTwo(false);
-      setIsDeleteMode(false);
       return true;
     } catch {
       setShowWipeConfirmStepOne(false);
@@ -134,17 +120,13 @@ export function useEntries(options?: UseEntriesOptions): UseEntriesResult {
   return {
     entries,
     flatItems,
-    isDeleteMode,
-    deleteTargetId,
-    showDeleteConfirm,
+    searchQuery,
+    setSearchQuery,
+    searchResults,
     showWipeConfirmStepOne,
     showWipeConfirmStepTwo,
     loadEntries,
-    enterDeleteMode,
-    exitDeleteMode,
-    requestDeleteOne,
-    cancelDeleteOne,
-    confirmDeleteOne,
+    toggleComplete,
     requestWipeAll,
     cancelWipeAll,
     continueWipeAll,

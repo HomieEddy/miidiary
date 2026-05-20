@@ -1,7 +1,6 @@
 import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 
-const mockConfirmDeleteOne = jest.fn();
 const mockConfirmWipeAll = jest.fn();
 
 const mockUseEntriesState = {
@@ -12,23 +11,27 @@ const mockUseEntriesState = {
       type: "row" as const,
       entry: {
         id: "entry-1",
+        text: "Some text",
         category: "note" as const,
         title: "First title",
         previewText: "One line preview",
+        updatedAt: "2026-05-18T10:00:00.000Z",
         createdAt: "2026-05-18T10:00:00.000Z",
+        queryKey: "note|entry-1",
+        isCompleted: false,
+        classificationConfidence: null,
+        classificationRationale: null,
+        classificationSource: null,
       },
     },
   ],
-  isDeleteMode: false,
-  showDeleteConfirm: false,
+  searchQuery: "",
+  setSearchQuery: jest.fn(),
+  searchResults: null,
   showWipeConfirmStepOne: false,
   showWipeConfirmStepTwo: false,
   loadEntries: jest.fn(),
-  enterDeleteMode: jest.fn(),
-  exitDeleteMode: jest.fn(),
-  requestDeleteOne: jest.fn(),
-  cancelDeleteOne: jest.fn(),
-  confirmDeleteOne: (...args: unknown[]) => mockConfirmDeleteOne(...args),
+  toggleComplete: jest.fn(),
   requestWipeAll: jest.fn(),
   cancelWipeAll: jest.fn(),
   continueWipeAll: jest.fn(),
@@ -65,8 +68,6 @@ import DiaryScreen from "@/screens/DiaryScreen";
 describe("DiaryScreen", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseEntriesState.isDeleteMode = false;
-    mockUseEntriesState.showDeleteConfirm = false;
     mockUseEntriesState.showWipeConfirmStepOne = false;
     mockUseEntriesState.showWipeConfirmStepTwo = false;
   });
@@ -79,29 +80,14 @@ describe("DiaryScreen", () => {
     expect(getByText("One line preview")).toBeTruthy();
   });
 
-  it("long-press enters delete mode and delete affordance opens confirm", () => {
-    mockUseEntriesState.isDeleteMode = true;
+  it("shows wipe-all trigger and calls hook request", () => {
     const { getByLabelText } = render(<DiaryScreen />);
 
-    fireEvent.press(getByLabelText("Delete entry entry-1"));
-    expect(mockUseEntriesState.requestDeleteOne).toHaveBeenCalledWith("entry-1");
-  });
-
-  it("confirmed single delete triggers hook action", async () => {
-    mockUseEntriesState.isDeleteMode = true;
-    mockUseEntriesState.showDeleteConfirm = true;
-    mockConfirmDeleteOne.mockResolvedValue(undefined);
-    const { getByLabelText } = render(<DiaryScreen />);
-
-    fireEvent.press(getByLabelText("Confirm delete"));
-
-    await waitFor(() => {
-      expect(mockConfirmDeleteOne).toHaveBeenCalled();
-    });
+    fireEvent.press(getByLabelText("Open wipe all"));
+    expect(mockUseEntriesState.requestWipeAll).toHaveBeenCalled();
   });
 
   it("wipe-all requires step-two confirmation and calls confirm", async () => {
-    mockUseEntriesState.isDeleteMode = true;
     mockUseEntriesState.showWipeConfirmStepTwo = true;
     mockConfirmWipeAll.mockResolvedValue(true);
     const { getByLabelText } = render(<DiaryScreen />);

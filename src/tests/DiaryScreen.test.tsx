@@ -2,6 +2,8 @@ import React from "react";
 import { render, fireEvent, waitFor } from "@testing-library/react-native";
 
 const mockConfirmWipeAll = jest.fn();
+const mockDeleteOne = jest.fn();
+const mockUpdateEntry = jest.fn();
 
 const mockUseEntriesState = {
   flatItems: [
@@ -60,6 +62,13 @@ jest.mock("@/hooks/useEntries", () => ({
 jest.mock("@react-navigation/native", () => ({
   useFocusEffect: (effect: () => void | (() => void)) => {
     effect();
+  },
+}));
+
+jest.mock("@/services/entriesRepository", () => ({
+  entriesRepository: {
+    deleteOne: (...args: unknown[]) => mockDeleteOne(...args),
+    updateEntry: (...args: unknown[]) => mockUpdateEntry(...args),
   },
 }));
 

@@ -79,7 +79,13 @@ describe("transcriptionService", () => {
     );
     expect(mockTranscribe).toHaveBeenCalledWith(
       "file:///recording.wav",
-      expect.objectContaining({ language: "en" }),
+      expect.objectContaining({
+        beamSize: 5,
+        language: "en",
+        prompt: expect.stringContaining("Canadian French"),
+        temperature: 0,
+        translate: false,
+      }),
     );
     expect(result.text).toBe("hello world");
   });
@@ -95,7 +101,12 @@ describe("transcriptionService", () => {
     expect(mockDecodeToPcm16Base64).toHaveBeenCalledWith("file:///recording.m4a");
     expect(mockTranscribeData).toHaveBeenCalledWith(
       "pcm16-base64",
-      expect.objectContaining({ language: "en" }),
+      expect.objectContaining({
+        beamSize: 5,
+        language: "en",
+        temperature: 0,
+        translate: false,
+      }),
     );
     expect(mockTranscribe).not.toHaveBeenCalledWith(
       "file:///recording.m4a",
@@ -130,7 +141,13 @@ describe("transcriptionService", () => {
     expect(mockResolveModel).toHaveBeenCalledWith("auto");
     expect(mockTranscribe).toHaveBeenCalledWith(
       "file:///recording.wav",
-      expect.objectContaining({ language: "auto", translate: false }),
+      expect.objectContaining({
+        beamSize: 5,
+        language: "auto",
+        prompt: expect.stringContaining("J'ai faim"),
+        temperature: 0,
+        translate: false,
+      }),
     );
   });
 
@@ -150,7 +167,12 @@ describe("transcriptionService", () => {
     expect(mockResolveModel).toHaveBeenCalledWith("fr-CA");
     expect(mockTranscribe).toHaveBeenCalledWith(
       "file:///recording.wav",
-      expect.objectContaining({ language: "fr", translate: false }),
+      expect.objectContaining({
+        beamSize: 5,
+        language: "fr",
+        temperature: 0,
+        translate: false,
+      }),
     );
     expect(result.language).toBe("en");
     expect(result.usedModelFallback).toBe(true);

@@ -46,14 +46,6 @@ export function ErrorBanner({ visible, onRetry }: ErrorBannerProps): React.React
         easing: Easing.out(Easing.back(1.5)),
       });
       translateX.value = withTiming(0, { duration: 300 });
-
-      const timer = setTimeout(() => {
-        opacity.value = withTiming(0, { duration: 500, easing: Easing.in(Easing.ease) });
-        translateX.value = withTiming(-20, { duration: 500 });
-        setTimeout(() => setError(null), 550);
-      }, 3000);
-
-      return () => clearTimeout(timer);
     }
   }, [visible, opacity, translateX, setError]);
 

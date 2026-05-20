@@ -40,7 +40,10 @@ export function GlowRing({ isActive }: GlowRingProps) {
   }));
 
   return (
-    <View className="absolute w-[180px] h-[180px] items-center justify-center">
+    <View
+      className="absolute w-[180px] h-[180px] items-center justify-center"
+      pointerEvents="none"
+    >
       <Animated.View
         className="w-full h-full rounded-full bg-primary/25"
         style={animatedStyle}

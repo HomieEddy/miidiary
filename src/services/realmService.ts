@@ -14,10 +14,15 @@ function buildRealmConfig(encryptionKey: Uint8Array): Realm.Configuration {
   return {
     path: REALM_PATH,
     schema: [EntryRealmSchema],
-    schemaVersion: 2,
+    schemaVersion: 3,
     encryptionKey,
-    onMigration: () => {
-      // Migration rules are explicit and additive only.
+    onMigration: (oldRealm, newRealm) => {
+      if (oldRealm.schemaVersion < 3) {
+        const entries = newRealm.objects("Entry");
+        for (const entry of entries) {
+          (entry as unknown as { isCompleted: boolean }).isCompleted = false;
+        }
+      }
     },
   };
 }

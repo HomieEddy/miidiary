@@ -28,6 +28,7 @@ export const EntryRealmSchema: Realm.ObjectSchema = {
     title: "string",
     previewText: "string",
     queryKey: { type: "string", indexed: true },
+    isCompleted: { type: "bool", default: false },
     classificationConfidence: "double?",
     classificationRationale: "string?",
     classificationSource: "string?",

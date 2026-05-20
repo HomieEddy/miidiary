@@ -1,11 +1,10 @@
 import type { ReactElement } from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
-import { useFocusEffect } from "@react-navigation/native";
 import { SvgXml } from "react-native-svg";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
-import { BookBookmarkBoldDuotone, CheckSquareBoldDuotone } from "@/assets/icons/solar";
+import { BookBookmarkBoldDuotone, MagniferBoldDuotone } from "@/assets/icons/solar";
 import { EntryDetailSheet } from "@/components/ui/EntryDetailSheet";
 import { ShimmerView } from "@/components/ui/ShimmerView";
 import { useEntries } from "@/hooks/useEntries";
@@ -54,7 +53,8 @@ export default function DiaryScreen(): ReactElement {
   const [sheetMode, setSheetMode] = useState<"view" | "edit">("view");
   const [sheetVisible, setSheetVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const searchBarHeight = useSharedValue(0);
+  const searchInputRef = useRef<TextInput | null>(null);
+  const searchBarProgress = useSharedValue(0);
 
   const loadWithState = useCallback(async () => {
     setIsLoading(true);
@@ -62,21 +62,26 @@ export default function DiaryScreen(): ReactElement {
     setIsLoading(false);
   }, [loadEntries]);
 
-  useFocusEffect(
-    useCallback(() => {
-      void loadWithState();
-    }, [loadWithState]),
-  );
+  useEffect(() => {
+    void loadWithState();
+  }, [loadWithState]);
 
   useEffect(() => {
-    searchBarHeight.value = withSpring(isSearchOpen ? 48 : 0, {
-      damping: 20,
-      stiffness: 200,
+    searchBarProgress.value = withSpring(isSearchOpen ? 1 : 0, {
+      damping: 18,
+      stiffness: 220,
+      overshootClamping: true,
     });
-  }, [isSearchOpen, searchBarHeight]);
+    if (!isSearchOpen) {
+      searchInputRef.current?.blur();
+    }
+  }, [isSearchOpen, searchBarProgress]);
 
   const searchBarStyle = useAnimatedStyle(() => ({
-    height: searchBarHeight.value,
+    height: 48 * searchBarProgress.value,
+    opacity: searchBarProgress.value,
+    marginBottom: 12 * searchBarProgress.value,
+    transform: [{ translateY: -6 * (1 - searchBarProgress.value) }],
     overflow: "hidden",
   }));
 
@@ -142,7 +147,7 @@ export default function DiaryScreen(): ReactElement {
             setIsSearchOpen((previous) => !previous);
           }}
         >
-          <SvgXml xml={CheckSquareBoldDuotone} width={20} height={20} color="#8A828F" />
+          <SvgXml xml={MagniferBoldDuotone} width={20} height={20} color="#8A828F" />
         </Pressable>
       </View>
 
@@ -150,8 +155,9 @@ export default function DiaryScreen(): ReactElement {
         Chronological thoughts, grouped by day.
       </Text>
 
-      <Animated.View style={searchBarStyle} className="mb-3">
+      <Animated.View style={searchBarStyle}>
         <TextInput
+          ref={searchInputRef}
           accessibilityLabel="Search entries"
           testID="search-input"
           className="bg-muted rounded-xl px-4 py-2 font-sans text-foreground text-sm"
@@ -160,6 +166,7 @@ export default function DiaryScreen(): ReactElement {
           value={searchQuery}
           onChangeText={setSearchQuery}
           autoFocus={isSearchOpen}
+          editable={isSearchOpen}
         />
       </Animated.View>
 

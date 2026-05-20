@@ -1,8 +1,7 @@
 import type { ReactElement } from "react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { FlashList } from "@shopify/flash-list";
-import { useFocusEffect } from "@react-navigation/native";
 import * as Haptics from "expo-haptics";
 import { ShimmerView } from "@/components/ui/ShimmerView";
 import { useEntries } from "@/hooks/useEntries";
@@ -70,11 +69,9 @@ export default function TasksScreen(): ReactElement {
     setIsLoading(false);
   }, [loadEntries]);
 
-  useFocusEffect(
-    useCallback(() => {
-      void loadWithState();
-    }, [loadWithState]),
-  );
+  useEffect(() => {
+    void loadWithState();
+  }, [loadWithState]);
 
   const taskEntries = useMemo(() => entries.filter((entry) => entry.category === "task"), [entries]);
 

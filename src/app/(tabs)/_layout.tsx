@@ -85,7 +85,6 @@ export default function TabLayout(): ReactElement {
       tabBar={() => <TabBar />}
       screenOptions={{
         headerShown: false,
-        tabBarPosition: "bottom",
         sceneStyle: { backgroundColor: "#FDF8F0" },
       }}
     >

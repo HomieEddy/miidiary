@@ -33,7 +33,7 @@ jest.mock("@/hooks/useEntries", () => ({
   useEntries: () => mockUseEntriesState,
 }));
 
-jest.mock("@react-navigation/native", () => ({
+jest.mock("expo-router", () => ({
   useFocusEffect: (effect: () => void | (() => void)) => {
     const ReactLocal = require("react");
     ReactLocal.useEffect(() => {

@@ -6,6 +6,7 @@ const mockStartRecording = jest.fn();
 const mockStopRecording = jest.fn();
 const mockOnMetering = jest.fn();
 const mockMarkPendingProcessing = jest.fn();
+const mockGetLastError = jest.fn();
 const mockNotificationAsync = jest.fn();
 
 jest.mock("@/services/audioCaptureService", () => ({
@@ -14,6 +15,7 @@ jest.mock("@/services/audioCaptureService", () => ({
     stopRecording: (...args: unknown[]) => mockStopRecording(...args),
     onMetering: (...args: unknown[]) => mockOnMetering(...args),
     markPendingProcessing: (...args: unknown[]) => mockMarkPendingProcessing(...args),
+    getLastError: (...args: unknown[]) => mockGetLastError(...args),
   },
 }));
 
@@ -40,6 +42,7 @@ jest.mock("react-native-reanimated", () => ({
 describe("useAudioCapture", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetLastError.mockReturnValue(null);
     useRecordingStore.getState().reset();
   });
 
@@ -56,6 +59,21 @@ describe("useAudioCapture", () => {
     expect(useRecordingStore.getState().isRecording).toBe(true);
   });
 
+  it("startRecording clears stale processing before recording", async () => {
+    mockStartRecording.mockResolvedValue(true);
+    useRecordingStore.getState().setProcessing(true);
+
+    const { result } = renderHook(() => useAudioCapture());
+
+    await act(async () => {
+      await result.current.startRecording();
+    });
+
+    expect(useRecordingStore.getState().isProcessing).toBe(false);
+    expect(useRecordingStore.getState().processingStage).toBe("idle");
+    expect(useRecordingStore.getState().isRecording).toBe(true);
+  });
+
   it("startRecording sets error on failure", async () => {
     mockStartRecording.mockResolvedValue(false);
 
@@ -66,7 +84,9 @@ describe("useAudioCapture", () => {
     });
 
     expect(useRecordingStore.getState().isRecording).toBe(false);
-    expect(useRecordingStore.getState().errorMessage).toBe("Recording failed");
+    expect(useRecordingStore.getState().errorMessage).toBe(
+      "Recording failed: Unable to start the microphone.",
+    );
     expect(mockNotificationAsync).toHaveBeenCalled();
   });
 
@@ -97,7 +117,9 @@ describe("useAudioCapture", () => {
     });
 
     expect(uri).toBeUndefined();
-    expect(useRecordingStore.getState().errorMessage).toBe("Recording failed");
+    expect(useRecordingStore.getState().errorMessage).toBe(
+      "Recording failed: Unable to save recorded audio.",
+    );
   });
 
   it("retry resets store state", async () => {

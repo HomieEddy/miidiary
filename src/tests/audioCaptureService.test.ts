@@ -1,5 +1,12 @@
 import { AudioCaptureService } from "@/services/audioCaptureService";
 
+const mockPrepareToRecordAsync = jest.fn();
+const mockRecord = jest.fn();
+const mockStop = jest.fn();
+const mockGetStatus = jest.fn();
+const mockRequestRecordingPermissionsAsync = jest.fn();
+const mockSetAudioModeAsync = jest.fn();
+
 jest.mock("expo-audio", () => ({
   AudioQuality: { MAX: "MAX" },
   AndroidAudioEncoder: { AAC: "AAC" },
@@ -7,17 +14,35 @@ jest.mock("expo-audio", () => ({
   IOSOutputFormat: { LINEARPCM: "LINEARPCM" },
   AudioModule: {
     AudioRecorder: class {
-      prepareToRecordAsync = jest.fn();
-      record = jest.fn();
-      stop = jest.fn();
-      getStatus = jest.fn();
+      uri = "file:///cache/recording.m4a";
+      prepareToRecordAsync = mockPrepareToRecordAsync;
+      record = mockRecord;
+      stop = mockStop;
+      getStatus = mockGetStatus;
     },
   },
-  requestRecordingPermissionsAsync: jest.fn(),
-  setAudioModeAsync: jest.fn(),
+  requestRecordingPermissionsAsync: (...args: unknown[]) => mockRequestRecordingPermissionsAsync(...args),
+  setAudioModeAsync: (...args: unknown[]) => mockSetAudioModeAsync(...args),
+}));
+
+jest.mock("expo-file-system", () => ({
+  File: class {
+    exists = false;
+    delete = jest.fn();
+  },
 }));
 
 describe("AudioCaptureService pending processing", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useRealTimers();
+    mockRequestRecordingPermissionsAsync.mockResolvedValue({ granted: true });
+    mockSetAudioModeAsync.mockResolvedValue(undefined);
+    mockPrepareToRecordAsync.mockResolvedValue(undefined);
+    mockStop.mockResolvedValue(undefined);
+    mockGetStatus.mockReturnValue({ metering: -20 });
+  });
+
   it("tracks pending processing URIs", () => {
     const service = new AudioCaptureService();
 
@@ -47,5 +72,28 @@ describe("AudioCaptureService pending processing", () => {
     service.markProcessingComplete("file:///missing.wav");
 
     expect(service.getPendingProcessingUris()).toEqual(["file:///a.wav"]);
+  });
+
+  it("returns the recorder URI captured before native stop resets it", async () => {
+    const service = new AudioCaptureService();
+
+    await service.startRecording();
+    const uri = await service.stopRecording();
+
+    expect(uri).toBe("file:///cache/recording.m4a");
+    expect(mockStop).toHaveBeenCalled();
+  });
+
+  it("times out when native stop does not resolve", async () => {
+    jest.useFakeTimers();
+    mockStop.mockReturnValue(new Promise(() => undefined));
+    const service = new AudioCaptureService();
+
+    await service.startRecording();
+    const stopPromise = service.stopRecording();
+
+    jest.advanceTimersByTime(5_000);
+
+    await expect(stopPromise).resolves.toBeNull();
   });
 });

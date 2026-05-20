@@ -6,10 +6,10 @@ Dear Diary transforms voice capture into organized entries — from a single tap
 
 ## Phases
 
-- [ ] **Phase 0: Project Scaffolding** - React Native Expo app initialized with all dependencies, theme system, and a basic render test
+- [x] **Phase 0: Project Scaffolding** - React Native Expo app initialized with all dependencies, theme system, and a basic render test
 - [x] **Phase 1: Foundation & Audio Capture** - Core record → visualize → transcribe → discard loop with haptic feedback
 - [x] **Phase 2: Encrypted Storage & Basic Browse** - SQLCipher database, entry persistence, and chronological entry list
-- [ ] **Phase 3: On-Device ML Pipeline** - On-device speech-to-text (EN/FR) and auto-classification (Diary/Task/Note)
+- [x] **Phase 3: On-Device ML Pipeline** - On-device speech-to-text (EN/FR) and auto-classification (Diary/Task/Note)
 - [ ] **Phase 4: Browse, Review, Tasks & Polish** - Search, filter, edit entries, task management, motion animations, dark mode
 
 ## Phase Details
@@ -31,9 +31,9 @@ Dear Diary transforms voice capture into organized entries — from a single tap
 **Wave Structure**: 1 → 2 → 3
 
 Plans:
-- [ ] 00-01-PLAN.md — Initialize Expo project (CNG + prebuild), install all locked dependencies, configure NativeWind v4 Babel plugin + CSS entry, create src/ directory structure, bundle font TTF files
-- [ ] 00-02-PLAN.md — Wire theme system (app.json brand colors, tailwind.config.js registration, tsconfig path aliases), create root layout with useFonts font loading + SplashScreen, build Expo Router tab navigation with UI-SPEC tab bar (Solar icons, border-4, offset shadow, pink skew underline), 4 placeholder screens
-- [ ] 00-03-PLAN.md — Configure Jest (jest-expo preset, @/ path mapping), write basic render test (ui.test.tsx) verifying app shell rendering and theme class application
+- [x] 00-01-PLAN.md — Initialize Expo project (CNG + prebuild), install all locked dependencies, configure NativeWind v4 Babel plugin + CSS entry, create src/ directory structure, bundle font TTF files
+- [x] 00-02-PLAN.md — Wire theme system (app.json brand colors, tailwind.config.js registration, tsconfig path aliases), create root layout with useFonts font loading + SplashScreen, build Expo Router tab navigation with UI-SPEC tab bar (Solar icons, border-4, offset shadow, pink skew underline), 4 placeholder screens
+- [x] 00-03-PLAN.md — Configure Jest (jest-expo preset, @/ path mapping), write basic render test (ui.test.tsx) verifying app shell rendering and theme class application
 
 ### Phase 1: Foundation & Audio Capture
 **Goal**: Users can capture voice recordings with tactile feedback, see live audio visualization, and have interruptions handled gracefully — audio is ephemeral, discarded after transcription
@@ -76,8 +76,6 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 02-01: Realm encrypted database setup (Realm schema with deterministic indexing on timestamp/category, MMKV + Keychain key management)
-- [ ] 02-02: Entry repository CRUD + chronological list screen (flash-list) + delete flow + offline validation + biometric unlock
 - [x] 02-01: Realm encrypted database setup (Realm schema with deterministic indexing on timestamp/category, MMKV + Keychain key management)
 - [x] 02-02: Entry repository CRUD + chronological list screen (flash-list) + delete flow + offline validation + biometric unlock
 
@@ -95,9 +93,9 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 03-01: STT service (Whisper model download/cache, whisper.rn integration, bilingual transcription, progress reporting)
-- [ ] 03-02: NLP classifier service (Executorch + SmolLM2 model download, classification prompt, keyword heuristic fallback)
-- [ ] 03-03: Pipeline orchestration (Entry Service: coordinate record → STT → NLP → persist with per-stage error isolation)
+- [x] 03-01: STT service (Whisper model download/cache, whisper.rn integration, bilingual transcription, progress reporting)
+- [x] 03-02: NLP classifier service (Executorch + SmolLM2 model download, classification prompt, keyword heuristic fallback)
+- [x] 03-03: Pipeline orchestration (Entry Service: coordinate record → STT → NLP → persist with per-stage error isolation, pending replay, background hooks, model download fallback)
 
 ### Phase 4: Browse, Review, Tasks & Polish
 **Goal**: Users can search, filter, edit entries, manage tasks, and experience a polished app with smooth animations, Thought Shredder transition, and dark mode

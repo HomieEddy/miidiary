@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-05-17)
 
 **Core value:** Instant, private, offline voice capture that automatically organizes thoughts into the right place — so users never lose an idea.
-**Current focus:** Phase 3: On-Device ML Pipeline
+**Current focus:** Phase 4: Browse, Review, Tasks & Polish
 
 ## Current Position
 
-Phase: 3 of 5 (On-Device ML Pipeline)
-Plan: 0 of 3 in current phase
-Status: Phase 2 merged - PR #2
-Last activity: 2026-05-18 - Phase 2 merged via PR #2 into master
+Phase: 3 of 5 (On-Device ML Pipeline) — **COMPLETE**
+Plan: 3 of 3 in Phase 3
+Status: Phase 3 complete — ready for ship/docs-update before Phase 4
+Last activity: 2026-05-20 - Phase 3 implementation complete with transcription, classification, and pipeline hardening
 
-Progress: [████████░░] 67%
+Progress: [██████████░░] 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 2
+- Total plans completed: 8
 - Average duration: 9 min
-- Total execution time: 0.28 hours
+- Total execution time: ~1.2 hours
 
 **By Phase:**
 
@@ -29,15 +29,17 @@ Progress: [████████░░] 67%
 |-------|-------|-------|----------|
 | 0. Project Scaffolding | 3/3 | 8 min | 3 min |
 | 1. Foundation & Audio Capture | 3/3 | 28 min | 9 min |
-| 2. Encrypted Storage & Basic Browse | 0/2 | — | — |
-| 3. On-Device ML Pipeline | 0/3 | — | — |
+| 2. Encrypted Storage & Basic Browse | 2/2 | ~18 min | 9 min |
+| 3. On-Device ML Pipeline | 3/3 | ~25 min | 8 min |
 | 4. Browse, Review, Tasks & Polish | 0/3 | — | — |
 
 **Recent Trend:**
 - Last 5 plans:
-  1. 01-03 — Orchestration hooks, state UI, HomeScreen pipeline (8 min, 4 commits)
-  2. 01-02 — Skia waveform, stub transcription, entries store, cn() (8 min, 2 commits)
-  3. 01-01 — Audio recording engine + UI (12 min, 10 commits)
+  1. 03-03 — Pipeline orchestration, pending replay, background hooks, model download fallback (12 min, 13 commits)
+  2. 03-02 — NLP classifier service with keyword heuristic fallback (8 min, 3 commits)
+  3. 03-01 — Whisper STT service, model manager, stage-based progress (9 min, 2 commits)
+  4. 02-02 — Entry repository CRUD, flash-list, biometric unlock (9 min)
+  5. 02-01 — Realm encrypted database, MMKV + Keychain key management (9 min)
 - Trend: Steady
 
 *Updated after each plan completion*
@@ -59,8 +61,16 @@ Recent decisions affecting current work:
 - WHISPER_QUALITY: Added `web` field to satisfy RecordingOptions type
 - useAudioCapture hook: Reanimated shared value buffer (120 samples, 0.3 smoothing alpha) for waveform visualization
 - useTranscription hook: stub transcription → entriesStore → cleanup pipeline
-- ErrorBanner: auto-dismiss after 3s, press-to-retry
+- ErrorBanner: removed in Phase 3 refactor; error state handled inline in HomeScreen
 - TranscriptionResult: 4s display then fade-out with spring-in animation
+- Phase 3 STT: language-specific Whisper models (EN + FR-CA) rather than single bilingual model
+- Phase 3 classifier: lightweight on-device model with deterministic keyword heuristic fallback (no cloud)
+- Phase 3 progress UX: stage-based labels (not percentage) — loading/transcribing/classifying/saving
+- Phase 3 pending replay: audio URIs tracked through processing lifecycle; replayed on app mount and AppState active resume
+- Phase 3 background tasks: expo-task-manager + expo-background-fetch wired for pending replay and model sync
+- Phase 3 model download: background `File.downloadFileAsync` fallback with safe failure path; ModelReadinessNotice shown when model not ready
+- Phase 3 audio cleanup: always deletes both audioUri and tempFilePath after processing (Set-based dedup)
+- whisper-rn.d.ts: hand-rolled type definitions for react-native-whisper bridging
 
 ### Pending Todos
 
@@ -78,6 +88,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-18
-Stopped at: Phase 2 merged - ready for Phase 3
-Resume file: .planning/phases/03-on-device-ml-pipeline/
+Last session: 2026-05-20
+Stopped at: Phase 3 complete — all 3 plans executed, code reviewed, hardened with model lifecycle improvements
+Resume file: .planning/phases/04-browse-review-tasks-polish/
+Next step: /gsd-ship (create Phase 3 PR) → /gsd-docs-update → /gsd-discuss-phase 4

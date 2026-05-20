@@ -13,6 +13,7 @@ export interface Entry {
 interface EntriesState {
   entries: Entry[];
   addEntry: (entry: Omit<Entry, 'id'>) => void;
+  addPersistedEntry: (entry: Entry) => void;
   getLatestEntry: () => Entry | undefined;
   clearAll: () => void;
 }
@@ -25,6 +26,10 @@ export const useEntriesStore = create<EntriesState>((set, get) => ({
         { ...entry, id: `entry-${Crypto.randomUUID()}` },
         ...state.entries,
       ],
+    })),
+  addPersistedEntry: (entry) =>
+    set((state) => ({
+      entries: [entry, ...state.entries.filter((item) => item.id !== entry.id)],
     })),
   getLatestEntry: () => get().entries[0],
   clearAll: () => set({ entries: [] }),

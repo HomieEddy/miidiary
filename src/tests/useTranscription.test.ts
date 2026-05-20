@@ -92,6 +92,20 @@ describe("useTranscription", () => {
     expect(mockMarkProcessingComplete).toHaveBeenCalledWith("file:///test.wav");
   });
 
+  it("processRecording surfaces actionable install error guidance", async () => {
+    mockTranscribeAudio.mockRejectedValue(new Error("Cannot read property 'install' of undefined"));
+
+    const { result } = renderHook(() => useTranscription());
+
+    await act(async () => {
+      await result.current.processRecording("file:///test.wav");
+    });
+
+    expect(useRecordingStore.getState().errorMessage).toBe(
+      "Transcription failed: Whisper runtime unavailable. Rebuild the dev client and retry.",
+    );
+  });
+
   it("processRecording uses fallback detail for non-informative errors", async () => {
     mockTranscribeAudio.mockRejectedValue(new Error("!"));
 
@@ -105,6 +119,57 @@ describe("useTranscription", () => {
       "Transcription failed: Unknown error",
     );
     expect(useRecordingStore.getState().isProcessing).toBe(false);
+  });
+
+  it("processRecording surfaces message from object-shaped rejections", async () => {
+    mockTranscribeAudio.mockRejectedValue({ message: "Native STT init failed" });
+
+    const { result } = renderHook(() => useTranscription());
+
+    await act(async () => {
+      await result.current.processRecording("file:///test.wav");
+    });
+
+    expect(useRecordingStore.getState().errorMessage).toBe(
+      "Transcription failed: Native STT init failed",
+    );
+  });
+
+  it("processRecording sets explicit classification error", async () => {
+    mockTranscribeAudio.mockResolvedValue({ text: "Needs category" });
+    mockClassifyEntry.mockRejectedValue(new Error("classifier offline"));
+
+    const { result } = renderHook(() => useTranscription());
+
+    await act(async () => {
+      await result.current.processRecording("file:///test.wav");
+    });
+
+    expect(useRecordingStore.getState().errorMessage).toBe(
+      "Classification failed: classifier offline",
+    );
+    expect(mockCreateEntry).not.toHaveBeenCalled();
+  });
+
+  it("processRecording sets explicit save error", async () => {
+    mockTranscribeAudio.mockResolvedValue({ text: "Save me" });
+    mockClassifyEntry.mockResolvedValue({
+      category: "note",
+      confidence: 0.72,
+      rationale: "Model matched 2 weighted feature(s) for note.",
+      source: "model",
+    });
+    mockCreateEntry.mockRejectedValue(new Error("Realm write failed"));
+
+    const { result } = renderHook(() => useTranscription());
+
+    await act(async () => {
+      await result.current.processRecording("file:///test.wav");
+    });
+
+    expect(useRecordingStore.getState().errorMessage).toBe(
+      "Save failed: Realm write failed",
+    );
   });
 
   it("processRecording clears processing on success", async () => {

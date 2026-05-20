@@ -1,11 +1,16 @@
 import { TranscriptionService } from "@/services/transcriptionService";
+import { NativeModules, Platform } from "react-native";
 
 const mockResolveModel = jest.fn();
+const mockMarkModelUnavailable = jest.fn();
 const mockInitWhisper = jest.fn();
 const mockTranscribe = jest.fn();
+const mockTranscribeData = jest.fn();
+const mockDecodeToPcm16Base64 = jest.fn();
 
 jest.mock("@/services/modelManager", () => ({
   modelManager: {
+    markModelUnavailable: (...args: unknown[]) => mockMarkModelUnavailable(...args),
     resolveModel: (...args: unknown[]) => mockResolveModel(...args),
     resetCache: jest.fn(),
   },
@@ -18,6 +23,14 @@ jest.mock("whisper.rn", () => ({
 describe("transcriptionService", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    Object.defineProperty(Platform, "OS", {
+      configurable: true,
+      value: "android",
+    });
+    NativeModules.AudioPcmDecoder = {
+      decodeToPcm16Base64: (...args: unknown[]) => mockDecodeToPcm16Base64(...args),
+    };
+    mockDecodeToPcm16Base64.mockResolvedValue("pcm16-base64");
 
     mockResolveModel.mockResolvedValue({
       language: "en",
@@ -35,8 +48,19 @@ describe("transcriptionService", () => {
       }),
     });
 
+    mockTranscribeData.mockReturnValue({
+      stop: jest.fn(),
+      promise: Promise.resolve({
+        result: "hello world",
+        language: "en",
+        segments: [],
+        isAborted: false,
+      }),
+    });
+
     mockInitWhisper.mockResolvedValue({
       transcribe: (...args: unknown[]) => mockTranscribe(...args),
+      transcribeData: (...args: unknown[]) => mockTranscribeData(...args),
       release: jest.fn(),
     });
   });
@@ -56,6 +80,26 @@ describe("transcriptionService", () => {
     expect(mockTranscribe).toHaveBeenCalledWith(
       "file:///recording.wav",
       expect.objectContaining({ language: "en" }),
+    );
+    expect(result.text).toBe("hello world");
+  });
+
+  it("transcribes non-wav recordings using Android decoded PCM data", async () => {
+    const service = new TranscriptionService();
+
+    const result = await service.transcribeAudio({
+      audioUri: "file:///recording.m4a",
+      language: "en",
+    });
+
+    expect(mockDecodeToPcm16Base64).toHaveBeenCalledWith("file:///recording.m4a");
+    expect(mockTranscribeData).toHaveBeenCalledWith(
+      "pcm16-base64",
+      expect.objectContaining({ language: "en" }),
+    );
+    expect(mockTranscribe).not.toHaveBeenCalledWith(
+      "file:///recording.m4a",
+      expect.anything(),
     );
     expect(result.text).toBe("hello world");
   });
@@ -109,7 +153,36 @@ describe("transcriptionService", () => {
 
     await expect(
       service.transcribeAudio({ audioUri: "file:///recording.wav" }),
-    ).rejects.toThrow("Transcription produced empty text");
+    ).rejects.toThrow("No speech detected");
+  });
+
+  it("throws when Whisper returns blank audio token", async () => {
+    mockTranscribe.mockReturnValue({
+      stop: jest.fn(),
+      promise: Promise.resolve({
+        result: "[BLANK_AUDIO]",
+        language: "en",
+        segments: [],
+        isAborted: false,
+      }),
+    });
+
+    const service = new TranscriptionService();
+
+    await expect(
+      service.transcribeAudio({ audioUri: "file:///recording.wav" }),
+    ).rejects.toThrow("No speech detected");
+  });
+
+  it("throws when compressed recording decoding returns empty audio", async () => {
+    mockDecodeToPcm16Base64.mockResolvedValue("   ");
+
+    const service = new TranscriptionService();
+
+    await expect(
+      service.transcribeAudio({ audioUri: "file:///recording.m4a" }),
+    ).rejects.toThrow("Unable to decode recorded audio");
+    expect(mockTranscribeData).not.toHaveBeenCalled();
   });
 
   it("propagates model resolution failures", async () => {
@@ -120,5 +193,35 @@ describe("transcriptionService", () => {
     await expect(
       service.transcribeAudio({ audioUri: "file:///recording.wav" }),
     ).rejects.toThrow("No local Whisper model found");
+  });
+
+  it("evicts and retries when the native model load fails", async () => {
+    mockInitWhisper
+      .mockRejectedValueOnce(new Error("Failed to load the model"))
+      .mockResolvedValueOnce({
+        transcribe: (...args: unknown[]) => mockTranscribe(...args),
+        transcribeData: (...args: unknown[]) => mockTranscribeData(...args),
+        release: jest.fn(),
+      });
+
+    mockResolveModel
+      .mockResolvedValueOnce({
+        language: "en",
+        modelPath: "file:///models/ggml-base.en.bin",
+        fallbackUsed: false,
+      })
+      .mockResolvedValueOnce({
+        language: "en",
+        modelPath: "file:///models/ggml-tiny.en.bin",
+        fallbackUsed: true,
+      });
+
+    const service = new TranscriptionService();
+    const result = await service.transcribeAudio({ audioUri: "file:///recording.wav" });
+
+    expect(mockMarkModelUnavailable).toHaveBeenCalledWith("file:///models/ggml-base.en.bin");
+    expect(mockInitWhisper).toHaveBeenCalledTimes(2);
+    expect(result.modelPath).toBe("file:///models/ggml-tiny.en.bin");
+    expect(result.usedModelFallback).toBe(true);
   });
 });

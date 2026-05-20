@@ -11,8 +11,8 @@ See: .planning/PROJECT.md (updated 2026-05-17)
 
 Phase: 3 of 5 (On-Device ML Pipeline) — **COMPLETE**
 Plan: 3 of 3 in Phase 3
-Status: Phase 3 complete — ready for ship/docs-update before Phase 4
-Last activity: 2026-05-20 - Phase 3 implementation complete with transcription, classification, and pipeline hardening
+Status: Phase 3 shipped — PR #3 open to master
+Last activity: 2026-05-20 - /gsd-ship completed, PR #3 created and ready for review/merge
 
 Progress: [██████████░░] 80%
 
@@ -91,4 +91,4 @@ None yet.
 Last session: 2026-05-20
 Stopped at: Phase 3 complete — all 3 plans executed, code reviewed, hardened with model lifecycle improvements
 Resume file: .planning/phases/04-browse-review-tasks-polish/
-Next step: /gsd-ship (create Phase 3 PR) → /gsd-docs-update → /gsd-discuss-phase 4
+Next step: /gsd-docs-update → review/merge PR #3 → /gsd-discuss-phase 4

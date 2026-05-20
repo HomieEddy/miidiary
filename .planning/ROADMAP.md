@@ -110,15 +110,15 @@ Plans:
    5. User can view entries classified as Tasks in a dedicated task view and mark them complete/incomplete
    6. "Thought Shredder" transition plays on recording stop: card downscales, cracks along pause cuts, staggered layout animation separates into categories
    7. App has smooth motion animations throughout (Reanimated native worklet thread — locked at max refresh even under ML load), progressive skeletal shimmer reveals, and dark/light mode adaptation
-**Plans**: TBD
+**Plans**: 4 plans
 
 **UI hint**: yes
 
 Plans:
-- [ ] 04-01: Browse & search screen (category tabs with Realm FTS, Reanimated category tab bar, flash-list entry list, entry detail)
-- [ ] 04-02: Edit & task management (inline text editing, classification override, task complete/incomplete toggle, pinch-to-merge with haptics)
-- [ ] 04-03: Thought Shredder transition + animation polish (Reanimated staggered layout & spring worklets, Moti exit animations, NativeWind skeletal shimmer, Rive state machine integration, dark/light mode)
-- [ ] 04-04: Integration tests (Jest + RTL: sentence slicing, bilingual token mapping) + E2E tests (Detox: swipe gestures, shake-to-clear, mock audio pipelines)
+- [ ] 04-01-PLAN.md — Data layer: isCompleted schema migration, searchEntries/toggleComplete/updateEntry, useEntries delete-mode removal
+- [ ] 04-02-PLAN.md — Browse screen: search reveal, long-press contextual menu, EntryDetailSheet (view + edit)
+- [ ] 04-03-PLAN.md — Task completion checkbox + Thought Shredder animation + dark mode + shimmer skeletons
+- [ ] 04-04-PLAN.md — Jest tests (search, completion, edit, bilingual FR-CA) + Detox E2E setup
 
 ## Progress
 

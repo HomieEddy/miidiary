@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { Pressable, View } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -10,15 +10,21 @@ import * as Haptics from 'expo-haptics';
 import { useRecordingStore } from '@/stores/recordingStore';
 import { SvgXml } from 'react-native-svg';
 import { colors } from '@/theme/colors';
+import { cn } from '@/utils/cn';
 
 interface RecorderButtonProps {
-  onStartRecording: () => void;
-  onStopRecording: () => void;
+  disabled?: boolean;
+  onStartRecording: () => Promise<void> | void;
+  onStopRecording: () => Promise<void> | void;
 }
 
-export function RecorderButton({ onStartRecording, onStopRecording }: RecorderButtonProps): ReactElement {
+export function RecorderButton({
+  disabled = false,
+  onStartRecording,
+  onStopRecording,
+}: RecorderButtonProps): ReactElement {
   const scale = useSharedValue(1);
-  const isProcessing = useRecordingStore((state) => state.isProcessing);
+  const isHandlingPress = useRef(false);
   const isRecording = useRecordingStore((state) => state.isRecording);
 
   const buttonStyle = useAnimatedStyle(() => ({
@@ -26,46 +32,56 @@ export function RecorderButton({ onStartRecording, onStopRecording }: RecorderBu
   }));
 
   const handlePress = useCallback(async () => {
-    if (isProcessing) return;
+    if (disabled && !isRecording) return;
+    if (isHandlingPress.current) return;
+    isHandlingPress.current = true;
 
-    if (!isRecording) {
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    try {
+      if (!isRecording) {
+        await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-      scale.value = withSpring(1.15, {
-        mass: 0.5,
-        stiffness: 200,
-        damping: 12,
-      }, () => {
-        scale.value = withSpring(1.0);
-      });
+        scale.value = withSpring(1.15, {
+          mass: 0.5,
+          stiffness: 200,
+          damping: 12,
+        }, () => {
+          scale.value = withSpring(1.0);
+        });
 
-      onStartRecording();
-    } else {
-      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        await onStartRecording();
+      } else {
+        await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
-      scale.value = withSpring(1.05, {
-        mass: 0.5,
-        stiffness: 150,
-        damping: 15,
-      }, () => {
-        scale.value = withSpring(1.0);
-      });
+        scale.value = withSpring(1.05, {
+          mass: 0.5,
+          stiffness: 150,
+          damping: 15,
+        }, () => {
+          scale.value = withSpring(1.0);
+        });
 
-      onStopRecording();
+        await onStopRecording();
+      }
+    } finally {
+      isHandlingPress.current = false;
     }
-  }, [isRecording, isProcessing, onStartRecording, onStopRecording, scale]);
+  }, [disabled, isRecording, onStartRecording, onStopRecording, scale]);
 
   return (
     <Pressable
       onPress={handlePress}
-      disabled={isProcessing}
+      hitSlop={12}
+      accessibilityState={{ disabled: disabled && !isRecording }}
       accessibilityLabel={isRecording ? 'Stop recording' : 'Record audio'}
       accessibilityHint={
         isRecording
           ? 'Double tap to stop recording'
           : 'Double tap to start recording a voice entry'
       }
-      className="w-[144px] h-[144px] items-center justify-center"
+      className={cn(
+        'w-[144px] h-[144px] items-center justify-center z-20',
+        disabled && !isRecording ? 'opacity-50' : 'opacity-100'
+      )}
     >
       <Animated.View style={buttonStyle} className="w-[144px] h-[144px]">
         <View className="w-[144px] h-[144px] rounded-full bg-card border-4 border-border" />

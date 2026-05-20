@@ -31,6 +31,9 @@ type AudioPcmDecoderModule = {
   decodeToPcm16Base64: (audioUri: string) => Promise<string>;
 };
 
+const AUTO_TRANSCRIPTION_PROMPT =
+  "Transcribe in the spoken language without translating. The speaker may use English or Canadian French. Keep French phrases in French, for example: J'ai faim. Je suis malade.";
+
 function emitStage(
   onStageChange: ((update: TranscriptionStageUpdate) => void) | undefined,
   stage: TranscriptionStage,
@@ -106,6 +109,9 @@ export class TranscriptionService {
     const transcribeOptions = {
       language: whisperLanguage,
       translate: false,
+      beamSize: 5,
+      prompt: AUTO_TRANSCRIPTION_PROMPT,
+      temperature: 0,
       onProgress,
     };
 

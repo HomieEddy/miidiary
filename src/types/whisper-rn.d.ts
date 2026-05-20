@@ -9,6 +9,9 @@ declare module "whisper.rn" {
   export type TranscribeOptions = {
     language?: string;
     translate?: boolean;
+    beamSize?: number;
+    prompt?: string;
+    temperature?: number;
     onProgress?: (progress: number) => void;
   };
 

@@ -8,36 +8,36 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: "#FDF8F0",
-        foreground: "#2A2631",
+        background: "rgb(var(--background))",
+        foreground: "rgb(var(--foreground))",
         primary: {
-          DEFAULT: "#FF6B9E",
-          foreground: "#FFFFFF",
+          DEFAULT: "rgb(var(--primary))",
+          foreground: "rgb(var(--primary-foreground))",
         },
         secondary: {
-          DEFAULT: "#FFD166",
-          foreground: "#2A2631",
+          DEFAULT: "rgb(var(--secondary))",
+          foreground: "rgb(var(--secondary-foreground))",
         },
         accent: {
-          DEFAULT: "#06D6A0",
-          foreground: "#FFFFFF",
+          DEFAULT: "rgb(var(--accent))",
+          foreground: "rgb(var(--accent-foreground))",
         },
         muted: {
-          DEFAULT: "#F0E9DF",
-          foreground: "#8A828F",
+          DEFAULT: "rgb(var(--muted))",
+          foreground: "rgb(var(--muted-foreground))",
         },
-        destructive: "#EF476F",
+        destructive: "rgb(var(--destructive))",
         card: {
-          DEFAULT: "#FFFFFF",
-          foreground: "#2A2631",
+          DEFAULT: "rgb(var(--card))",
+          foreground: "rgb(var(--card-foreground))",
         },
         popover: {
-          DEFAULT: "#FFFFFF",
-          foreground: "#2A2631",
+          DEFAULT: "rgb(var(--card))",
+          foreground: "rgb(var(--card-foreground))",
         },
-        border: "#2A2631",
-        input: "#FFFFFF",
-        ring: "#FF6B9E",
+        border: "rgb(var(--border))",
+        input: "rgb(var(--card))",
+        ring: "rgb(var(--ring))",
         chart: {
           1: "#FF6B9E",
           2: "#FFD166",

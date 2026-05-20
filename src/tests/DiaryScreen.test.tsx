@@ -32,7 +32,7 @@ const mockUseEntriesState = {
   searchResults: null,
   showWipeConfirmStepOne: false,
   showWipeConfirmStepTwo: false,
-  loadEntries: jest.fn(),
+  loadEntries: jest.fn().mockResolvedValue(undefined),
   toggleComplete: jest.fn(),
   requestWipeAll: jest.fn(),
   cancelWipeAll: jest.fn(),
@@ -61,7 +61,10 @@ jest.mock("@/hooks/useEntries", () => ({
 
 jest.mock("@react-navigation/native", () => ({
   useFocusEffect: (effect: () => void | (() => void)) => {
-    effect();
+    const ReactLocal = require("react");
+    ReactLocal.useEffect(() => {
+      return effect();
+    }, []);
   },
 }));
 
@@ -81,12 +84,14 @@ describe("DiaryScreen", () => {
     mockUseEntriesState.showWipeConfirmStepTwo = false;
   });
 
-  it("renders grouped headers and rows in chronological model", () => {
+  it("renders grouped headers and rows in chronological model", async () => {
     const { getByText } = render(<DiaryScreen />);
 
-    expect(getByText("Today")).toBeTruthy();
-    expect(getByText("First title")).toBeTruthy();
-    expect(getByText("One line preview")).toBeTruthy();
+    await waitFor(() => {
+      expect(getByText("Today")).toBeTruthy();
+      expect(getByText("First title")).toBeTruthy();
+      expect(getByText("One line preview")).toBeTruthy();
+    });
   });
 
   it("shows wipe-all trigger and calls hook request", () => {

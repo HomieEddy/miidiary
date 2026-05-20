@@ -1,7 +1,10 @@
 import { Pressable, Text, View } from "react-native";
 import { useEntries } from "@/hooks/useEntries";
+import { useTheme } from "@/hooks/useTheme";
+import { cn } from "@/utils/cn";
 
 export default function DigestsScreen() {
+  const { themeOverride, setThemeOverride } = useTheme();
   const {
     showWipeConfirmStepOne,
     showWipeConfirmStepTwo,
@@ -23,6 +26,29 @@ export default function DigestsScreen() {
         <Text className="font-sans text-sm text-muted-foreground mt-2">
           Manage encrypted local storage controls.
         </Text>
+
+        <View className="bg-card border-4 border-border rounded-2xl p-4 shadow-[4px_4px_0px_theme(colors.border)] rotate-1 mb-4 mt-4">
+          <Text className="font-heading text-lg text-foreground mb-3">Appearance</Text>
+          {(["system", "light", "dark"] as const).map((mode) => (
+            <Pressable
+              key={mode}
+              onPress={() => setThemeOverride(mode)}
+              className={cn(
+                "flex-row items-center py-2",
+                themeOverride === mode ? "opacity-100" : "opacity-50",
+              )}
+            >
+              <View
+                className={cn(
+                  "w-4 h-4 rounded-full border-2 border-border mr-3",
+                  themeOverride === mode && "bg-primary",
+                )}
+              />
+              <Text className="font-sans text-foreground capitalize">{mode}</Text>
+            </Pressable>
+          ))}
+        </View>
+
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Open wipe all from settings"

@@ -7,6 +7,7 @@ import { SvgXml } from "react-native-svg";
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { BookBookmarkBoldDuotone, CheckSquareBoldDuotone } from "@/assets/icons/solar";
 import { EntryDetailSheet } from "@/components/ui/EntryDetailSheet";
+import { ShimmerView } from "@/components/ui/ShimmerView";
 import { useEntries } from "@/hooks/useEntries";
 import { entriesRepository } from "@/services/entriesRepository";
 import type { EntryRecord } from "@/types/entry";
@@ -52,12 +53,19 @@ export default function DiaryScreen(): ReactElement {
   const [sheetEntry, setSheetEntry] = useState<EntryRecord | null>(null);
   const [sheetMode, setSheetMode] = useState<"view" | "edit">("view");
   const [sheetVisible, setSheetVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const searchBarHeight = useSharedValue(0);
+
+  const loadWithState = useCallback(async () => {
+    setIsLoading(true);
+    await loadEntries();
+    setIsLoading(false);
+  }, [loadEntries]);
 
   useFocusEffect(
     useCallback(() => {
-      void loadEntries();
-    }, [loadEntries]),
+      void loadWithState();
+    }, [loadWithState]),
   );
 
   useEffect(() => {
@@ -78,6 +86,7 @@ export default function DiaryScreen(): ReactElement {
         key={entry.id}
         accessibilityRole="button"
         accessibilityLabel={`Entry ${entry.id}`}
+        testID={`diary-entry-card-${entry.id}`}
         className="bg-card border-4 border-border rounded-2xl p-4 shadow-paper mb-3"
         onPress={() => {
           setSheetEntry(entry);
@@ -127,6 +136,7 @@ export default function DiaryScreen(): ReactElement {
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Toggle search"
+          testID="search-toggle-btn"
           className="w-10 h-10 rounded-xl border-2 border-border bg-card items-center justify-center"
           onPress={() => {
             setIsSearchOpen((previous) => !previous);
@@ -143,6 +153,7 @@ export default function DiaryScreen(): ReactElement {
       <Animated.View style={searchBarStyle} className="mb-3">
         <TextInput
           accessibilityLabel="Search entries"
+          testID="search-input"
           className="bg-muted rounded-xl px-4 py-2 font-sans text-foreground text-sm"
           placeholder="Search entries..."
           placeholderTextColor="#8A828F"
@@ -161,7 +172,13 @@ export default function DiaryScreen(): ReactElement {
         <Text className="font-sans text-xs font-bold text-white">Wipe all</Text>
       </Pressable>
 
-      {searchResults !== null ? (
+      {isLoading ? (
+        <View>
+          <ShimmerView className="h-20 mb-3" />
+          <ShimmerView className="h-20 mb-3" />
+          <ShimmerView className="h-20" />
+        </View>
+      ) : searchResults !== null ? (
         <FlashList
           data={visibleEntries}
           keyExtractor={(item) => item.id}

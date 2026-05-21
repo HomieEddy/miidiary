@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useColorScheme } from "react-native";
+import { Platform, useColorScheme } from "react-native";
 
 type ThemeOverride = "system" | "dark" | "light";
 
@@ -16,11 +16,13 @@ let storage: StorageLike = {
   },
 };
 
-try {
-  const mmkvModule = require("react-native-mmkv") as { createMMKV: (input: { id: string }) => StorageLike };
-  storage = mmkvModule.createMMKV({ id: "theme" });
-} catch {
-  // Jest/web fallback uses in-memory storage.
+if (Platform.OS !== "web") {
+  try {
+    const mmkvModule = require("react-native-mmkv") as { createMMKV: (input: { id: string }) => StorageLike };
+    storage = mmkvModule.createMMKV({ id: "theme" });
+  } catch {
+    // Jest/native fallback uses in-memory storage.
+  }
 }
 
 const THEME_KEY = "theme_override";

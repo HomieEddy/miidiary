@@ -8,6 +8,7 @@ import {
 import { getRealmKey, resetRealmKey, setRealmKey } from "@/services/keychainService";
 
 let realmInstance: Realm | null = null;
+let realmOpenPromise: Promise<Realm> | null = null;
 const REALM_PATH = "miidiary.realm";
 
 function buildRealmConfig(encryptionKey: Uint8Array): Realm.Configuration {
@@ -27,15 +28,28 @@ function buildRealmConfig(encryptionKey: Uint8Array): Realm.Configuration {
   };
 }
 
-async function resetEncryptedRealmState(): Promise<void> {
-  await resetRealmKey();
-  setRealmKeyMetadata(null);
+function deleteRealmFile(encryptionKey?: Uint8Array): void {
+  if (encryptionKey) {
+    try {
+      Realm.deleteFile(buildRealmConfig(encryptionKey));
+      return;
+    } catch {
+      // Fall through to path-only cleanup for partially-created Realm files.
+    }
+  }
 
   try {
     Realm.deleteFile({ path: REALM_PATH });
   } catch {
     // Best-effort cleanup; key reset still allows retry with a fresh key.
   }
+}
+
+async function resetEncryptedRealmState(encryptionKey?: Uint8Array): Promise<void> {
+  closeRealmInstance();
+  await resetRealmKey();
+  setRealmKeyMetadata(null);
+  deleteRealmFile(encryptionKey);
 }
 
 async function resolveEncryptionKey(): Promise<Uint8Array> {
@@ -60,11 +74,7 @@ async function resolveEncryptionKey(): Promise<Uint8Array> {
   return generated;
 }
 
-export async function getRealmInstance(): Promise<Realm> {
-  if (realmInstance) {
-    return realmInstance;
-  }
-
+async function openRealmInstance(): Promise<Realm> {
   const encryptionKey = await resolveEncryptionKey();
 
   if (encryptionKey.length !== 64) {
@@ -73,26 +83,35 @@ export async function getRealmInstance(): Promise<Realm> {
 
   try {
     realmInstance = await Realm.open(buildRealmConfig(encryptionKey));
+    return realmInstance;
+  } catch {
+    await resetEncryptedRealmState(encryptionKey);
+  }
 
+  try {
+    const regeneratedKey = await resolveEncryptionKey();
+    if (regeneratedKey.length !== 64) {
+      throw new Error("Invalid Realm encryption key length");
+    }
+
+    realmInstance = await Realm.open(buildRealmConfig(regeneratedKey));
     return realmInstance;
   } catch {
     realmInstance = null;
-
-    await resetEncryptedRealmState();
-
-    try {
-      const regeneratedKey = await resolveEncryptionKey();
-      if (regeneratedKey.length !== 64) {
-        throw new Error("Invalid Realm encryption key length");
-      }
-
-      realmInstance = await Realm.open(buildRealmConfig(regeneratedKey));
-      return realmInstance;
-    } catch {
-      realmInstance = null;
-      throw new Error("Unable to open encrypted Realm");
-    }
+    throw new Error("Unable to open encrypted Realm");
   }
+}
+
+export async function getRealmInstance(): Promise<Realm> {
+  if (realmInstance && !realmInstance.isClosed) {
+    return realmInstance;
+  }
+
+  realmOpenPromise ??= openRealmInstance().finally(() => {
+    realmOpenPromise = null;
+  });
+
+  return realmOpenPromise;
 }
 
 export function closeRealmInstance(): void {
@@ -101,6 +120,7 @@ export function closeRealmInstance(): void {
   }
 
   realmInstance = null;
+  realmOpenPromise = null;
 }
 
 export function __resetRealmForTests(): void {

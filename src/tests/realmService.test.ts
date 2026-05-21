@@ -108,8 +108,47 @@ describe("realmService", () => {
 
     expect(mockResetRealmKey).toHaveBeenCalled();
     expect(mockSetRealmKeyMetadata).toHaveBeenCalledWith(null);
-    expect(deleteFileSpy).toHaveBeenCalledWith({ path: "miidiary.realm" });
+    expect(deleteFileSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        encryptionKey: stored,
+        path: "miidiary.realm",
+      }),
+    );
     expect(mockSetRealmKey).toHaveBeenCalledWith(regenerated);
     expect(mockOpen).toHaveBeenCalledTimes(2);
+  });
+
+  it("shares one open operation across concurrent callers", async () => {
+    const stored = Uint8Array.from({ length: 64 }, (_, i) => i + 1);
+    const openedRealm = { isClosed: false, close: jest.fn() };
+    let resolveOpen: ((realm: typeof openedRealm) => void) | undefined;
+
+    mockGetRealmKeyMetadata.mockReturnValue({ keyId: "1", version: 1 });
+    mockGetRealmKey.mockResolvedValue(stored);
+    mockOpen.mockReturnValue(
+      new Promise((resolve) => {
+        resolveOpen = resolve;
+      }),
+    );
+
+    const first = getRealmInstance();
+    const second = getRealmInstance();
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(mockOpen).toHaveBeenCalledTimes(1);
+
+    if (!resolveOpen) {
+      throw new Error("Expected Realm.open promise resolver to be captured");
+    }
+
+    resolveOpen(openedRealm);
+
+    await expect(Promise.all([first, second])).resolves.toEqual([
+      openedRealm,
+      openedRealm,
+    ]);
+    expect(mockSetRealmKey).not.toHaveBeenCalled();
   });
 });

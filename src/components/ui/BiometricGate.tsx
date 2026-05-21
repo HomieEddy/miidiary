@@ -39,29 +39,31 @@ export function BiometricGate({ children }: PropsWithChildren): ReactElement {
     void unlock();
   }, [unlock]);
 
-  if (isUnlocked) {
-    return <>{children}</>;
-  }
-
   return (
-    <View className="flex-1 min-h-screen bg-background items-center justify-center px-6">
-      <View className="bg-card border-4 border-border rounded-2xl p-6 shadow-paper w-full max-w-sm">
-        <Text className="font-heading text-3xl text-foreground">Dear Diary</Text>
-        <Text className="font-sans text-sm text-muted-foreground mt-2">{message}</Text>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Retry unlock"
-          className="mt-5 bg-primary rounded-xl border-2 border-border px-4 py-3 active:translate-y-1 active:translate-x-1 active:shadow-none"
-          disabled={isChecking}
-          onPress={() => {
-            void unlock();
-          }}
-        >
-          <Text className="font-sans font-bold text-primary-foreground text-center">
-            {isChecking ? "Checking..." : "Unlock"}
-          </Text>
-        </Pressable>
-      </View>
+    <View className="flex-1">
+      {children}
+
+      {!isUnlocked ? (
+        <View className="absolute inset-0 z-50 bg-background items-center justify-center px-6">
+          <View className="bg-card border-4 border-border rounded-2xl p-6 shadow-paper w-full max-w-sm">
+            <Text className="font-heading text-3xl text-foreground">Dear Diary</Text>
+            <Text className="font-sans text-sm text-muted-foreground mt-2">{message}</Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Retry unlock"
+              className="mt-5 bg-primary rounded-xl border-2 border-border px-4 py-3 active:translate-y-1 active:translate-x-1 active:shadow-none"
+              disabled={isChecking}
+              onPress={() => {
+                void unlock();
+              }}
+            >
+              <Text className="font-sans font-bold text-primary-foreground text-center">
+                {isChecking ? "Checking..." : "Unlock"}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      ) : null}
     </View>
   );
 }

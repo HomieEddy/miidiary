@@ -36,4 +36,34 @@ describe("classificationService", () => {
     expect(result.source).toBe("heuristic");
     expect(result.rationale).toContain("Fallback");
   });
+
+  it("prefers diary over note on tie when first-person language is present", async () => {
+    const result = await classificationService.classifyEntry({
+      text: "I felt a strong idea about this concept today.",
+    });
+
+    expect(result.category).toBe("diary");
+    expect(result.source).toBe("model");
+    expect(result.rationale).toContain("tie-break");
+  });
+
+  it("prefers note over diary on tie when first-person language is absent", async () => {
+    const result = await classificationService.classifyEntry({
+      text: "Today the idea and concept happened during review.",
+    });
+
+    expect(result.category).toBe("note");
+    expect(result.source).toBe("model");
+    expect(result.rationale).toContain("tie-break");
+  });
+
+  it("prefers task when task ties with another category", async () => {
+    const result = await classificationService.classifyEntry({
+      text: "Need to call today because I felt pressure.",
+    });
+
+    expect(result.category).toBe("task");
+    expect(result.source).toBe("model");
+    expect(result.rationale).toContain("tie-break");
+  });
 });

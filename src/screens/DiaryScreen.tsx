@@ -1,14 +1,13 @@
 import type { ReactElement } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
-import { FlashList } from "@shopify/flash-list";
 import { SvgXml } from "react-native-svg";
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from "react-native-reanimated";
 import { BookBookmarkBoldDuotone, MagniferBoldDuotone } from "@/assets/icons/solar";
 import { EntryDetailSheet } from "@/components/ui/EntryDetailSheet";
 import { ShimmerView } from "@/components/ui/ShimmerView";
 import { useEntries } from "@/hooks/useEntries";
 import { entriesRepository } from "@/services/entriesRepository";
+import { useEntriesStore } from "@/stores/entriesStore";
 import type { EntryRecord } from "@/types/entry";
 import { cn } from "@/utils/cn";
 
@@ -32,6 +31,7 @@ function formatTime(value: string): string {
 }
 
 export default function DiaryScreen(): ReactElement {
+  const latestPersistedEntryId = useEntriesStore((state) => state.entries[0]?.id);
   const {
     entries,
     flatItems,
@@ -45,7 +45,7 @@ export default function DiaryScreen(): ReactElement {
     cancelWipeAll,
     continueWipeAll,
     confirmWipeAll,
-  } = useEntries();
+  } = useEntries({ autoLoad: false, category: "diary" });
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [longPressTarget, setLongPressTarget] = useState<EntryRecord | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<EntryRecord | null>(null);
@@ -54,7 +54,6 @@ export default function DiaryScreen(): ReactElement {
   const [sheetVisible, setSheetVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const searchInputRef = useRef<TextInput | null>(null);
-  const searchBarProgress = useSharedValue(0);
 
   const loadWithState = useCallback(async () => {
     setIsLoading(true);
@@ -67,23 +66,18 @@ export default function DiaryScreen(): ReactElement {
   }, [loadWithState]);
 
   useEffect(() => {
-    searchBarProgress.value = withSpring(isSearchOpen ? 1 : 0, {
-      damping: 18,
-      stiffness: 220,
-      overshootClamping: true,
-    });
+    if (!latestPersistedEntryId) {
+      return;
+    }
+
+    void loadEntries();
+  }, [latestPersistedEntryId, loadEntries]);
+
+  useEffect(() => {
     if (!isSearchOpen) {
       searchInputRef.current?.blur();
     }
-  }, [isSearchOpen, searchBarProgress]);
-
-  const searchBarStyle = useAnimatedStyle(() => ({
-    height: 48 * searchBarProgress.value,
-    opacity: searchBarProgress.value,
-    marginBottom: 12 * searchBarProgress.value,
-    transform: [{ translateY: -6 * (1 - searchBarProgress.value) }],
-    overflow: "hidden",
-  }));
+  }, [isSearchOpen]);
 
   const renderEntryCard = (entry: EntryRecord): ReactElement => {
     return (
@@ -155,7 +149,8 @@ export default function DiaryScreen(): ReactElement {
         Chronological thoughts, grouped by day.
       </Text>
 
-      <Animated.View style={searchBarStyle}>
+      {isSearchOpen ? (
+        <View className="mb-3">
         <TextInput
           ref={searchInputRef}
           accessibilityLabel="Search entries"
@@ -168,7 +163,8 @@ export default function DiaryScreen(): ReactElement {
           autoFocus={isSearchOpen}
           editable={isSearchOpen}
         />
-      </Animated.View>
+        </View>
+      ) : null}
 
       <Pressable
         accessibilityRole="button"
@@ -186,28 +182,21 @@ export default function DiaryScreen(): ReactElement {
           <ShimmerView className="h-20" />
         </View>
       ) : searchResults !== null ? (
-        <FlashList
-          data={visibleEntries}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => renderEntryCard(item)}
-        />
+        <View>{visibleEntries.map((entry) => renderEntryCard(entry))}</View>
       ) : (
-        <FlashList
-          data={flatItems}
-          getItemType={(item) => item.type}
-          keyExtractor={(item) => item.key}
-          renderItem={({ item }) => {
+        <View>
+          {flatItems.map((item) => {
             if (item.type === "header") {
               return (
-                <View className="mb-3 mt-2">
+                <View className="mb-3 mt-2" key={item.key}>
                   <Text className="font-heading text-xl text-foreground">{item.label}</Text>
                 </View>
               );
             }
 
             return renderEntryCard(item.entry);
-          }}
-        />
+          })}
+        </View>
       )}
 
       {longPressTarget ? (

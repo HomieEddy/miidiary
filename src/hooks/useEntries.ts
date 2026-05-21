@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { entriesRepository } from "@/services/entriesRepository";
 import { reauthenticateForDestructiveAction } from "@/services/localAuthService";
+import type { EntryCategory } from "@/types/entry";
 import { flattenEntrySections, groupEntriesByDay } from "@/utils/entryGrouping";
 import type { EntryRecord } from "@/types/entry";
 
@@ -22,10 +23,12 @@ interface UseEntriesResult {
 
 interface UseEntriesOptions {
   autoLoad?: boolean;
+  category?: EntryCategory;
 }
 
 export function useEntries(options?: UseEntriesOptions): UseEntriesResult {
   const autoLoad = options?.autoLoad ?? true;
+  const category = options?.category;
   const [entries, setEntries] = useState<EntryRecord[]>([]);
   const [searchQuery, setSearchQueryState] = useState("");
   const [searchResults, setSearchResults] = useState<EntryRecord[] | null>(null);
@@ -33,9 +36,9 @@ export function useEntries(options?: UseEntriesOptions): UseEntriesResult {
   const [showWipeConfirmStepTwo, setShowWipeConfirmStepTwo] = useState(false);
 
   const loadEntries = useCallback(async () => {
-    const nextEntries = await entriesRepository.listChronological();
+    const nextEntries = await entriesRepository.listChronological(category);
     setEntries(nextEntries);
-  }, []);
+  }, [category]);
 
   useEffect(() => {
     if (!autoLoad) {
@@ -61,14 +64,17 @@ export function useEntries(options?: UseEntriesOptions): UseEntriesResult {
 
     const timeout = setTimeout(() => {
       void entriesRepository.searchEntries(trimmed).then((results) => {
-        setSearchResults(results);
+        const scoped = category
+          ? results.filter((item) => item.category === category)
+          : results;
+        setSearchResults(scoped);
       });
     }, 150);
 
     return () => {
       clearTimeout(timeout);
     };
-  }, [searchQuery]);
+  }, [category, searchQuery]);
 
   const toggleComplete = useCallback(async (id: string) => {
     await entriesRepository.toggleComplete(id);

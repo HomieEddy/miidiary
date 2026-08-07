@@ -11,6 +11,7 @@ function buildEntry(id: string, createdAt: string): EntryRecord {
     title: `title-${id}`,
     previewText: `preview-${id}`,
     queryKey: `note|${id}`,
+    isCompleted: false,
     classificationConfidence: null,
     classificationRationale: null,
     classificationSource: null,

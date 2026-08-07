@@ -10,6 +10,8 @@ import {
   ReanimatedLogLevel,
 } from "react-native-reanimated";
 import { BiometricGate } from "@/components/ui/BiometricGate";
+import { useTheme } from "@/hooks/useTheme";
+import { cn } from "@/utils/cn";
 import "../../global.css";
 
 configureReanimatedLogger({
@@ -22,6 +24,7 @@ void SplashScreen.preventAutoHideAsync().catch(() => {
 });
 
 export default function RootLayout(): ReactElement | null {
+  const { isDark } = useTheme();
   const [loaded, error] = useFonts({
     Nunito: require("../assets/fonts/Nunito.ttf"),
     Fredoka: require("../assets/fonts/Fredoka.ttf"),
@@ -41,8 +44,8 @@ export default function RootLayout(): ReactElement | null {
 
   return (
     <BiometricGate>
-      <View className="flex-1 bg-background">
-        <StatusBar style="dark" />
+      <View className={cn("flex-1 bg-background", isDark && "dark")}>
+        <StatusBar style={isDark ? "light" : "dark"} />
         <Stack screenOptions={{ headerShown: false }} />
       </View>
     </BiometricGate>

@@ -1,10 +1,14 @@
 import type { ReactElement } from "react";
-import { useCallback } from "react";
-import { Pressable, Text, View } from "react-native";
-import { FlashList } from "@shopify/flash-list";
-import { useFocusEffect } from "@react-navigation/native";
-import { DeleteModeToolbar } from "@/components/ui/DeleteModeToolbar";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Pressable, Text, TextInput, View } from "react-native";
+import { SvgXml } from "react-native-svg";
+import { BookBookmarkBoldDuotone, MagniferBoldDuotone } from "@/assets/icons/solar";
+import { EntryDetailSheet } from "@/components/ui/EntryDetailSheet";
+import { ShimmerView } from "@/components/ui/ShimmerView";
 import { useEntries } from "@/hooks/useEntries";
+import { entriesRepository } from "@/services/entriesRepository";
+import { useEntriesStore } from "@/stores/entriesStore";
+import type { EntryRecord } from "@/types/entry";
 import { cn } from "@/utils/cn";
 
 const categoryBadgeClassMap = {
@@ -27,104 +31,210 @@ function formatTime(value: string): string {
 }
 
 export default function DiaryScreen(): ReactElement {
+  const latestPersistedEntryId = useEntriesStore((state) => state.entries[0]?.id);
   const {
+    entries,
     flatItems,
-    isDeleteMode,
-    showDeleteConfirm,
+    searchQuery,
+    setSearchQuery,
+    searchResults,
     showWipeConfirmStepOne,
     showWipeConfirmStepTwo,
     loadEntries,
-    enterDeleteMode,
-    exitDeleteMode,
-    requestDeleteOne,
-    cancelDeleteOne,
-    confirmDeleteOne,
     requestWipeAll,
     cancelWipeAll,
     continueWipeAll,
     confirmWipeAll,
-  } = useEntries();
+  } = useEntries({ autoLoad: false, category: "diary" });
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [longPressTarget, setLongPressTarget] = useState<EntryRecord | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<EntryRecord | null>(null);
+  const [sheetEntry, setSheetEntry] = useState<EntryRecord | null>(null);
+  const [sheetMode, setSheetMode] = useState<"view" | "edit">("view");
+  const [sheetVisible, setSheetVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const searchInputRef = useRef<TextInput | null>(null);
 
-  useFocusEffect(
-    useCallback(() => {
-      void loadEntries();
-    }, [loadEntries]),
-  );
+  const loadWithState = useCallback(async () => {
+    setIsLoading(true);
+    await loadEntries();
+    setIsLoading(false);
+  }, [loadEntries]);
+
+  useEffect(() => {
+    void loadWithState();
+  }, [loadWithState]);
+
+  useEffect(() => {
+    if (!latestPersistedEntryId) {
+      return;
+    }
+
+    void loadEntries();
+  }, [latestPersistedEntryId, loadEntries]);
+
+  useEffect(() => {
+    if (!isSearchOpen) {
+      searchInputRef.current?.blur();
+    }
+  }, [isSearchOpen]);
+
+  const renderEntryCard = (entry: EntryRecord): ReactElement => {
+    return (
+      <Pressable
+        key={entry.id}
+        accessibilityRole="button"
+        accessibilityLabel={`Entry ${entry.id}`}
+        testID={`diary-entry-card-${entry.id}`}
+        className="bg-card border-4 border-border rounded-2xl p-4 shadow-paper mb-3"
+        onPress={() => {
+          setSheetEntry(entry);
+          setSheetMode("view");
+          setSheetVisible(true);
+        }}
+        onLongPress={() => {
+          setLongPressTarget(entry);
+        }}
+      >
+        <View className="flex-row items-start justify-between gap-3">
+          <View className="flex-1">
+            <View
+              className={cn(
+                "self-start px-2 py-1 rounded-full border-2 border-border",
+                categoryBadgeClassMap[entry.category],
+              )}
+            >
+              <Text className="font-sans text-[10px] uppercase font-bold">{entry.category}</Text>
+            </View>
+
+            <Text className="font-sans text-base font-bold text-foreground mt-2">{entry.title}</Text>
+            <Text className="font-sans text-sm text-muted-foreground mt-1" numberOfLines={1}>
+              {entry.previewText}
+            </Text>
+            <Text className="font-sans text-xs text-muted-foreground mt-2">
+              {formatTime(entry.createdAt)}
+            </Text>
+          </View>
+        </View>
+      </Pressable>
+    );
+  };
+
+  const visibleEntries = useMemo(() => {
+    if (searchResults !== null) {
+      return searchResults;
+    }
+
+    return entries;
+  }, [entries, searchResults]);
 
   return (
     <View className="min-h-screen bg-background text-foreground pb-32 font-sans px-6 pt-10">
-      <Text className="font-heading text-4xl text-foreground tracking-wide mb-2">Diary</Text>
-      <Text className="font-sans text-sm text-muted-foreground mb-5">
+      <View className="flex-row items-center justify-between mb-2">
+        <Text className="font-heading text-4xl text-foreground tracking-wide">Diary</Text>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Toggle search"
+          testID="search-toggle-btn"
+          className="w-10 h-10 rounded-xl border-2 border-border bg-card items-center justify-center"
+          onPress={() => {
+            setIsSearchOpen((previous) => !previous);
+          }}
+        >
+          <SvgXml xml={MagniferBoldDuotone} width={20} height={20} color="#8A828F" />
+        </Pressable>
+      </View>
+
+      <Text className="font-sans text-sm text-muted-foreground mb-3">
         Chronological thoughts, grouped by day.
       </Text>
 
-      {isDeleteMode ? (
-        <DeleteModeToolbar onCancel={exitDeleteMode} onWipeAll={requestWipeAll} />
+      {isSearchOpen ? (
+        <View className="mb-3">
+        <TextInput
+          ref={searchInputRef}
+          accessibilityLabel="Search entries"
+          testID="search-input"
+          className="bg-muted rounded-xl px-4 py-2 font-sans text-foreground text-sm"
+          placeholder="Search entries..."
+          placeholderTextColor="#8A828F"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          autoFocus={isSearchOpen}
+          editable={isSearchOpen}
+        />
+        </View>
       ) : null}
 
-      <FlashList
-        data={flatItems}
-        getItemType={(item) => item.type}
-        keyExtractor={(item) => item.key}
-        renderItem={({ item }) => {
-          if (item.type === "header") {
-            return (
-              <View className="mb-3 mt-2">
-                <Text className="font-heading text-xl text-foreground">{item.label}</Text>
-              </View>
-            );
-          }
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel="Open wipe all"
+        className="self-start mb-4 bg-destructive border-2 border-border rounded-xl px-3 py-2 active:translate-y-1 active:translate-x-1 active:shadow-none"
+        onPress={requestWipeAll}
+      >
+        <Text className="font-sans text-xs font-bold text-white">Wipe all</Text>
+      </Pressable>
 
-          const entry = item.entry;
+      {isLoading ? (
+        <View>
+          <ShimmerView className="h-20 mb-3" />
+          <ShimmerView className="h-20 mb-3" />
+          <ShimmerView className="h-20" />
+        </View>
+      ) : searchResults !== null ? (
+        <View>{visibleEntries.map((entry) => renderEntryCard(entry))}</View>
+      ) : (
+        <View>
+          {flatItems.map((item) => {
+            if (item.type === "header") {
+              return (
+                <View className="mb-3 mt-2" key={item.key}>
+                  <Text className="font-heading text-xl text-foreground">{item.label}</Text>
+                </View>
+              );
+            }
 
-          return (
+            return renderEntryCard(item.entry);
+          })}
+        </View>
+      )}
+
+      {longPressTarget ? (
+        <Pressable
+          className="absolute inset-0 bg-black/20 items-center justify-center"
+          onPress={() => setLongPressTarget(null)}
+        >
+          <View className="flex-row">
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel={`Entry ${entry.id}`}
-              className="bg-card border-4 border-border rounded-2xl p-4 shadow-paper mb-3"
-              onLongPress={enterDeleteMode}
+              accessibilityLabel="Edit entry"
+              className="bg-card border-2 border-border rounded-xl p-3"
+              onPress={() => {
+                setLongPressTarget(null);
+                setSheetEntry(longPressTarget);
+                setSheetMode("edit");
+                setSheetVisible(true);
+              }}
             >
-              <View className="flex-row items-start justify-between gap-3">
-                <View className="flex-1">
-                  <View
-                    className={cn(
-                      "self-start px-2 py-1 rounded-full border-2 border-border",
-                      categoryBadgeClassMap[entry.category],
-                    )}
-                  >
-                    <Text className="font-sans text-[10px] uppercase font-bold">
-                      {entry.category}
-                    </Text>
-                  </View>
-
-                  <Text className="font-sans text-base font-bold text-foreground mt-2">
-                    {entry.title}
-                  </Text>
-                  <Text className="font-sans text-sm text-muted-foreground mt-1" numberOfLines={1}>
-                    {entry.previewText}
-                  </Text>
-                  <Text className="font-sans text-xs text-muted-foreground mt-2">
-                    {formatTime(entry.createdAt)}
-                  </Text>
-                </View>
-
-                {isDeleteMode ? (
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel={`Delete entry ${entry.id}`}
-                    className="w-8 h-8 rounded-full border-2 border-border bg-destructive items-center justify-center active:translate-y-1 active:translate-x-1 active:shadow-none"
-                    onPress={() => requestDeleteOne(entry.id)}
-                  >
-                    <Text className="text-white font-bold">X</Text>
-                  </Pressable>
-                ) : null}
-              </View>
+              <SvgXml xml={BookBookmarkBoldDuotone} width={20} height={20} color="#3A3544" />
             </Pressable>
-          );
-        }}
-      />
 
-      {showDeleteConfirm ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Delete entry"
+              className="bg-destructive border-2 border-border rounded-xl p-3 ml-2"
+              onPress={() => {
+                setDeleteTarget(longPressTarget);
+                setLongPressTarget(null);
+              }}
+            >
+              <Text className="font-sans text-white font-bold">X</Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      ) : null}
+
+      {deleteTarget ? (
         <View className="absolute inset-0 bg-black/40 items-center justify-center px-6">
           <View className="bg-card border-4 border-border rounded-2xl p-5 shadow-paper w-full">
             <Text className="font-heading text-xl text-foreground">Delete this entry?</Text>
@@ -136,7 +246,9 @@ export default function DiaryScreen(): ReactElement {
                 accessibilityRole="button"
                 accessibilityLabel="Cancel delete"
                 className="flex-1 bg-muted border-2 border-border rounded-xl p-3"
-                onPress={cancelDeleteOne}
+                onPress={() => {
+                  setDeleteTarget(null);
+                }}
               >
                 <Text className="font-sans text-center font-bold text-foreground">Cancel</Text>
               </Pressable>
@@ -145,7 +257,15 @@ export default function DiaryScreen(): ReactElement {
                 accessibilityLabel="Confirm delete"
                 className="flex-1 bg-destructive border-2 border-border rounded-xl p-3"
                 onPress={() => {
-                  void confirmDeleteOne();
+                  if (!deleteTarget) {
+                    return;
+                  }
+
+                  void (async () => {
+                    await entriesRepository.deleteOne(deleteTarget.id);
+                    await loadEntries();
+                    setDeleteTarget(null);
+                  })();
                 }}
               >
                 <Text className="font-sans text-center font-bold text-white">Delete</Text>
@@ -214,6 +334,24 @@ export default function DiaryScreen(): ReactElement {
           </View>
         </View>
       ) : null}
+
+      <EntryDetailSheet
+        entry={sheetEntry}
+        mode={sheetMode}
+        visible={sheetVisible}
+        onClose={() => {
+          setSheetVisible(false);
+        }}
+        onSave={async (patch) => {
+          if (!sheetEntry) {
+            return;
+          }
+
+          await entriesRepository.updateEntry(sheetEntry.id, patch);
+          await loadEntries();
+          setSheetVisible(false);
+        }}
+      />
     </View>
   );
 }

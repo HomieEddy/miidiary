@@ -1,7 +1,12 @@
 import * as Crypto from "expo-crypto";
 import { buildEntryQueryKey } from "@/models/EntryRealm";
 import { getRealmInstance } from "@/services/realmService";
-import type { CreateEntryInput, EntryCategory, EntryRecord } from "@/types/entry";
+import type {
+  CreateEntryInput,
+  EntryCategory,
+  EntryRecord,
+  UpdateEntryPatch,
+} from "@/types/entry";
 import { deriveEntryPreview, deriveEntryTitle } from "@/utils/entryTextDerivation";
 
 type RealmEntry = {
@@ -13,6 +18,7 @@ type RealmEntry = {
   title: string;
   previewText: string;
   queryKey: string;
+  isCompleted: boolean;
   classificationConfidence: number | null;
   classificationRationale: string | null;
   classificationSource: "model" | "heuristic" | null;
@@ -28,6 +34,7 @@ function toEntryRecord(item: RealmEntry): EntryRecord {
     title: item.title,
     previewText: item.previewText,
     queryKey: item.queryKey,
+    isCompleted: item.isCompleted,
     classificationConfidence: item.classificationConfidence,
     classificationRationale: item.classificationRationale,
     classificationSource: item.classificationSource,
@@ -50,6 +57,7 @@ async function createEntry(input: CreateEntryInput): Promise<EntryRecord> {
     title: deriveEntryTitle(input.text),
     previewText: deriveEntryPreview(input.text),
     queryKey: buildEntryQueryKey(input.category, createdAt, id),
+    isCompleted: false,
     classificationConfidence: input.classification?.confidence ?? null,
     classificationRationale: input.classification?.rationale ?? null,
     classificationSource: input.classification?.source ?? null,
@@ -94,10 +102,59 @@ async function count(): Promise<number> {
   return realm.objects("Entry").length;
 }
 
+async function searchEntries(query: string): Promise<EntryRecord[]> {
+  const trimmed = query.trim();
+  if (!trimmed) {
+    return listChronological();
+  }
+
+  const realm = await getRealmInstance();
+  return realm
+    .objects<RealmEntry>("Entry")
+    .filtered("text CONTAINS[c] $0", trimmed)
+    .sorted("queryKey")
+    .map((item) => toEntryRecord(item));
+}
+
+async function toggleComplete(id: string): Promise<void> {
+  const realm = await getRealmInstance();
+  const entry = realm.objectForPrimaryKey<RealmEntry>("Entry", id);
+  if (!entry) {
+    return;
+  }
+
+  realm.write(() => {
+    entry.isCompleted = !entry.isCompleted;
+  });
+}
+
+async function updateEntry(id: string, patch: UpdateEntryPatch): Promise<EntryRecord> {
+  const realm = await getRealmInstance();
+  const entry = realm.objectForPrimaryKey<RealmEntry>("Entry", id);
+  if (!entry) {
+    throw new Error(`Entry ${id} not found`);
+  }
+
+  realm.write(() => {
+    const nextText = patch.text ?? entry.text;
+    entry.text = nextText;
+    entry.category = patch.category ?? entry.category;
+    entry.title = patch.title ?? deriveEntryTitle(nextText);
+    entry.previewText = deriveEntryPreview(nextText);
+    entry.updatedAt = new Date();
+    entry.queryKey = buildEntryQueryKey(entry.category, entry.createdAt, entry.id);
+  });
+
+  return toEntryRecord(entry);
+}
+
 export const entriesRepository = {
   createEntry,
   listChronological,
   deleteOne,
   wipeAll,
   count,
+  searchEntries,
+  toggleComplete,
+  updateEntry,
 };

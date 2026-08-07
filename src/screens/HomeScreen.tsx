@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AppState, Image, ScrollView, Text, View } from 'react-native';
 import { GlowRing } from '@/components/ui/GlowRing';
 import { HomePreviewSections } from '@/components/ui/HomePreviewSections';
@@ -12,6 +12,8 @@ import { ErrorBanner } from '@/components/ui/ErrorBanner';
 import { ModelReadinessNotice } from '@/components/ui/ModelReadinessNotice';
 import { useAudioCapture } from '@/hooks/useAudioCapture';
 import { useTranscription } from '@/hooks/useTranscription';
+import { useEntriesStore } from '@/stores/entriesStore';
+import { useRecordingStore } from '@/stores/recordingStore';
 import {
   initializeBackgroundProcessing,
   setBackgroundProcessors,
@@ -35,6 +37,8 @@ function describeError(error: unknown): string {
 export default function HomeScreen(): ReactElement {
   const [modelState, setModelState] = useState<ModelReadinessState>('loading');
   const [modelError, setModelError] = useState<string | null>(null);
+  const latestEntry = useEntriesStore((state) => state.entries[0]);
+  const resetRecording = useRecordingStore((state) => state.reset);
   const {
     isRecording, isProcessing, status,
     startRecording, stopRecording, retry,
@@ -98,6 +102,18 @@ export default function HomeScreen(): ReactElement {
     }
   }, [stopRecording, processRecording]);
 
+  const tabTargetPosition = useMemo(() => {
+    if (latestEntry?.category === 'task') {
+      return { x: 215, y: 760 };
+    }
+
+    if (latestEntry?.category === 'note') {
+      return { x: 120, y: 760 };
+    }
+
+    return { x: 120, y: 760 };
+  }, [latestEntry?.category]);
+
   return (
     <ScrollView className="min-h-screen bg-background text-foreground pb-32 font-sans">
       <View className="px-6 pt-12">
@@ -150,6 +166,10 @@ export default function HomeScreen(): ReactElement {
         <View className="mt-4 px-6">
           <TranscriptionResult
             visible={!isRecording && !isProcessing && status === 'idle'}
+            tabTargetPosition={tabTargetPosition}
+            onShredderComplete={() => {
+              resetRecording();
+            }}
           />
         </View>
 

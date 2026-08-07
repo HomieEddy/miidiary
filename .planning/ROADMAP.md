@@ -10,7 +10,7 @@ Dear Diary transforms voice capture into organized entries — from a single tap
 - [x] **Phase 1: Foundation & Audio Capture** - Core record → visualize → transcribe → discard loop with haptic feedback
 - [x] **Phase 2: Encrypted Storage & Basic Browse** - SQLCipher database, entry persistence, and chronological entry list
 - [x] **Phase 3: On-Device ML Pipeline** - On-device speech-to-text (EN/FR) and auto-classification (Diary/Task/Note)
-- [ ] **Phase 4: Browse, Review, Tasks & Polish** - Search, filter, edit entries, task management, motion animations, dark mode
+- [x] **Phase 4: Browse, Review, Tasks & Polish** - Search, filter, edit entries, task management, motion animations, dark mode
 
 ## Phase Details
 
@@ -110,15 +110,15 @@ Plans:
    5. User can view entries classified as Tasks in a dedicated task view and mark them complete/incomplete
    6. "Thought Shredder" transition plays on recording stop: card downscales, cracks along pause cuts, staggered layout animation separates into categories
    7. App has smooth motion animations throughout (Reanimated native worklet thread — locked at max refresh even under ML load), progressive skeletal shimmer reveals, and dark/light mode adaptation
-**Plans**: TBD
+**Plans**: 4 plans
 
 **UI hint**: yes
 
 Plans:
-- [ ] 04-01: Browse & search screen (category tabs with Realm FTS, Reanimated category tab bar, flash-list entry list, entry detail)
-- [ ] 04-02: Edit & task management (inline text editing, classification override, task complete/incomplete toggle, pinch-to-merge with haptics)
-- [ ] 04-03: Thought Shredder transition + animation polish (Reanimated staggered layout & spring worklets, Moti exit animations, NativeWind skeletal shimmer, Rive state machine integration, dark/light mode)
-- [ ] 04-04: Integration tests (Jest + RTL: sentence slicing, bilingual token mapping) + E2E tests (Detox: swipe gestures, shake-to-clear, mock audio pipelines)
+- [x] 04-01-PLAN.md — Data layer: isCompleted schema migration, searchEntries/toggleComplete/updateEntry, useEntries delete-mode removal
+- [x] 04-02-PLAN.md — Browse screen: search reveal, long-press contextual menu, EntryDetailSheet (view + edit)
+- [x] 04-03-PLAN.md — Task completion checkbox + Thought Shredder animation + dark mode + shimmer skeletons
+- [x] 04-04-PLAN.md — Jest tests (search, completion, edit, bilingual FR-CA) + Detox E2E setup
 
 ## Progress
 
@@ -131,4 +131,4 @@ Phases execute in numeric order: 0 → 1 → 2 → 3 → 4
 | 1. Foundation & Audio Capture | 3/3 | Complete | 2026-05-18 |
 | 2. Encrypted Storage & Basic Browse | 2/2 | Complete | 2026-05-18 |
 | 3. On-Device ML Pipeline | 0/3 | Not started | - |
-| 4. Browse, Review, Tasks & Polish | 0/4 | Not started | - |
+| 4. Browse, Review, Tasks & Polish | 4/4 | Complete | 2026-05-20 |

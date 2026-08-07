@@ -1,4 +1,9 @@
 const mockGetRealmInstance = jest.fn();
+const mockRandomUUID = jest.fn();
+
+jest.mock("expo-crypto", () => ({
+  randomUUID: (...args: unknown[]) => mockRandomUUID(...args),
+}));
 
 jest.mock("@/services/realmService", () => ({
   getRealmInstance: (...args: unknown[]) => mockGetRealmInstance(...args),
@@ -17,14 +22,29 @@ describe("entriesRepository", () => {
       },
       objects: () => {
         const list = Array.from(store.values());
+        const sortByQueryKey = (records: Record<string, unknown>[]) =>
+          [...records].sort((a, b) => String(a.queryKey).localeCompare(String(b.queryKey)));
+        const buildResult = (records: Record<string, unknown>[]) => ({
+          sorted: () => sortByQueryKey(records),
+          map: <T>(mapper: (record: Record<string, unknown>) => T): T[] =>
+            sortByQueryKey(records).map(mapper),
+        });
 
         return {
           length: list.length,
-          filtered: (_query: string, category: string) => ({
-            sorted: () => list.filter((item) => item.category === category),
-          }),
-          sorted: () =>
-            list.sort((a, b) => String(a.queryKey).localeCompare(String(b.queryKey))),
+          filtered: (query: string, value: string) => {
+            if (query.includes("category")) {
+              return buildResult(list.filter((item) => item.category === value));
+            }
+
+            const lowered = value.toLowerCase();
+            return buildResult(
+              list.filter((item) => String(item.text).toLowerCase().includes(lowered)),
+            );
+          },
+          sorted: () => sortByQueryKey(list),
+          map: <T>(mapper: (record: Record<string, unknown>) => T): T[] =>
+            sortByQueryKey(list).map(mapper),
         };
       },
       objectForPrimaryKey: (_name: string, id: string) => store.get(id),
@@ -47,6 +67,11 @@ describe("entriesRepository", () => {
   beforeEach(() => {
     store.clear();
     jest.clearAllMocks();
+    let counter = 0;
+    mockRandomUUID.mockImplementation(() => {
+      counter += 1;
+      return `uuid-${counter}`;
+    });
     mockGetRealmInstance.mockResolvedValue(buildRealmMock());
   });
 

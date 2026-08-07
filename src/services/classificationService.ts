@@ -72,10 +72,47 @@ function localModelScores(text: string): CategoryScores {
   };
 }
 
-function maxCategory(scores: CategoryScores): { category: EntryCategory; score: number } {
-  const ranked = Object.entries(scores).sort((a, b) => b[1] - a[1]);
-  const top = ranked[0] as [EntryCategory, number];
-  return { category: top[0], score: top[1] };
+function hasFirstPersonSignal(normalizedText: string): boolean {
+  return /\b(i|i'm|i’ve|i'd|me|my|myself)\b/.test(normalizedText);
+}
+
+function maxCategory(
+  scores: CategoryScores,
+  text: string,
+): { category: EntryCategory; score: number; tieBreakUsed: boolean } {
+  const orderedCategories: EntryCategory[] = ["task", "diary", "note"];
+  const topScore = Math.max(...Object.values(scores));
+  const tiedTopCategories = orderedCategories.filter((category) => scores[category] === topScore);
+
+  if (tiedTopCategories.length === 1) {
+    return {
+      category: tiedTopCategories[0],
+      score: topScore,
+      tieBreakUsed: false,
+    };
+  }
+
+  if (tiedTopCategories.includes("task")) {
+    return {
+      category: "task",
+      score: topScore,
+      tieBreakUsed: true,
+    };
+  }
+
+  if (tiedTopCategories.includes("diary") && tiedTopCategories.includes("note")) {
+    return {
+      category: hasFirstPersonSignal(normalize(text)) ? "diary" : "note",
+      score: topScore,
+      tieBreakUsed: true,
+    };
+  }
+
+  return {
+    category: tiedTopCategories[0],
+    score: topScore,
+    tieBreakUsed: true,
+  };
 }
 
 function confidenceFromScores(scores: CategoryScores, category: EntryCategory): number {
@@ -129,7 +166,7 @@ export class ClassificationService {
   async classifyEntry(input: ClassifyEntryInput): Promise<ClassificationResult> {
     try {
       const scores = localModelScores(input.text);
-      const top = maxCategory(scores);
+      const top = maxCategory(scores, input.text);
 
       if (top.score === 0) {
         return heuristicFallback(input.text);
@@ -138,7 +175,9 @@ export class ClassificationService {
       return {
         category: top.category,
         confidence: confidenceFromScores(scores, top.category),
-        rationale: `Model matched ${top.score} weighted feature(s) for ${top.category}.`,
+        rationale: top.tieBreakUsed
+          ? `Model matched ${top.score} weighted feature(s) with tie-break resolution for ${top.category}.`
+          : `Model matched ${top.score} weighted feature(s) for ${top.category}.`,
         source: "model",
       };
     } catch {

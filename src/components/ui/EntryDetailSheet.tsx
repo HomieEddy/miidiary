@@ -29,6 +29,7 @@ const categoryClassMap: Record<EntryCategory, string> = {
 export function EntryDetailSheet({ entry, mode, visible, onClose, onSave }: EntryDetailSheetProps): ReactElement {
   const [internalMode, setInternalMode] = useState<"view" | "edit">(mode);
   const [titleDraft, setTitleDraft] = useState("");
+  const [titleEdited, setTitleEdited] = useState(false);
   const [textDraft, setTextDraft] = useState("");
   const [categoryDraft, setCategoryDraft] = useState<EntryCategory>("note");
   const slideY = useSharedValue(800);
@@ -71,16 +72,20 @@ export function EntryDetailSheet({ entry, mode, visible, onClose, onSave }: Entr
     }
 
     setTitleDraft(entry.title);
+    setTitleEdited(false);
     setTextDraft(entry.text);
     setCategoryDraft(entry.category);
   };
 
   const handleSave = async (): Promise<void> => {
-    await onSave({
+    const patch: UpdateEntryPatch = {
       text: textDraft,
       category: categoryDraft,
-      title: titleDraft,
-    });
+      // Only send the title when the user edited it, so the repository
+      // re-derives it from the saved text otherwise (D-09 manual override).
+      ...(titleEdited ? { title: titleDraft } : {}),
+    };
+    await onSave(patch);
   };
 
   const prettyCategory = useMemo(() => {
@@ -124,7 +129,10 @@ export function EntryDetailSheet({ entry, mode, visible, onClose, onSave }: Entr
                 <TextInput
                   className="bg-muted rounded-xl px-4 py-3 font-sans text-foreground text-base"
                   value={titleDraft}
-                  onChangeText={setTitleDraft}
+                  onChangeText={(next) => {
+                    setTitleEdited(true);
+                    setTitleDraft(next);
+                  }}
                   placeholder="Title"
                   placeholderTextColor="#8A828F"
                 />

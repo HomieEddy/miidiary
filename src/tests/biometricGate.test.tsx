@@ -25,19 +25,23 @@ describe("BiometricGate", () => {
     mockIsEnrolledAsync.mockResolvedValue(true);
   });
 
-  it("blocks children until authentication succeeds", async () => {
+  it("keeps lock overlay until authentication succeeds", async () => {
     mockAuthenticateAsync.mockResolvedValue({ success: true });
-    const { queryByText } = render(
+    const { queryByLabelText, queryByText } = render(
       <Wrapper>
         <Text>Protected content</Text>
       </Wrapper>,
     );
 
-    expect(queryByText("Protected content")).toBeNull();
+    // Lock overlay is shown while content is gated.
+    expect(queryByLabelText("Retry unlock")).toBeTruthy();
 
     await waitFor(() => {
-      expect(queryByText("Protected content")).toBeTruthy();
+      expect(queryByLabelText("Retry unlock")).toBeNull();
     });
+
+    // Protected content is rendered once unlocked.
+    expect(queryByText("Protected content")).toBeTruthy();
   });
 
   it("uses fallback-capable authenticate call", async () => {
@@ -60,14 +64,14 @@ describe("BiometricGate", () => {
       .mockResolvedValueOnce({ success: false })
       .mockResolvedValue({ success: true });
 
-    const { getByLabelText, queryByText } = render(
+    const { getByLabelText, queryByLabelText } = render(
       <Wrapper>
         <Text>Protected content</Text>
       </Wrapper>,
     );
 
     await waitFor(() => {
-      expect(queryByText("Protected content")).toBeNull();
+      expect(queryByLabelText("Retry unlock")).toBeTruthy();
     });
 
     await waitFor(() => {
@@ -79,7 +83,7 @@ describe("BiometricGate", () => {
     });
 
     await waitFor(() => {
-      expect(queryByText("Protected content")).toBeTruthy();
+      expect(queryByLabelText("Retry unlock")).toBeNull();
     });
   });
 });

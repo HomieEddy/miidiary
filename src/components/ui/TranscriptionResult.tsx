@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { View, Text } from 'react-native';
+import { Platform, View, Text } from 'react-native';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -37,7 +37,7 @@ export function TranscriptionResult({
       translateY.value = withSpring(0);
 
       const timer = setTimeout(() => {
-        if (onShredderComplete && tabTargetPosition) {
+        if (onShredderComplete && tabTargetPosition && Platform.OS !== "web") {
           setShowShredder(true);
           return;
         }

@@ -1,6 +1,6 @@
 import type { PropsWithChildren, ReactElement } from "react";
 import { useCallback, useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Platform, Pressable, Text, View } from "react-native";
 import * as LocalAuthentication from "expo-local-authentication";
 
 export function BiometricGate({ children }: PropsWithChildren): ReactElement {
@@ -12,6 +12,14 @@ export function BiometricGate({ children }: PropsWithChildren): ReactElement {
     setIsChecking(true);
 
     try {
+      if (Platform.OS === "web") {
+        // Biometric auth is unavailable on web and the web storage
+        // fallback (in-memory) holds no sensitive data — skip the gate.
+        setIsUnlocked(true);
+        setMessage("Unlocked");
+        return;
+      }
+
       await LocalAuthentication.hasHardwareAsync();
       await LocalAuthentication.isEnrolledAsync();
 

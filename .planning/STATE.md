@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-05-17)
 
 **Core value:** Instant, private, offline voice capture that automatically organizes thoughts into the right place — so users never lose an idea.
-**Current focus:** Phase 4 complete — ready for verify-work / code-review / ship
+**Current focus:** Phase 4 shipped (PR #4) — 8/8 UAT passed, verification-time fixes merged
 
 ## Current Position
 
-Phase: 4 of 5 (Browse, Review, Tasks & Polish) — **COMPLETE**
+Phase: 4 of 5 (Browse, Review, Tasks & Polish) — **SHIPPED (PR #4, merged 2026-08-07)**
 Plan: 4 of 4 in Phase 4
-Status: Phase 4 plans executed on feature branch
-Last activity: 2026-05-20 - Phase 4 plans 04-01 to 04-04 executed with summaries
+Status: Phase 4 verified and shipped — PR #4 merged into master
+Last activity: 2026-08-07 - Phase 4 shipped after browser-driven UAT (8/8) and verification fixes
 
 Progress: [████████████] 100%
 
@@ -88,7 +88,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-05-20
-Stopped at: Phase 3 complete — all 3 plans executed, code reviewed, hardened with model lifecycle improvements
+Last session: 2026-08-07
+Stopped at: Phase 4 shipped — PR #4 merged; UAT 8/8 passed; 126 Jest tests green
 Resume file: .planning/phases/04-browse-review-tasks-polish/
-Next step: /gsd-code-review 4 → /gsd-verify-work 4 → /gsd-ship
+Next step: Phase 5 (final) — discuss/plan remaining milestone scope, then complete-milestone

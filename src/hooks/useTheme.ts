@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useSyncExternalStore } from "react";
 import { Platform, useColorScheme } from "react-native";
 
 type ThemeOverride = "system" | "dark" | "light";
@@ -27,25 +27,47 @@ if (Platform.OS !== "web") {
 
 const THEME_KEY = "theme_override";
 
+function readStoredOverride(): ThemeOverride {
+  const saved = storage.getString(THEME_KEY);
+  if (saved === "dark" || saved === "light" || saved === "system") {
+    return saved;
+  }
+  return "system";
+}
+
+// Single module-level source of truth so every useTheme() consumer
+// (root layout, settings screens) shares the same override state.
+const listeners = new Set<() => void>();
+let cachedOverride: ThemeOverride = readStoredOverride();
+
+function subscribe(listener: () => void): () => void {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+function getSnapshot(): ThemeOverride {
+  return cachedOverride;
+}
+
+function setOverride(mode: ThemeOverride): void {
+  storage.set(THEME_KEY, mode);
+  cachedOverride = mode;
+  listeners.forEach((listener) => listener());
+}
+
 export function useTheme(): {
   isDark: boolean;
   themeOverride: ThemeOverride;
   setThemeOverride: (mode: ThemeOverride) => void;
 } {
   const systemScheme = useColorScheme();
-  const [themeOverride, setThemeOverrideState] = useState<ThemeOverride>("system");
+  const themeOverride = useSyncExternalStore(subscribe, getSnapshot);
 
-  useEffect(() => {
-    const saved = storage.getString(THEME_KEY);
-    if (saved === "dark" || saved === "light" || saved === "system") {
-      setThemeOverrideState(saved);
-    }
+  const setThemeOverride = useCallback((mode: ThemeOverride) => {
+    setOverride(mode);
   }, []);
-
-  const setThemeOverride = (mode: ThemeOverride): void => {
-    storage.set(THEME_KEY, mode);
-    setThemeOverrideState(mode);
-  };
 
   const isDark = useMemo(() => {
     if (themeOverride === "dark") {

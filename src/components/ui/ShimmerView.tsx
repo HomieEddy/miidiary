@@ -11,6 +11,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
+import { LinearGradient } from "expo-linear-gradient";
 import { cn } from "@/utils/cn";
 
 interface ShimmerViewProps {
@@ -18,9 +19,9 @@ interface ShimmerViewProps {
 }
 
 /**
- * Skeletal shimmer placeholder with an animated highlight sweep.
- * A warm highlight band travels across the muted block (ambient layer);
- * honors reduced-motion by rendering a static placeholder.
+ * Skeletal shimmer placeholder: a warm cream gradient band sweeps across
+ * the muted block (ambient layer). Honors reduced-motion with a static
+ * placeholder.
  */
 export function ShimmerView({ className }: ShimmerViewProps): ReactElement {
   const sweep = useSharedValue(-1);
@@ -53,10 +54,14 @@ export function ShimmerView({ className }: ShimmerViewProps): ReactElement {
       className={cn("bg-muted/70 rounded-xl overflow-hidden relative", className)}
     >
       {!reducedMotion ? (
-        <Animated.View
-          className="absolute inset-y-0 w-1/2 bg-card/80 rotate-12"
-          style={sweepStyle}
-        />
+        <Animated.View className="absolute inset-y-0 w-1/2 -skew-x-12" style={sweepStyle}>
+          <LinearGradient
+            colors={["rgba(255,255,255,0)", "rgba(255,251,240,0.75)", "rgba(255,255,255,0)"]}
+            start={{ x: 0, y: 0.5 }}
+            end={{ x: 1, y: 0.5 }}
+            style={{ flex: 1 }}
+          />
+        </Animated.View>
       ) : null}
     </View>
   );

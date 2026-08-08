@@ -7,6 +7,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { ThoughtShredder } from '@/components/ui/ThoughtShredder';
+import { useLocale } from '@/i18n';
 import { useEntriesStore } from '@/stores/entriesStore';
 import { useRecordingStore } from '@/stores/recordingStore';
 
@@ -21,6 +22,7 @@ export function TranscriptionResult({
   tabTargetPosition,
   onShredderComplete,
 }: TranscriptionResultProps) {
+  const { t } = useLocale();
   const entry = useEntriesStore((state) => state.entries[0]);
   const setProcessing = useRecordingStore((s) => s.setProcessing);
   const [show, setShow] = useState(false);
@@ -79,13 +81,13 @@ export function TranscriptionResult({
         <View className="flex-row items-center justify-between">
           <View className="bg-accent px-2 py-0.5 rounded-full">
             <Text className="text-xs font-bold text-accent-foreground">
-              Note
+              {t("sheet.categoryNote")}
             </Text>
           </View>
         </View>
 
         <Text className="font-sans text-xs font-medium text-primary text-center mt-1">
-          Tap to record another thought
+          {t("result.tapAnother")}
         </Text>
       </View>
 

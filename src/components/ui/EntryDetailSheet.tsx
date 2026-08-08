@@ -8,6 +8,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import type { EntryCategory, EntryRecord, UpdateEntryPatch } from "@/types/entry";
+import { useLocale } from "@/i18n";
 import { cn } from "@/utils/cn";
 
 interface EntryDetailSheetProps {
@@ -27,6 +28,7 @@ const categoryClassMap: Record<EntryCategory, string> = {
 };
 
 export function EntryDetailSheet({ entry, mode, visible, onClose, onSave }: EntryDetailSheetProps): ReactElement {
+  const { t } = useLocale();
   const [internalMode, setInternalMode] = useState<"view" | "edit">(mode);
   const [titleDraft, setTitleDraft] = useState("");
   const [titleEdited, setTitleEdited] = useState(false);
@@ -111,10 +113,12 @@ export function EntryDetailSheet({ entry, mode, visible, onClose, onSave }: Entr
               <>
                 <View className="flex-row items-center justify-between">
                   <View className={cn("self-start px-2 py-1 rounded-full border-2 border-border", categoryClassMap[entry.category])}>
-                    <Text className="font-sans text-[10px] uppercase font-bold">{entry.category}</Text>
+                    <Text className="font-sans text-[10px] uppercase font-bold">
+                      {t(`sheet.category${entry.category.charAt(0).toUpperCase()}${entry.category.slice(1)}`)}
+                    </Text>
                   </View>
                   <Pressable className="px-3 py-2 rounded-xl border-2 border-border bg-muted" onPress={onClose}>
-                    <Text className="font-sans text-xs font-bold text-foreground">Close</Text>
+                    <Text className="font-sans text-xs font-bold text-foreground">{t("sheet.close")}</Text>
                   </Pressable>
                 </View>
 
@@ -125,7 +129,7 @@ export function EntryDetailSheet({ entry, mode, visible, onClose, onSave }: Entr
                   className="mt-4 bg-primary border-2 border-border rounded-xl p-3 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all"
                   onPress={() => setInternalMode("edit")}
                 >
-                  <Text className="font-sans text-center font-bold text-primary-foreground">Edit</Text>
+                  <Text className="font-sans text-center font-bold text-primary-foreground">{t("sheet.edit")}</Text>
                 </Pressable>
               </>
             ) : (
@@ -137,7 +141,7 @@ export function EntryDetailSheet({ entry, mode, visible, onClose, onSave }: Entr
                     setTitleEdited(true);
                     setTitleDraft(next);
                   }}
-                  placeholder="Title"
+                  placeholder={t("sheet.titlePlaceholder")}
                   placeholderTextColor="#8A828F"
                 />
 
@@ -145,7 +149,7 @@ export function EntryDetailSheet({ entry, mode, visible, onClose, onSave }: Entr
                   className={cn("self-start mt-3 px-3 py-2 rounded-full border-2 border-border", categoryClassMap[categoryDraft])}
                   onPress={cycleCategory}
                 >
-                  <Text className="font-sans text-xs font-bold">{prettyCategory}</Text>
+                  <Text className="font-sans text-xs font-bold">{t(`sheet.category${prettyCategory}`)}</Text>
                 </Pressable>
 
                 <TextInput
@@ -154,7 +158,7 @@ export function EntryDetailSheet({ entry, mode, visible, onClose, onSave }: Entr
                   onChangeText={setTextDraft}
                   multiline
                   numberOfLines={6}
-                  placeholder="Edit entry text"
+                  placeholder={t("sheet.editTextPlaceholder")}
                   placeholderTextColor="#8A828F"
                 />
 
@@ -166,7 +170,7 @@ export function EntryDetailSheet({ entry, mode, visible, onClose, onSave }: Entr
                       setInternalMode("view");
                     }}
                   >
-                    <Text className="font-sans text-center font-bold text-foreground">Cancel</Text>
+                    <Text className="font-sans text-center font-bold text-foreground">{t("diary.cancel")}</Text>
                   </Pressable>
                   <Pressable
                     className="flex-1 bg-primary border-2 border-border rounded-xl p-3 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all"
@@ -174,7 +178,7 @@ export function EntryDetailSheet({ entry, mode, visible, onClose, onSave }: Entr
                       void handleSave();
                     }}
                   >
-                    <Text className="font-sans text-center font-bold text-primary-foreground">Save</Text>
+                    <Text className="font-sans text-center font-bold text-primary-foreground">{t("sheet.save")}</Text>
                   </Pressable>
                 </View>
               </>

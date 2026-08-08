@@ -11,6 +11,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated';
+import { useLocale } from '@/i18n';
 import { useRecordingStore } from '@/stores/recordingStore';
 
 interface ProcessingStateProps {
@@ -24,15 +25,16 @@ const DOT_COUNT = 3;
  * stage runs. Honors reduced-motion (static dots).
  */
 export function ProcessingState({ visible }: ProcessingStateProps) {
+  const { t } = useLocale();
   const processingStage = useRecordingStore((state) => state.processingStage);
 
   const stageLabel: Record<typeof processingStage, string> = {
-    idle: 'Preparing transcription...',
-    preparing: 'Preparing model...',
-    transcribing: 'Transcribing audio...',
-    classifying: 'Classifying entry...',
-    persisting: 'Saving entry...',
-    finalizing: 'Finalizing...',
+    idle: t("processing.idle"),
+    preparing: t("processing.preparing"),
+    transcribing: t("processing.transcribing"),
+    classifying: t("processing.classifying"),
+    persisting: t("processing.persisting"),
+    finalizing: t("processing.finalizing"),
   };
 
   if (!visible) return null;

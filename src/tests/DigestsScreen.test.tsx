@@ -16,6 +16,31 @@ jest.mock("@/hooks/useEntries", () => ({
   useEntries: () => mockUseEntriesState,
 }));
 
+jest.mock("@/services/entriesRepository", () => ({
+  entriesRepository: {
+    listChronological: jest.fn().mockResolvedValue([]),
+  },
+}));
+
+jest.mock("expo-sharing", () => ({ isAvailableAsync: jest.fn() }));
+jest.mock("expo-print", () => ({ printAsync: jest.fn(), printToFileAsync: jest.fn() }));
+jest.mock("expo-file-system", () => ({
+  Paths: { cache: { uri: "file:///cache" } },
+  File: class {
+    uri = "file:///cache/export.json";
+  },
+  writeAsStringAsync: jest.fn(),
+}));
+jest.mock("expo-notifications", () => ({
+  setNotificationHandler: jest.fn(),
+  getPermissionsAsync: jest.fn().mockResolvedValue({ status: "granted" }),
+  requestPermissionsAsync: jest.fn().mockResolvedValue({ status: "granted" }),
+  scheduleNotificationAsync: jest.fn().mockResolvedValue(undefined),
+  cancelScheduledNotificationAsync: jest.fn().mockResolvedValue(undefined),
+  getAllScheduledNotificationsAsync: jest.fn().mockResolvedValue([]),
+  SchedulableTriggerInputTypes: { DAILY: "daily" },
+}));
+
 import DigestsScreen from "@/screens/DigestsScreen";
 
 describe("DigestsScreen", () => {

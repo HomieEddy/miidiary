@@ -5,9 +5,11 @@ import Animated, { FadeInDown, ZoomIn } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { AnimatedEntrance } from "@/components/ui/AnimatedEntrance";
 import { ShimmerView } from "@/components/ui/ShimmerView";
+import { useLocale } from "@/i18n";
 import { entriesRepository } from "@/services/entriesRepository";
 import { useEntriesStore } from "@/stores/entriesStore";
 import type { EntryRecord } from "@/types/entry";
+import { i18n } from "@/i18n";
 import { cn } from "@/utils/cn";
 import { staggerMs } from "@/utils/motion";
 
@@ -15,7 +17,7 @@ function formatTime(value: string): string {
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return "Just now";
+    return i18n.t("diary.justNow");
   }
 
   return new Intl.DateTimeFormat(undefined, {
@@ -72,6 +74,7 @@ function TaskCard({
 }
 
 export default function TasksScreen(): ReactElement {
+  const { t } = useLocale();
   const latestPersistedEntryId = useEntriesStore((state) => state.entries[0]?.id);
   const [entries, setEntries] = useState<EntryRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -109,9 +112,9 @@ export default function TasksScreen(): ReactElement {
 
   return (
     <View className="min-h-screen bg-background text-foreground pb-32 font-sans px-6 pt-10">
-      <Text className="font-heading text-4xl text-foreground tracking-wide mb-2">Tasks</Text>
+      <Text className="font-heading text-4xl text-foreground tracking-wide mb-2">{t("tasks.title")}</Text>
       <Text className="font-sans text-sm text-muted-foreground mb-5">
-        Entries auto-classified as tasks appear here.
+        {t("tasks.subtitle")}
       </Text>
 
       {isLoading ? (
@@ -125,9 +128,9 @@ export default function TasksScreen(): ReactElement {
           entering={FadeInDown.duration(250).springify().damping(16)}
           className="bg-card border-4 border-border rounded-2xl p-5"
         >
-          <Text className="font-heading text-xl text-foreground">No tasks yet</Text>
+          <Text className="font-heading text-xl text-foreground">{t("tasks.emptyTitle")}</Text>
           <Text className="font-sans text-sm text-muted-foreground mt-2">
-            Record a thought and on-device classification will surface it here when it sounds like a task.
+            {t("tasks.emptyBody")}
           </Text>
         </Animated.View>
       ) : (

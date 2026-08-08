@@ -8,10 +8,12 @@ import { AnimatedEntrance } from "@/components/ui/AnimatedEntrance";
 import { EntryDetailSheet } from "@/components/ui/EntryDetailSheet";
 import { PressableScale } from "@/components/ui/PressableScale";
 import { ShimmerView } from "@/components/ui/ShimmerView";
+import { useLocale } from "@/i18n";
 import { useEntries } from "@/hooks/useEntries";
 import { entriesRepository } from "@/services/entriesRepository";
 import { useEntriesStore } from "@/stores/entriesStore";
 import type { EntryRecord } from "@/types/entry";
+import { i18n } from "@/i18n";
 import { cn } from "@/utils/cn";
 import { staggerMs } from "@/utils/motion";
 
@@ -27,7 +29,7 @@ function formatTime(value: string): string {
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return "Just now";
+    return i18n.t("diary.justNow");
   }
 
   return new Intl.DateTimeFormat(undefined, {
@@ -37,6 +39,7 @@ function formatTime(value: string): string {
 }
 
 export default function DiaryScreen(): ReactElement {
+  const { t } = useLocale();
   const latestPersistedEntryId = useEntriesStore((state) => state.entries[0]?.id);
   const {
     entries,
@@ -138,7 +141,7 @@ export default function DiaryScreen(): ReactElement {
   return (
     <View className="min-h-screen bg-background text-foreground pb-32 font-sans px-6 pt-10">
       <View className="flex-row items-center justify-between mb-2">
-        <Text className="font-heading text-4xl text-foreground tracking-wide">Diary</Text>
+        <Text className="font-heading text-4xl text-foreground tracking-wide">{t("diary.title")}</Text>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Toggle search"
@@ -153,17 +156,17 @@ export default function DiaryScreen(): ReactElement {
       </View>
 
       <Text className="font-sans text-sm text-muted-foreground mb-3">
-        Chronological thoughts, grouped by day.
+        {t("diary.subtitle")}
       </Text>
 
       {isSearchOpen ? (
         <Animated.View entering={FadeInDown.duration(200)} className="mb-3">
           <TextInput
             ref={searchInputRef}
-            accessibilityLabel="Search entries"
+            accessibilityLabel={t("diary.searchLabel")}
             testID="search-input"
             className="bg-muted rounded-xl px-4 py-2 font-sans text-foreground text-sm"
-            placeholder="Search entries..."
+            placeholder={t("diary.searchPlaceholder")}
             placeholderTextColor="#8A828F"
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -179,7 +182,7 @@ export default function DiaryScreen(): ReactElement {
         className="self-start mb-4 bg-destructive border-2 border-border rounded-xl px-3 py-2 active:translate-y-1 active:translate-x-1 active:shadow-none"
         onPress={requestWipeAll}
       >
-        <Text className="font-sans text-xs font-bold text-white">Wipe all</Text>
+        <Text className="font-sans text-xs font-bold text-white">{t("diary.wipeAll")}</Text>
       </Pressable>
 
       {isLoading ? (
@@ -250,9 +253,9 @@ export default function DiaryScreen(): ReactElement {
             entering={ZoomIn.springify().damping(16).stiffness(220)}
             className="bg-card border-4 border-border rounded-2xl p-5 shadow-paper w-full"
           >
-            <Text className="font-heading text-xl text-foreground">Delete this entry?</Text>
+            <Text className="font-heading text-xl text-foreground">{t("diary.deleteTitle")}</Text>
             <Text className="font-sans text-sm text-muted-foreground mt-2">
-              This removes only the selected entry.
+              {t("diary.deleteBody")}
             </Text>
             <View className="flex-row gap-2 mt-4">
               <Pressable
@@ -263,7 +266,7 @@ export default function DiaryScreen(): ReactElement {
                   setDeleteTarget(null);
                 }}
               >
-                <Text className="font-sans text-center font-bold text-foreground">Cancel</Text>
+                <Text className="font-sans text-center font-bold text-foreground">{t("diary.cancel")}</Text>
               </Pressable>
               <Pressable
                 accessibilityRole="button"
@@ -281,7 +284,7 @@ export default function DiaryScreen(): ReactElement {
                   })();
                 }}
               >
-                <Text className="font-sans text-center font-bold text-white">Delete</Text>
+                <Text className="font-sans text-center font-bold text-white">{t("diary.delete")}</Text>
               </Pressable>
             </View>
           </Animated.View>
@@ -294,9 +297,9 @@ export default function DiaryScreen(): ReactElement {
             entering={ZoomIn.springify().damping(16).stiffness(220)}
             className="bg-card border-4 border-border rounded-2xl p-5 shadow-paper w-full"
           >
-            <Text className="font-heading text-xl text-foreground">Wipe all entries?</Text>
+            <Text className="font-heading text-xl text-foreground">{t("diary.wipeTitle")}</Text>
             <Text className="font-sans text-sm text-muted-foreground mt-2">
-              Step 1 of 2 confirmation.
+              {t("diary.wipeStepOne")}
             </Text>
             <View className="flex-row gap-2 mt-4">
               <Pressable
@@ -313,7 +316,7 @@ export default function DiaryScreen(): ReactElement {
                 className="flex-1 bg-destructive border-2 border-border rounded-xl p-3"
                 onPress={continueWipeAll}
               >
-                <Text className="font-sans text-center font-bold text-white">Continue</Text>
+                <Text className="font-sans text-center font-bold text-white">{t("diary.continue")}</Text>
               </Pressable>
             </View>
           </Animated.View>
@@ -326,9 +329,9 @@ export default function DiaryScreen(): ReactElement {
             entering={ZoomIn.springify().damping(16).stiffness(220)}
             className="bg-card border-4 border-border rounded-2xl p-5 shadow-paper w-full"
           >
-            <Text className="font-heading text-xl text-foreground">Final wipe confirmation</Text>
+            <Text className="font-heading text-xl text-foreground">{t("diary.wipeFinalTitle")}</Text>
             <Text className="font-sans text-sm text-muted-foreground mt-2">
-              Step 2 of 2. Local device authentication is required (biometric or passcode fallback).
+              {t("diary.wipeStepTwo")}
             </Text>
             <View className="flex-row gap-2 mt-4">
               <Pressable
@@ -347,7 +350,7 @@ export default function DiaryScreen(): ReactElement {
                   void confirmWipeAll();
                 }}
               >
-                <Text className="font-sans text-center font-bold text-white">Wipe all</Text>
+                <Text className="font-sans text-center font-bold text-white">{t("diary.wipeConfirm")}</Text>
               </Pressable>
             </View>
           </Animated.View>

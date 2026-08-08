@@ -8,6 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { SvgXml } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
+import { useLocale } from '@/i18n';
 import { useRecordingStore } from '@/stores/recordingStore';
 
 const WARNING_ICON = `<svg viewBox="0 0 24 24" fill="none"><path d="M12 7.75a.75.75 0 0 1 .75.75v4a.75.75 0 0 1-1.5 0v-4a.75.75 0 0 1 .75-.75zM12 16.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5z" fill="currentColor" opacity="0.5"/><path d="M1.745 20.418a1.5 1.5 0 0 1 1.317-2.272h17.876a1.5 1.5 0 0 1 1.317 2.272l-8.938 15.013a1.5 1.5 0 0 1-2.634 0L1.745 20.418z" fill="currentColor" opacity="0.3"/></svg>`;
@@ -17,22 +18,23 @@ interface ErrorBannerProps {
   onRetry?: () => void;
 }
 
-function resolveErrorMessage(message: string | null): string {
+function resolveErrorMessage(message: string | null, t: (key: string) => string): string {
   if (!message) {
-    return 'Something went wrong while processing your recording.';
+    return t("banner.fallback");
   }
 
   const trimmed = message.trim();
   if (trimmed.length <= 1 || !/[A-Za-z0-9]/.test(trimmed)) {
-    return 'Something went wrong while processing your recording.';
+    return t("banner.fallback");
   }
 
   return trimmed;
 }
 
 export function ErrorBanner({ visible, onRetry }: ErrorBannerProps): React.ReactElement | null {
+  const { t } = useLocale();
   const errorMessage = useRecordingStore((state) => state.errorMessage);
-  const resolvedErrorMessage = resolveErrorMessage(errorMessage);
+  const resolvedErrorMessage = resolveErrorMessage(errorMessage, t);
   const setError = useRecordingStore((state) => state.setError);
   const opacity = useSharedValue(0);
   const translateX = useSharedValue(-20);
@@ -66,7 +68,7 @@ export function ErrorBanner({ visible, onRetry }: ErrorBannerProps): React.React
               {resolvedErrorMessage}
             </Text>
             <Text className="font-sans text-xs font-medium text-destructive/80 mt-0.5">
-              Tap to try again
+              {t("banner.tapToRetry")}
             </Text>
           </View>
         </View>

@@ -10,22 +10,21 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
+import { LinearGradient } from "expo-linear-gradient";
+import { i18n, useLocale } from "@/i18n";
 import { easings } from "@/utils/motion";
-
-const PROMPTS = [
-  "What made you smile today without even trying?",
-  "What's the smallest thing that went right today?",
-  "If today had a title, what would it be?",
-];
 
 const PROMPT_INTERVAL_MS = 12000;
 
 /**
  * Daily Spark — the app's hero card. Rotates through reflection prompts
  * with a paper-fade crossfade, while the spark illustration floats
- * slowly (ambient layer). Honors reduced-motion (crossfade only).
+ * slowly over a warm gradient band (ambient layer). Honors
+ * reduced-motion (crossfade only).
  */
 export function DailySparkCard(): ReactElement {
+  const { t } = useLocale();
+  const prompts = i18n.t("home.quotes") as unknown as string[];
   const [promptIndex, setPromptIndex] = useState(0);
   const promptOpacity = useSharedValue(1);
   const promptOffset = useSharedValue(0);
@@ -46,11 +45,11 @@ export function DailySparkCard(): ReactElement {
         withTiming(-6, { duration: 220, easing: easings.exit }),
         withTiming(0, { duration: 260, easing: easings.entrance }),
       );
-      setPromptIndex((current) => (current + 1) % PROMPTS.length);
+      setPromptIndex((current) => (current + 1) % prompts.length);
     }, PROMPT_INTERVAL_MS);
 
     return () => clearInterval(timer);
-  }, [promptOpacity, promptOffset, reducedMotion]);
+  }, [promptOffset, promptOpacity, prompts.length, reducedMotion]);
 
   useEffect(() => {
     if (reducedMotion) {
@@ -78,7 +77,13 @@ export function DailySparkCard(): ReactElement {
   }));
 
   return (
-    <View className="relative bg-secondary border-4 border-border rounded-3xl p-6 shadow-paper -rotate-2">
+    <View className="relative bg-secondary border-4 border-border rounded-3xl p-6 shadow-paper -rotate-2 overflow-hidden">
+      <LinearGradient
+        colors={["rgba(255,107,158,0.10)", "rgba(255,107,158,0)", "rgba(255,255,255,0.06)"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ position: "absolute", inset: 0 }}
+      />
       <Animated.View
         className="absolute -top-10 -right-4 z-10 w-20 h-20"
         style={floatStyle}
@@ -90,14 +95,14 @@ export function DailySparkCard(): ReactElement {
         />
       </Animated.View>
       <Text className="font-heading text-xl mb-1 text-secondary-foreground tracking-wide">
-        Daily Spark
+        {t("home.sparkTitle")}
       </Text>
       <Animated.View style={promptStyle}>
         <Text
           key={promptIndex}
           className="text-sm text-secondary-foreground font-medium"
         >
-          "{PROMPTS[promptIndex]}"
+          "{prompts[promptIndex]}"
         </Text>
       </Animated.View>
     </View>

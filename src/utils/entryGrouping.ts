@@ -1,4 +1,5 @@
 import type { EntryRecord } from "@/types/entry";
+import { i18n } from "@/i18n";
 
 export interface EntryDaySection {
   dayKey: string;
@@ -31,11 +32,11 @@ function getDayLabel(date: Date, now: Date): string {
   const delta = dayDiff(now, date);
 
   if (delta === 0) {
-    return "Today";
+    return i18n.t("diary.today");
   }
 
   if (delta === 1) {
-    return "Yesterday";
+    return i18n.t("diary.yesterday");
   }
 
   return formatDateLabel(date);

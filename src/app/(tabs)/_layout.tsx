@@ -1,6 +1,9 @@
 import type { ReactElement } from "react";
+import { StyleSheet } from "react-native";
 import { Tabs } from "expo-router";
+import { BlurView } from "expo-blur";
 import { useTheme } from "@/hooks/useTheme";
+import { useLocale } from "@/i18n";
 import { AnimatedTabIcon } from "@/components/ui/AnimatedTabIcon";
 import {
   BookBookmarkBold,
@@ -13,6 +16,7 @@ import {
 
 export default function TabLayout(): ReactElement {
   const { isDark } = useTheme();
+  const { t } = useLocale();
 
   return (
     <Tabs
@@ -23,6 +27,14 @@ export default function TabLayout(): ReactElement {
         sceneStyle: { backgroundColor: isDark ? "#1E1A24" : "#FDF8F0" },
         tabBarActiveTintColor: "#FF6B9E",
         tabBarInactiveTintColor: "#8A828F",
+        tabBarBackground: (): ReactElement => (
+          <BlurView
+            intensity={42}
+            tint={isDark ? "dark" : "light"}
+            style={StyleSheet.absoluteFill}
+            experimentalBlurMethod="dimezisBlurView"
+          />
+        ),
         tabBarStyle: {
           position: "absolute",
           left: 24,
@@ -32,7 +44,7 @@ export default function TabLayout(): ReactElement {
           borderTopWidth: 4,
           borderTopColor: isDark ? "#4A4550" : "#4C3A51",
           borderRadius: 24,
-          backgroundColor: isDark ? "#2A2631" : "#F7EFD8",
+          backgroundColor: "transparent",
           elevation: 0,
           shadowColor: isDark ? "#4A4550" : "#4C3A51",
           shadowOpacity: 1,
@@ -46,12 +58,13 @@ export default function TabLayout(): ReactElement {
           fontSize: 10,
           fontWeight: "700",
         },
+
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
+          title: t("tabs.home"),
           tabBarIcon: ({ color, focused }): ReactElement => (
             <AnimatedTabIcon focused={focused} xml={HomeSmileBoldDuotone} color={color} />
           ),
@@ -60,7 +73,7 @@ export default function TabLayout(): ReactElement {
       <Tabs.Screen
         name="diary"
         options={{
-          title: "Diary",
+          title: t("tabs.diary"),
           tabBarIcon: ({ focused, color }): ReactElement => (
             <AnimatedTabIcon
               focused={focused}
@@ -73,7 +86,7 @@ export default function TabLayout(): ReactElement {
       <Tabs.Screen
         name="tasks"
         options={{
-          title: "Tasks",
+          title: t("tabs.tasks"),
           tabBarIcon: ({ focused, color }): ReactElement => (
             <AnimatedTabIcon
               focused={focused}
@@ -86,7 +99,7 @@ export default function TabLayout(): ReactElement {
       <Tabs.Screen
         name="digests"
         options={{
-          title: "Digests",
+          title: t("tabs.digests"),
           tabBarIcon: ({ focused, color }): ReactElement => (
             <AnimatedTabIcon
               focused={focused}

@@ -6,9 +6,11 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated';
+import { useLocale } from '@/i18n';
 import { useRecordingStore } from '@/stores/recordingStore';
 
 export function PromptText(): ReactElement {
+  const { t } = useLocale();
   const isRecording = useRecordingStore((state) => state.isRecording);
   const opacity = useSharedValue(1);
 
@@ -25,7 +27,7 @@ export function PromptText(): ReactElement {
   return (
     <Animated.View style={animatedStyle}>
       <Text className="font-heading text-xl font-bold text-foreground/80 tracking-wide text-center">
-        Tap to record a thought
+        {t("home.tapToRecord")}
       </Text>
     </Animated.View>
   );

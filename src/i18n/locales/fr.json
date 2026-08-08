@@ -1,0 +1,123 @@
+{
+  "tabs": {
+    "home": "Accueil",
+    "diary": "Journal",
+    "tasks": "Tâches",
+    "digests": "Résumés"
+  },
+  "gate": {
+    "unlockPrompt": "Déverrouillez Dear Diary pour continuer",
+    "title": "Dear Diary",
+    "unlocked": "Déverrouillé",
+    "authRequired": "Authentification requise",
+    "authUnavailable": "Authentification indisponible",
+    "unlock": "Déverrouiller",
+    "checking": "Vérification...",
+    "retryLabel": "Réessayer le déverrouillage"
+  },
+  "home": {
+    "sparkTitle": "Étincelle du jour",
+    "quotes": [
+      "Qu'est-ce qui vous a fait sourire aujourd'hui, sans même y penser ?",
+      "Quelle est la plus petite chose qui a bien tourné aujourd'hui ?",
+      "Si aujourd'hui avait un titre, lequel serait-ce ?"
+    ],
+    "tapToRecord": "Touchez pour noter une pensée",
+    "freshThoughts": "Pensées récentes",
+    "recentDigests": "Résumés récents",
+    "noThoughtsTitle": "Aucune pensée",
+    "noThoughtsBody": "Enregistrez votre première pensée et elle apparaîtra ici.",
+    "digestsTitle": "Les résumés apparaîtront ici",
+    "digestsBody": "Les réflexions hebdomadaires et mensuelles seront disponibles après l'arrivée des fonctions de consultation.",
+    "shakeHint": "Secouez pendant l'enregistrement pour annuler",
+    "shakeDiscarded": "Enregistrement annulé"
+  },
+  "diary": {
+    "title": "Journal",
+    "subtitle": "Pensées chronologiques, groupées par jour.",
+    "searchPlaceholder": "Rechercher des pensées...",
+    "searchLabel": "Rechercher des pensées",
+    "wipeAll": "Tout effacer",
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "justNow": "À l'instant",
+    "deleteTitle": "Supprimer cette pensée ?",
+    "deleteBody": "Seule la pensée sélectionnée sera supprimée.",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "wipeTitle": "Effacer toutes les pensées ?",
+    "wipeStepOne": "Étape 1 de 2 de confirmation.",
+    "wipeFinalTitle": "Confirmation finale de l'effacement",
+    "wipeStepTwo": "Étape 2 de 2. Authentification locale requise (biométrie ou code de secours).",
+    "continue": "Continuer",
+    "wipeConfirm": "Tout effacer"
+  },
+  "tasks": {
+    "title": "Tâches",
+    "subtitle": "Les pensées classées comme tâches apparaissent ici.",
+    "emptyTitle": "Aucune tâche",
+    "emptyBody": "Enregistrez une pensée et la classification sur l'appareil l'affichera ici si elle ressemble à une tâche."
+  },
+  "digests": {
+    "title": "Résumés",
+    "subtitle": "Réflexions hebdomadaires et mensuelles. Paramètres et contrôles de données pour l'instant.",
+    "settings": "Paramètres",
+    "settingsBody": "Gérez les contrôles de stockage local chiffré.",
+    "appearance": "Apparence",
+    "system": "Système",
+    "light": "Clair",
+    "dark": "Sombre",
+    "language": "Langue",
+    "english": "English",
+    "french": "Français",
+    "wipeAllData": "Effacer toutes les données"
+  },
+  "sheet": {
+    "titlePlaceholder": "Titre",
+    "editTextPlaceholder": "Modifier le texte",
+    "save": "Enregistrer",
+    "close": "Fermer",
+    "edit": "Modifier",
+    "categoryDiary": "Journal",
+    "categoryTask": "Tâche",
+    "categoryNote": "Note"
+  },
+  "processing": {
+    "idle": "Préparation de la transcription...",
+    "preparing": "Préparation du modèle...",
+    "transcribing": "Transcription de l'audio...",
+    "classifying": "Classification de la pensée...",
+    "persisting": "Enregistrement...",
+    "finalizing": "Finalisation..."
+  },
+  "reminders": {
+    "title": "Rappel de l'étincelle quotidienne",
+    "body": "Recevez une petite piqûre de rappel chaque jour pour noter une pensée.",
+    "remindMe": "Rappel quotidien",
+    "presetMorning": "Matin (9 h)",
+    "presetMidday": "Midi (12 h 30)",
+    "presetEvening": "Soir (19 h)",
+    "permissionDenied": "Les notifications sont désactivées. Activez-les dans les réglages du système.",
+    "enabledAt": "Chaque jour à {time}"
+  },
+  "export": {
+    "title": "Exporter votre journal",
+    "body": "Tout est stocké sur cet appareil — emportez-le avec vous.",
+    "json": "Exporter en JSON",
+    "pdf": "Exporter en PDF",
+    "empty": "Rien à exporter pour l'instant — enregistrez d'abord une pensée."
+  },
+  "banner": {
+    "fallback": "Une erreur est survenue pendant le traitement de votre enregistrement.",
+    "tapToRetry": "Touchez pour réessayer"
+  },
+  "model": {
+    "notReadyTitle": "Le modèle vocal n'est pas prêt",
+    "notReadyBody": "Le modèle de transcription n'a pas pu être chargé.",
+    "preparingTitle": "Préparation du modèle vocal",
+    "preparingBody": "L'enregistrement se débloquera quand la transcription hors ligne sera prête."
+  },
+  "result": {
+    "tapAnother": "Touchez pour enregistrer une autre pensée"
+  }
+}

@@ -16,6 +16,7 @@ import {
   CheckSquareBold,
   HomeSmileBoldDuotone,
 } from '@/assets/icons/solar';
+import { i18n, useLocale } from '@/i18n';
 import { useEntriesStore, type Entry, type EntryCategory } from '@/stores/entriesStore';
 import { colors } from '@/theme/colors';
 import { cn } from '@/utils/cn';
@@ -50,30 +51,31 @@ const categoryConfig: Record<EntryCategory, {
 const digestIconColor = '#118AB2';
 
 export function HomePreviewSections(): ReactElement {
+  const { t } = useLocale();
   const entries = useEntriesStore((state) => state.entries);
   const recentEntries = entries.slice(0, 3);
 
   return (
     <View className="px-6 gap-10">
       <View>
-        <SectionHeader title="Fresh Thoughts" icon={BookBookmarkBold} color={colors.accent} />
+        <SectionHeader title={t("home.freshThoughts")} icon={BookBookmarkBold} color={colors.accent} />
         {recentEntries.length > 0 ? <EntryList entries={recentEntries} /> : (
           <EmptyState
             icon={BookBookmarkBold}
             iconColor={colors.accent}
-            title="No thoughts yet"
-            body="Record your first thought and it will appear here."
+            title={t("home.noThoughtsTitle")}
+            body={t("home.noThoughtsBody")}
           />
         )}
       </View>
 
       <View>
-        <SectionHeader title="Recent Digests" icon={BoxMinimalisticBoldDuotone} color={digestIconColor} />
+        <SectionHeader title={t("home.recentDigests")} icon={BoxMinimalisticBoldDuotone} color={digestIconColor} />
         <EmptyState
           icon={BoxMinimalisticBoldDuotone}
           iconColor={digestIconColor}
-          title="Digests will appear here"
-          body="Weekly and monthly reflections unlock after browse and review features land."
+          title={t("home.digestsTitle")}
+          body={t("home.digestsBody")}
         />
       </View>
     </View>
@@ -100,7 +102,13 @@ interface EntryCardProps {
 }
 
 function EntryCard({ entry, index }: EntryCardProps): ReactElement {
+  const { t } = useLocale();
   const config = categoryConfig[entry.category];
+  const categoryLabel: Record<EntryCategory, string> = {
+    diary: t("sheet.categoryDiary"),
+    task: t("sheet.categoryTask"),
+    note: t("sheet.categoryNote"),
+  };
 
   return (
     <AnimatedEntrance delay={index * staggerMs}>
@@ -114,7 +122,7 @@ function EntryCard({ entry, index }: EntryCardProps): ReactElement {
           <View className={cn('flex-row items-center gap-1 px-3 py-1.5 border-2 border-border rounded-full shadow-paper-sm', config.badgeClassName)}>
             <SvgXml xml={config.icon} color={config.iconColor} width={14} height={14} />
             <Text className="text-[10px] uppercase tracking-wider font-bold">
-              {config.label}
+              {categoryLabel[entry.category]}
             </Text>
           </View>
         </View>
@@ -182,7 +190,7 @@ function formatEntryTime(value: string): string {
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
-    return 'Just now';
+    return i18n.t('diary.justNow');
   }
 
   return new Intl.DateTimeFormat(undefined, {

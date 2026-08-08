@@ -2,6 +2,7 @@ import type { ReactElement } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SvgXml } from 'react-native-svg';
+import { useLocale } from '@/i18n';
 import { colors } from '@/theme/colors';
 
 type ModelReadinessNoticeProps = {
@@ -15,6 +16,8 @@ export function ModelReadinessNotice({
   errorMessage,
   state,
 }: ModelReadinessNoticeProps): ReactElement | null {
+  const { t } = useLocale();
+
   if (state === 'ready') {
     return null;
   }
@@ -28,10 +31,10 @@ export function ModelReadinessNotice({
         <SvgXml xml={WARNING_ICON} width={22} height={22} color={colors.destructive} />
         <View className="flex-1">
           <Text className="font-sans text-sm font-bold text-destructive">
-            Voice model is not ready
+            {t("model.notReadyTitle")}
           </Text>
           <Text className="font-sans text-xs font-medium text-destructive/80 mt-1">
-            {errorMessage ?? 'The transcription model could not be loaded.'}
+            {errorMessage ?? t("model.notReadyBody")}
           </Text>
         </View>
       </Animated.View>
@@ -46,10 +49,10 @@ export function ModelReadinessNotice({
       <ActivityIndicator size="small" color={colors.primary} />
       <View className="flex-1">
         <Text className="font-sans text-sm font-bold text-foreground">
-          Preparing voice model
+          {t("model.preparingTitle")}
         </Text>
         <Text className="font-sans text-xs font-medium text-muted-foreground mt-1">
-          Recording will unlock when offline transcription is ready.
+          {t("model.preparingBody")}
         </Text>
       </View>
     </Animated.View>

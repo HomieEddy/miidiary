@@ -1,0 +1,123 @@
+{
+  "tabs": {
+    "home": "Home",
+    "diary": "Diary",
+    "tasks": "Tasks",
+    "digests": "Digests"
+  },
+  "gate": {
+    "unlockPrompt": "Unlock Dear Diary to continue",
+    "title": "Dear Diary",
+    "unlocked": "Unlocked",
+    "authRequired": "Authentication required",
+    "authUnavailable": "Authentication unavailable",
+    "unlock": "Unlock",
+    "checking": "Checking...",
+    "retryLabel": "Retry unlock"
+  },
+  "home": {
+    "sparkTitle": "Daily Spark",
+    "quotes": [
+      "What made you smile today without even trying?",
+      "What's the smallest thing that went right today?",
+      "If today had a title, what would it be?"
+    ],
+    "tapToRecord": "Tap to record a thought",
+    "freshThoughts": "Fresh Thoughts",
+    "recentDigests": "Recent Digests",
+    "noThoughtsTitle": "No thoughts yet",
+    "noThoughtsBody": "Record your first thought and it will appear here.",
+    "digestsTitle": "Digests will appear here",
+    "digestsBody": "Weekly and monthly reflections unlock after browse and review features land.",
+    "shakeHint": "Shake during recording to discard",
+    "shakeDiscarded": "Recording discarded"
+  },
+  "diary": {
+    "title": "Diary",
+    "subtitle": "Chronological thoughts, grouped by day.",
+    "searchPlaceholder": "Search entries...",
+    "searchLabel": "Search entries",
+    "wipeAll": "Wipe all",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "justNow": "Just now",
+    "deleteTitle": "Delete this entry?",
+    "deleteBody": "This removes only the selected entry.",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "wipeTitle": "Wipe all entries?",
+    "wipeStepOne": "Step 1 of 2 confirmation.",
+    "wipeFinalTitle": "Final wipe confirmation",
+    "wipeStepTwo": "Step 2 of 2. Local device authentication is required (biometric or passcode fallback).",
+    "continue": "Continue",
+    "wipeConfirm": "Wipe all"
+  },
+  "tasks": {
+    "title": "Tasks",
+    "subtitle": "Entries auto-classified as tasks appear here.",
+    "emptyTitle": "No tasks yet",
+    "emptyBody": "Record a thought and on-device classification will surface it here when it sounds like a task."
+  },
+  "digests": {
+    "title": "Digests",
+    "subtitle": "Weekly and monthly reflections. Settings and data controls live here for now.",
+    "settings": "Settings",
+    "settingsBody": "Manage encrypted local storage controls.",
+    "appearance": "Appearance",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark",
+    "language": "Language",
+    "english": "English",
+    "french": "Français",
+    "wipeAllData": "Wipe all data"
+  },
+  "sheet": {
+    "titlePlaceholder": "Title",
+    "editTextPlaceholder": "Edit entry text",
+    "save": "Save",
+    "close": "Close",
+    "edit": "Edit",
+    "categoryDiary": "Diary",
+    "categoryTask": "Task",
+    "categoryNote": "Note"
+  },
+  "processing": {
+    "idle": "Preparing transcription...",
+    "preparing": "Preparing model...",
+    "transcribing": "Transcribing audio...",
+    "classifying": "Classifying entry...",
+    "persisting": "Saving entry...",
+    "finalizing": "Finalizing..."
+  },
+  "reminders": {
+    "title": "Daily Spark reminder",
+    "body": "Get a gentle nudge to capture a thought every day.",
+    "remindMe": "Remind me daily",
+    "presetMorning": "Morning (9:00)",
+    "presetMidday": "Midday (12:30)",
+    "presetEvening": "Evening (19:00)",
+    "permissionDenied": "Notifications are disabled. Enable them in system settings.",
+    "enabledAt": "Daily at {time}"
+  },
+  "export": {
+    "title": "Export your diary",
+    "body": "Everything is stored on this device — take it with you.",
+    "json": "Export JSON",
+    "pdf": "Export PDF",
+    "empty": "Nothing to export yet — record a thought first."
+  },
+  "banner": {
+    "fallback": "Something went wrong while processing your recording.",
+    "tapToRetry": "Tap to try again"
+  },
+  "model": {
+    "notReadyTitle": "Voice model is not ready",
+    "notReadyBody": "The transcription model could not be loaded.",
+    "preparingTitle": "Preparing voice model",
+    "preparingBody": "Recording will unlock when offline transcription is ready."
+  },
+  "result": {
+    "tapAnother": "Tap to record another thought"
+  }
+}

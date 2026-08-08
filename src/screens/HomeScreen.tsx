@@ -14,13 +14,18 @@ import { DailySparkCard } from '@/components/ui/DailySparkCard';
 import { AnimatedEntrance } from '@/components/ui/AnimatedEntrance';
 import { useAudioCapture } from '@/hooks/useAudioCapture';
 import { useTranscription } from '@/hooks/useTranscription';
+import { useShakeToReset } from '@/hooks/useShakeToReset';
+import { useLocale } from '@/i18n';
 import { useEntriesStore } from '@/stores/entriesStore';
 import { useRecordingStore } from '@/stores/recordingStore';
 import {
   initializeBackgroundProcessing,
   setBackgroundProcessors,
 } from '@/services/backgroundTaskService';
+import { audioCaptureService } from '@/services/audioCaptureService';
 import { modelManager } from '@/services/modelManager';
+import { File } from 'expo-file-system';
+import * as Haptics from 'expo-haptics';
 
 type ModelReadinessState = 'loading' | 'ready' | 'error';
 
@@ -37,6 +42,7 @@ function describeError(error: unknown): string {
 }
 
 export default function HomeScreen(): ReactElement {
+  const { t } = useLocale();
   const [modelState, setModelState] = useState<ModelReadinessState>('loading');
   const [modelError, setModelError] = useState<string | null>(null);
   const latestEntry = useEntriesStore((state) => state.entries[0]);
@@ -104,6 +110,32 @@ export default function HomeScreen(): ReactElement {
     }
   }, [stopRecording, processRecording]);
 
+  // UX-06: shake during recording to discard the buffer without saving.
+  const handleShakeDiscard = useCallback(async () => {
+    if (!isRecording) {
+      return;
+    }
+
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+    const uri = await stopRecording();
+    if (uri) {
+      audioCaptureService.markProcessingComplete(uri);
+      try {
+        const file = new File(uri);
+        if (file.exists) {
+          file.delete();
+        }
+      } catch {
+        // Best-effort cleanup — the file may already be gone.
+      }
+    }
+
+    resetRecording();
+  }, [isRecording, resetRecording, stopRecording]);
+
+  useShakeToReset(handleShakeDiscard);
+
   const tabTargetPosition = useMemo(() => {
     if (latestEntry?.category === 'task') {
       return { x: 215, y: 760 };
@@ -138,6 +170,14 @@ export default function HomeScreen(): ReactElement {
         <View className="mt-10">
           <PromptText />
         </View>
+
+        {isRecording ? (
+          <View className="mt-2">
+            <Text className="font-sans text-xs font-medium text-muted-foreground text-center">
+              {t("home.shakeHint")}
+            </Text>
+          </View>
+        ) : null}
 
         <View className="mt-4">
           <RecordingTimer />

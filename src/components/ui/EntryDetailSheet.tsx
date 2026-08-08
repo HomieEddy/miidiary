@@ -1,14 +1,15 @@
 import type { ReactElement } from "react";
-import { useEffect, useMemo, useState } from "react";
-import { Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSpring,
-  withTiming,
-} from "react-native-reanimated";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Pressable, Text, TextInput, View } from "react-native";
+import {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+  BottomSheetScrollView,
+  type BottomSheetBackdropProps,
+} from "@gorhom/bottom-sheet";
 import type { EntryCategory, EntryRecord, UpdateEntryPatch } from "@/types/entry";
 import { useLocale } from "@/i18n";
+import { useTheme } from "@/hooks/useTheme";
 import { cn } from "@/utils/cn";
 
 interface EntryDetailSheetProps {
@@ -27,15 +28,33 @@ const categoryClassMap: Record<EntryCategory, string> = {
   note: "bg-accent text-accent-foreground",
 };
 
-export function EntryDetailSheet({ entry, mode, visible, onClose, onSave }: EntryDetailSheetProps): ReactElement {
+const categoryKeyMap: Record<EntryCategory, string> = {
+  diary: "sheet.categoryDiary",
+  task: "sheet.categoryTask",
+  note: "sheet.categoryNote",
+};
+
+/**
+ * Entry detail sheet built on @gorhom/bottom-sheet: snap points (half /
+ * near-full), swipe-to-dismiss, press-backdrop-to-close, and keyboard
+ * avoidance for the edit mode.
+ */
+export function EntryDetailSheet({
+  entry,
+  mode,
+  visible,
+  onClose,
+  onSave,
+}: EntryDetailSheetProps): ReactElement {
   const { t } = useLocale();
+  const { isDark } = useTheme();
   const [internalMode, setInternalMode] = useState<"view" | "edit">(mode);
   const [titleDraft, setTitleDraft] = useState("");
   const [titleEdited, setTitleEdited] = useState(false);
   const [textDraft, setTextDraft] = useState("");
   const [categoryDraft, setCategoryDraft] = useState<EntryCategory>("note");
-  const slideY = useSharedValue(800);
-  const panelOpacity = useSharedValue(0);
+  const sheetRef = useRef<BottomSheetModal>(null);
+  const snapPoints = useMemo(() => ["48%", "88%"], []);
 
   useEffect(() => {
     setInternalMode(mode);
@@ -47,24 +66,34 @@ export function EntryDetailSheet({ entry, mode, visible, onClose, onSave }: Entr
     }
 
     setTitleDraft(entry.title);
+    setTitleEdited(false);
     setTextDraft(entry.text);
     setCategoryDraft(entry.category);
   }, [entry, visible]);
 
   useEffect(() => {
     if (visible) {
-      slideY.value = withSpring(0, { damping: 20, stiffness: 180 });
-      panelOpacity.value = withTiming(1, { duration: 220 });
+      sheetRef.current?.present();
     } else {
-      slideY.value = withTiming(800, { duration: 200 });
-      panelOpacity.value = withTiming(0, { duration: 150 });
+      sheetRef.current?.dismiss();
     }
-  }, [panelOpacity, slideY, visible]);
+  }, [visible]);
 
-  const panelStyle = useAnimatedStyle(() => ({
-    opacity: panelOpacity.value,
-    transform: [{ translateY: slideY.value }],
-  }));
+  const handleDismiss = useCallback(() => {
+    onClose();
+  }, [onClose]);
+
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        pressBehavior="close"
+      />
+    ),
+    [],
+  );
 
   const cycleCategory = (): void => {
     const currentIndex = categoryOrder.indexOf(categoryDraft);
@@ -94,98 +123,109 @@ export function EntryDetailSheet({ entry, mode, visible, onClose, onSave }: Entr
     await onSave(patch);
   };
 
-  const prettyCategory = useMemo(() => {
-    return categoryDraft.charAt(0).toUpperCase() + categoryDraft.slice(1);
-  }, [categoryDraft]);
-
   if (!entry) {
     return <></>;
   }
 
   return (
-    <Modal transparent visible={visible} animationType="none" statusBarTranslucent onRequestClose={onClose}>
-      <View className="flex-1">
-        <Pressable className="absolute inset-0 bg-black/40" onPress={onClose} />
+    <BottomSheetModal
+      ref={sheetRef}
+      index={0}
+      snapPoints={snapPoints}
+      enablePanDownToClose
+      keyboardBlurBehavior="restore"
+      backdropComponent={renderBackdrop}
+      onDismiss={handleDismiss}
+      backgroundStyle={{ backgroundColor: isDark ? "#2A2631" : "#FFFFFF" }}
+      handleIndicatorStyle={{ backgroundColor: isDark ? "#4A4550" : "#C9BFAE" }}
+    >
+      <BottomSheetScrollView className="px-6 pb-8">
+        {internalMode === "view" ? (
+          <>
+            <View className="flex-row items-center justify-between">
+              <View
+                className={cn(
+                  "self-start px-2 py-1 rounded-full border-2 border-border",
+                  categoryClassMap[entry.category],
+                )}
+              >
+                <Text className="font-sans text-[10px] uppercase font-bold">
+                  {t(categoryKeyMap[entry.category])}
+                </Text>
+              </View>
+              <Pressable
+                className="px-3 py-2 rounded-xl border-2 border-border bg-muted"
+                onPress={onClose}
+              >
+                <Text className="font-sans text-xs font-bold text-foreground">{t("sheet.close")}</Text>
+              </Pressable>
+            </View>
 
-        <Animated.View style={panelStyle} className="absolute bottom-0 left-0 right-0 max-h-[85%] bg-card border-t-4 border-border rounded-t-3xl p-6">
-          <ScrollView>
-            {internalMode === "view" ? (
-              <>
-                <View className="flex-row items-center justify-between">
-                  <View className={cn("self-start px-2 py-1 rounded-full border-2 border-border", categoryClassMap[entry.category])}>
-                    <Text className="font-sans text-[10px] uppercase font-bold">
-                      {t(`sheet.category${entry.category.charAt(0).toUpperCase()}${entry.category.slice(1)}`)}
-                    </Text>
-                  </View>
-                  <Pressable className="px-3 py-2 rounded-xl border-2 border-border bg-muted" onPress={onClose}>
-                    <Text className="font-sans text-xs font-bold text-foreground">{t("sheet.close")}</Text>
-                  </Pressable>
-                </View>
+            <Text className="font-heading text-2xl text-foreground mt-4">{entry.title}</Text>
+            <Text className="font-sans text-base text-foreground mt-2 leading-relaxed">{entry.text}</Text>
 
-                <Text className="font-heading text-2xl text-foreground mt-4">{entry.title}</Text>
-                <Text className="font-sans text-base text-foreground mt-2 leading-relaxed">{entry.text}</Text>
+            <Pressable
+              className="mt-4 bg-primary border-2 border-border rounded-xl p-3 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all"
+              onPress={() => setInternalMode("edit")}
+            >
+              <Text className="font-sans text-center font-bold text-primary-foreground">{t("sheet.edit")}</Text>
+            </Pressable>
+          </>
+        ) : (
+          <>
+            <TextInput
+              className="bg-muted rounded-xl px-4 py-3 font-sans text-foreground text-base"
+              value={titleDraft}
+              onChangeText={(next) => {
+                setTitleEdited(true);
+                setTitleDraft(next);
+              }}
+              placeholder={t("sheet.titlePlaceholder")}
+              placeholderTextColor="#8A828F"
+            />
 
-                <Pressable
-                  className="mt-4 bg-primary border-2 border-border rounded-xl p-3 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all"
-                  onPress={() => setInternalMode("edit")}
-                >
-                  <Text className="font-sans text-center font-bold text-primary-foreground">{t("sheet.edit")}</Text>
-                </Pressable>
-              </>
-            ) : (
-              <>
-                <TextInput
-                  className="bg-muted rounded-xl px-4 py-3 font-sans text-foreground text-base"
-                  value={titleDraft}
-                  onChangeText={(next) => {
-                    setTitleEdited(true);
-                    setTitleDraft(next);
-                  }}
-                  placeholder={t("sheet.titlePlaceholder")}
-                  placeholderTextColor="#8A828F"
-                />
+            <Pressable
+              className={cn(
+                "self-start mt-3 px-3 py-2 rounded-full border-2 border-border",
+                categoryClassMap[categoryDraft],
+              )}
+              onPress={cycleCategory}
+            >
+              <Text className="font-sans text-xs font-bold">{t(categoryKeyMap[categoryDraft])}</Text>
+            </Pressable>
 
-                <Pressable
-                  className={cn("self-start mt-3 px-3 py-2 rounded-full border-2 border-border", categoryClassMap[categoryDraft])}
-                  onPress={cycleCategory}
-                >
-                  <Text className="font-sans text-xs font-bold">{t(`sheet.category${prettyCategory}`)}</Text>
-                </Pressable>
+            <TextInput
+              className="bg-muted rounded-xl px-4 py-3 font-sans text-foreground text-base mt-3"
+              value={textDraft}
+              onChangeText={setTextDraft}
+              multiline
+              numberOfLines={6}
+              placeholder={t("sheet.editTextPlaceholder")}
+              placeholderTextColor="#8A828F"
+            />
 
-                <TextInput
-                  className="bg-muted rounded-xl px-4 py-3 font-sans text-foreground text-base mt-3"
-                  value={textDraft}
-                  onChangeText={setTextDraft}
-                  multiline
-                  numberOfLines={6}
-                  placeholder={t("sheet.editTextPlaceholder")}
-                  placeholderTextColor="#8A828F"
-                />
-
-                <View className="flex-row gap-2 mt-4">
-                  <Pressable
-                    className="flex-1 bg-muted border-2 border-border rounded-xl p-3"
-                    onPress={() => {
-                      resetDrafts();
-                      setInternalMode("view");
-                    }}
-                  >
-                    <Text className="font-sans text-center font-bold text-foreground">{t("diary.cancel")}</Text>
-                  </Pressable>
-                  <Pressable
-                    className="flex-1 bg-primary border-2 border-border rounded-xl p-3 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all"
-                    onPress={() => {
-                      void handleSave();
-                    }}
-                  >
-                    <Text className="font-sans text-center font-bold text-primary-foreground">{t("sheet.save")}</Text>
-                  </Pressable>
-                </View>
-              </>
-            )}
-          </ScrollView>
-        </Animated.View>
-      </View>
-    </Modal>
+            <View className="flex-row gap-2 mt-4">
+              <Pressable
+                className="flex-1 bg-muted border-2 border-border rounded-xl p-3"
+                onPress={() => {
+                  resetDrafts();
+                  setInternalMode("view");
+                }}
+              >
+                <Text className="font-sans text-center font-bold text-foreground">{t("diary.cancel")}</Text>
+              </Pressable>
+              <Pressable
+                className="flex-1 bg-primary border-2 border-border rounded-xl p-3 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all"
+                onPress={() => {
+                  void handleSave();
+                }}
+              >
+                <Text className="font-sans text-center font-bold text-primary-foreground">{t("sheet.save")}</Text>
+              </Pressable>
+            </View>
+          </>
+        )}
+      </BottomSheetScrollView>
+    </BottomSheetModal>
   );
 }

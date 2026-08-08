@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Platform, View, Text } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -6,7 +6,13 @@ import Animated, {
   withSpring,
   withTiming,
 } from 'react-native-reanimated';
-import { ThoughtShredder } from '@/components/ui/ThoughtShredder';
+// Lazy so the Skia module (which captures CanvasKit at import time) only
+// evaluates after the web wasm runtime is ready; native loads it on demand.
+const ThoughtShredder = lazy(() =>
+  import('@/components/ui/ThoughtShredder').then((module) => ({
+    default: module.ThoughtShredder,
+  })),
+);
 import { useLocale } from '@/i18n';
 import { useEntriesStore } from '@/stores/entriesStore';
 import { useRecordingStore } from '@/stores/recordingStore';
@@ -92,17 +98,19 @@ export function TranscriptionResult({
       </View>
 
       {showShredder && tabTargetPosition ? (
-        <ThoughtShredder
-          entry={entry}
-          cardLayout={cardLayout}
-          tabTargetPosition={tabTargetPosition}
-          onComplete={() => {
-            setShow(false);
-            setShowShredder(false);
-            setProcessing(false);
-            onShredderComplete?.();
-          }}
-        />
+        <Suspense fallback={null}>
+          <ThoughtShredder
+            entry={entry}
+            cardLayout={cardLayout}
+            tabTargetPosition={tabTargetPosition}
+            onComplete={() => {
+              setShow(false);
+              setShowShredder(false);
+              setProcessing(false);
+              onShredderComplete?.();
+            }}
+          />
+        </Suspense>
       ) : null}
     </Animated.View>
   );

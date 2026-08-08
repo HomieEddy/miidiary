@@ -2,7 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 import { Platform, Pressable, Text, View } from "react-native";
 import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
 import { AnimatedEntrance } from "@/components/ui/AnimatedEntrance";
+import { LazyStatsCard } from "@/components/ui/LazyStatsCard";
 import { useEntries } from "@/hooks/useEntries";
+import { useSkiaReady } from "@/hooks/useSkiaReady";
 import { useTheme } from "@/hooks/useTheme";
 import { useLocale, type AppLocale } from "@/i18n";
 import { exportJson, exportPdf } from "@/services/exportService";
@@ -262,6 +264,8 @@ export default function DigestsScreen() {
           </Pressable>
         </View>
       </AnimatedEntrance>
+
+      {useSkiaReady() ? <LazyStatsCard /> : null}
 
       {showWipeConfirmStepOne ? (
         <Animated.View entering={FadeIn.duration(150)} className="absolute inset-0 bg-black/40 items-center justify-center px-6">

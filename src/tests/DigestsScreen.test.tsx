@@ -12,6 +12,10 @@ const mockUseEntriesState = {
   confirmWipeAll: (...args: unknown[]) => mockConfirmWipeAll(...args),
 };
 
+jest.mock("@/components/ui/LazyStatsCard", () => ({
+  LazyStatsCard: () => null,
+}));
+
 jest.mock("@/hooks/useEntries", () => ({
   useEntries: () => mockUseEntriesState,
 }));

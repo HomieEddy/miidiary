@@ -11,6 +11,7 @@ import {
 } from "react-native-reanimated";
 import { BiometricGate } from "@/components/ui/BiometricGate";
 import { useTheme } from "@/hooks/useTheme";
+import { useInterruptionHandler } from "@/services/interruptionService";
 import { cn } from "@/utils/cn";
 import "../../global.css";
 
@@ -25,6 +26,7 @@ void SplashScreen.preventAutoHideAsync().catch(() => {
 
 export default function RootLayout(): ReactElement | null {
   const { isDark } = useTheme();
+  useInterruptionHandler();
   const [loaded, error] = useFonts({
     Nunito: require("../assets/fonts/Nunito.ttf"),
     Fredoka: require("../assets/fonts/Fredoka.ttf"),

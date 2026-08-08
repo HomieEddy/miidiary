@@ -114,7 +114,7 @@ export default function TasksScreen(): ReactElement {
         <View className="bg-card border-4 border-border rounded-2xl p-5">
           <Text className="font-heading text-xl text-foreground">No tasks yet</Text>
           <Text className="font-sans text-sm text-muted-foreground mt-2">
-            New recordings currently default to notes until Phase 3 classification is enabled.
+            Record a thought and on-device classification will surface it here when it sounds like a task.
           </Text>
         </View>
       ) : (

@@ -1,4 +1,3 @@
-import * as Crypto from 'expo-crypto';
 import { create } from 'zustand';
 
 export type EntryCategory = 'diary' | 'task' | 'note';
@@ -12,7 +11,6 @@ export interface Entry {
 
 interface EntriesState {
   entries: Entry[];
-  addEntry: (entry: Omit<Entry, 'id'>) => void;
   addPersistedEntry: (entry: Entry) => void;
   getLatestEntry: () => Entry | undefined;
   clearAll: () => void;
@@ -20,13 +18,6 @@ interface EntriesState {
 
 export const useEntriesStore = create<EntriesState>((set, get) => ({
   entries: [],
-  addEntry: (entry) =>
-    set((state) => ({
-      entries: [
-        { ...entry, id: `entry-${Crypto.randomUUID()}` },
-        ...state.entries,
-      ],
-    })),
   addPersistedEntry: (entry) =>
     set((state) => ({
       entries: [entry, ...state.entries.filter((item) => item.id !== entry.id)],

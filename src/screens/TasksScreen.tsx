@@ -4,6 +4,7 @@ import { Pressable, Text, View } from "react-native";
 import Animated, { FadeInDown, ZoomIn } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { AnimatedEntrance } from "@/components/ui/AnimatedEntrance";
+import { PerformanceMeasureView } from "@shopify/react-native-performance";
 import { ShimmerView } from "@/components/ui/ShimmerView";
 import { useLocale } from "@/i18n";
 import { entriesRepository } from "@/services/entriesRepository";
@@ -111,7 +112,8 @@ export default function TasksScreen(): ReactElement {
   }, [loadEntries]);
 
   return (
-    <View className="min-h-screen bg-background text-foreground pb-32 font-sans px-6 pt-10">
+    <PerformanceMeasureView screenName="TasksScreen" interactive>
+      <View className="min-h-screen bg-background text-foreground pb-32 font-sans px-6 pt-10">
       <Text className="font-heading text-4xl text-foreground tracking-wide mb-2">{t("tasks.title")}</Text>
       <Text className="font-sans text-sm text-muted-foreground mb-5">
         {t("tasks.subtitle")}
@@ -141,5 +143,6 @@ export default function TasksScreen(): ReactElement {
         </View>
       )}
     </View>
+    </PerformanceMeasureView>
   );
 }

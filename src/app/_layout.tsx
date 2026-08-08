@@ -8,6 +8,8 @@ import { useFonts } from "expo-font";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { KeyboardProvider } from "react-native-keyboard-controller";
+import * as NavigationBar from "expo-navigation-bar";
+import { PerformanceProfiler } from "@shopify/react-native-performance";
 import {
   configureReanimatedLogger,
   ReanimatedLogLevel,
@@ -44,6 +46,14 @@ export default function RootLayout(): ReactElement | null {
   }, []);
 
   useEffect(() => {
+    // Android system navigation bar follows the app theme.
+    if (Platform.OS === "android") {
+      void NavigationBar.setBackgroundColorAsync(isDark ? "#1E1A24" : "#FDF8F0");
+      void NavigationBar.setButtonStyleAsync(isDark ? "light" : "dark");
+    }
+  }, [isDark]);
+
+  useEffect(() => {
     if (loaded || error) {
       void SplashScreen.hideAsync();
     }
@@ -68,7 +78,9 @@ export default function RootLayout(): ReactElement | null {
         {Platform.OS === "web" ? (
           content
         ) : (
-          <KeyboardProvider>{content}</KeyboardProvider>
+          <KeyboardProvider>
+            <PerformanceProfiler>{content}</PerformanceProfiler>
+          </KeyboardProvider>
         )}
       </BottomSheetModalProvider>
     </GestureHandlerRootView>

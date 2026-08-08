@@ -3,6 +3,7 @@ import { Platform, Pressable, Text, View } from "react-native";
 import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
 import { AnimatedEntrance } from "@/components/ui/AnimatedEntrance";
 import { LazyStatsCard } from "@/components/ui/LazyStatsCard";
+import { PerformanceMeasureView } from "@shopify/react-native-performance";
 import { useEntries } from "@/hooks/useEntries";
 import { useSkiaReady } from "@/hooks/useSkiaReady";
 import { useTheme } from "@/hooks/useTheme";
@@ -87,7 +88,8 @@ export default function DigestsScreen() {
     : null;
 
   return (
-    <View className="min-h-screen bg-background text-foreground pb-32 font-sans p-6">
+    <PerformanceMeasureView screenName="DigestsScreen" interactive>
+      <View className="min-h-screen bg-background text-foreground pb-32 font-sans p-6">
       <AnimatedEntrance>
         <Text className="font-heading text-4xl text-foreground tracking-wide">{t("digests.title")}</Text>
       </AnimatedEntrance>
@@ -329,5 +331,6 @@ export default function DigestsScreen() {
         </Animated.View>
       ) : null}
     </View>
+    </PerformanceMeasureView>
   );
 }

@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { useEffect, useState } from "react";
-import { Image, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -11,6 +11,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { LinearGradient } from "expo-linear-gradient";
+import { Image } from "expo-image";
 import { i18n, useLocale } from "@/i18n";
 import { easings } from "@/utils/motion";
 
@@ -90,8 +91,9 @@ export function DailySparkCard(): ReactElement {
       >
         <Image
           source={require('../../../ui-export-react/images/tjieNgrH5Ca.png')}
-          className="w-full h-full"
-          resizeMode="contain"
+          style={{ width: '100%', height: '100%' }}
+          contentFit="contain"
+          transition={300}
         />
       </Animated.View>
       <Text className="font-heading text-xl mb-1 text-secondary-foreground tracking-wide">

@@ -8,6 +8,7 @@ import { AnimatedEntrance } from "@/components/ui/AnimatedEntrance";
 import { EntryDetailSheet } from "@/components/ui/EntryDetailSheet";
 import { PressableScale } from "@/components/ui/PressableScale";
 import { ShimmerView } from "@/components/ui/ShimmerView";
+import { PerformanceMeasureView } from "@shopify/react-native-performance";
 import { useLocale } from "@/i18n";
 import { useEntries } from "@/hooks/useEntries";
 import { entriesRepository } from "@/services/entriesRepository";

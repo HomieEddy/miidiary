@@ -12,26 +12,29 @@ Instant, private, offline voice capture that automatically organizes thoughts in
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ Single-tap voice capture with instant start and haptic feedback — v1.0
+- ✓ 100% local on-device speech-to-text processing (EN/FR-CA) — v1.0
+- ✓ Automatic contextual classification (Diary / Task / Reference Note) with manual override — v1.0
+- ✓ Local encrypted storage with zero cloud dependencies (Realm + MMKV/Keychain) — v1.0
+- ✓ Full offline reliability — v1.0
+- ✓ Bilingual support: English + Canadian/Quebec French — v1.0
+- ✓ Review and edit captured entries — v1.0
+- ✓ Browse/search organized entries by type — v1.0
+- ✓ Task management (complete/incomplete) — v1.0
+- ✓ Dark/light mode with system follow + manual override — v1.0
+- ✓ Thought Shredder transition + motion polish — v1.0
+- ✓ Biometric unlock (local auth) + interruption-safe recording — v1.0
+- ✓ Skia-accelerated voice visualization — v1.0
+- ✓ Deterministic integration tests (Jest + RTL, 123 tests) — v1.0
 
 ### Active
 
-- [ ] Expo CNG project scaffold with all locked dependencies installed and linking
-- [ ] Theme system wired (tailwind.config.js, colors, typography, fonts)
-- [ ] Expo Router tab navigation (Home, Diary, Tasks, Digests)
-- [ ] Basic render test passing
-- [ ] Single-button voice capture with instant recording start
-- [ ] 100% local on-device speech-to-text processing
-- [ ] Automatic contextual classification (Diary / Task / Reference Note)
-- [ ] Local encrypted storage with zero cloud dependencies
-- [ ] Full offline reliability
-- [ ] High-fidelity tactile motion animations (Reanimated + Moti + Rive)
-- [ ] Bilingual support: English + Canadian/Quebec French
-- [ ] Review and edit captured entries
-- [ ] Browse/search organized entries by type
-- [ ] Deterministic integration tests (Jest + RTL) + E2E via Detox
-- [ ] Skia-accelerated voice visualization
-- [ ] Biometric unlock (local auth)
+- [ ] Daily reminder to capture a thought (NOTF-01)
+- [ ] Export entries to text/JSON (EXPT-01)
+- [ ] Basic statistics (streaks, entry count, word count) (STAT-01)
+- [ ] Language switch in settings (MULT-01)
+- [ ] Detox E2E execution on emulator/device
+- [ ] Native-device verification of Thought Shredder animation
 
 ### Out of Scope
 
@@ -45,6 +48,20 @@ Instant, private, offline voice capture that automatically organizes thoughts in
 Built with React Native (Expo CNG / Prebuild Workflow) targeting the New Architecture (Fabric, JSI, TurboModules). Views constructed via NativeWind v4 with Tailwind-based utility styling. State flows through Zustand with transient memory isolation for live transcription — non-reactive variables bypass the React tree to minimize redraws during recording. Realm handles local persistence with deterministic single-key indexing; encryption via MMKV + Keychain. On-device STT via react-native-whisper (bilingual EN/FR-CA). Motion driven by Reanimated + Moti native worklets; complex vector UI states (mic-to-equalizer morphing) rendered via Rive on the GPU. Voice viz runs on Skia canvases, entirely GPU-side. List optimization via @shopify/flash-list. Background tasks via expo-task-manager + expo-background-fetch. **Audio is ephemeral — raw files are discarded immediately after transcription; only text persists.**
 
 The app targets users who think aloud: journalers, note-takers, task-capturers who want friction-free capture without worrying about where their data goes.
+
+## Current State
+
+**Shipped:** v1.0 MVP (2026-08-07, tagged v1.0) — 5 phases, 15 plans, 49/49 requirements validated.
+**Codebase:** Expo (New Architecture) + TypeScript; ~25 src services/hooks/stores; 123 Jest tests; web fallback build; Detox scaffold.
+**Known deferred:** Detox execution, web model readiness messaging, shimmer animation sweep, shredder native visual run.
+
+## Next Milestone Goals (v1.1)
+
+- Daily reminder to capture a thought (local notifications)
+- Export entries to text/JSON
+- Basic statistics (streaks, entry count, word count)
+- Language switch in settings (v1 auto-detects from speech)
+- Detox E2E execution and native-device verification passes
 
 ## Constraints
 
@@ -78,4 +95,4 @@ The app targets users who think aloud: journalers, note-takers, task-capturers w
 
 ---
 
-*Last updated: 2026-05-17 — added Phase 0 scaffolding requirements*
+*Last updated: 2026-08-07 after v1.0 milestone*

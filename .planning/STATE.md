@@ -5,14 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-05-17)
 
 **Core value:** Instant, private, offline voice capture that automatically organizes thoughts into the right place — so users never lose an idea.
-**Current focus:** Phase 4 shipped (PR #4) — 8/8 UAT passed, verification-time fixes merged
+**Current focus:** Milestone v1.0 SHIPPED (2026-08-07) — audit passed, archived, tagged
 
 ## Current Position
 
-Phase: 4 of 5 (Browse, Review, Tasks & Polish) — **SHIPPED (PR #4, merged 2026-08-07)**
-Plan: 4 of 4 in Phase 4
-Status: Phase 4 verified and shipped — PR #4 merged into master
-Last activity: 2026-08-07 - Phase 4 shipped after browser-driven UAT (8/8) and verification fixes
+Milestone: v1.0 MVP — **COMPLETE (tagged v1.0, archived)**
+Phase: 4 of 4 (Browse, Review, Tasks & Polish) — shipped via PR #4
+Status: Milestone v1.0 complete — 49/49 requirements, audit passed, archives in .planning/milestones/
+Last activity: 2026-08-07 - Milestone audit + completion: gap fixes (interruption wiring, tab bar dark mode, dead code), archives, tag v1.0
 
 Progress: [████████████] 100%
 
@@ -82,13 +82,18 @@ None yet.
 
 ## Deferred Items
 
+Items acknowledged and deferred at milestone close on 2026-08-07:
+
 | Category | Item | Status | Deferred At |
 |----------|------|--------|-------------|
-| *(none)* | | | |
+| e2e | Detox suite scaffolded (.detoxrc.js, browseReview.e2e.ts) — execution pending emulator | deferred | 2026-08-07 |
+| web | ModelManager reports ready model on web though transcription unsupported (browse-only) | deferred | 2026-08-07 |
+| polish | Shimmer placeholder static block, not animated gradient sweep (D-19 simplification) | deferred | 2026-08-07 |
+| native | Thought Shredder Skia visual run pending device/emulator | deferred | 2026-08-07 |
 
 ## Session Continuity
 
 Last session: 2026-08-07
-Stopped at: Phase 4 shipped — PR #4 merged; UAT 8/8 passed; 126 Jest tests green
-Resume file: .planning/phases/04-browse-review-tasks-polish/
-Next step: Phase 5 (final) — discuss/plan remaining milestone scope, then complete-milestone
+Stopped at: Milestone v1.0 complete — audit passed, archived to .planning/milestones/, tagged v1.0
+Resume file: .planning/milestones/v1.0-ROADMAP.md
+Next step: /gsd-new-milestone (v1.1) — reminders, export, stats, language switch; or /gsd-progress

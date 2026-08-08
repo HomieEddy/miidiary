@@ -14,7 +14,6 @@ interface UseEntriesResult {
   showWipeConfirmStepOne: boolean;
   showWipeConfirmStepTwo: boolean;
   loadEntries: () => Promise<void>;
-  toggleComplete: (id: string) => Promise<void>;
   requestWipeAll: () => void;
   cancelWipeAll: () => void;
   continueWipeAll: () => void;
@@ -76,11 +75,6 @@ export function useEntries(options?: UseEntriesOptions): UseEntriesResult {
     };
   }, [category, searchQuery]);
 
-  const toggleComplete = useCallback(async (id: string) => {
-    await entriesRepository.toggleComplete(id);
-    await loadEntries();
-  }, [loadEntries]);
-
   const requestWipeAll = useCallback(() => {
     setShowWipeConfirmStepOne(true);
   }, []);
@@ -132,7 +126,6 @@ export function useEntries(options?: UseEntriesOptions): UseEntriesResult {
     showWipeConfirmStepOne,
     showWipeConfirmStepTwo,
     loadEntries,
-    toggleComplete,
     requestWipeAll,
     cancelWipeAll,
     continueWipeAll,

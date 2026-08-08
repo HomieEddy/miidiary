@@ -1,4 +1,14 @@
-import { useEntriesStore } from "@/stores/entriesStore";
+import { useEntriesStore, type Entry } from "@/stores/entriesStore";
+
+function makeEntry(overrides: Partial<Entry> = {}): Entry {
+  return {
+    id: `entry-${Math.random().toString(36).slice(2)}`,
+    text: "Test entry",
+    category: "note",
+    createdAt: "2026-01-01T00:00:00.000Z",
+    ...overrides,
+  };
+}
 
 describe("entriesStore", () => {
   beforeEach(() => {
@@ -9,30 +19,27 @@ describe("entriesStore", () => {
     expect(useEntriesStore.getState().entries).toEqual([]);
   });
 
-  it("addEntry prepends entry and generates unique id", () => {
-    useEntriesStore.getState().addEntry({
-      text: "Test entry",
-      category: "note",
-      createdAt: "2026-01-01T00:00:00.000Z",
-    });
+  it("addPersistedEntry prepends entry", () => {
+    useEntriesStore.getState().addPersistedEntry(makeEntry({ text: "First" }));
+    useEntriesStore.getState().addPersistedEntry(makeEntry({ text: "Second" }));
+    const state = useEntriesStore.getState();
+    expect(state.entries).toHaveLength(2);
+    expect(state.entries[0].text).toBe("Second");
+    expect(state.entries[1].text).toBe("First");
+  });
+
+  it("addPersistedEntry replaces entry with same id", () => {
+    const entry = makeEntry({ text: "Original" });
+    useEntriesStore.getState().addPersistedEntry(entry);
+    useEntriesStore.getState().addPersistedEntry({ ...entry, text: "Updated" });
     const state = useEntriesStore.getState();
     expect(state.entries).toHaveLength(1);
-    expect(state.entries[0].text).toBe("Test entry");
-    expect(state.entries[0].category).toBe("note");
-    expect(state.entries[0].id).toMatch(/^entry-/);
+    expect(state.entries[0].text).toBe("Updated");
   });
 
   it("getLatestEntry returns most recent entry", () => {
-    useEntriesStore.getState().addEntry({
-      text: "First",
-      category: "note",
-      createdAt: "2026-01-01T00:00:00.000Z",
-    });
-    useEntriesStore.getState().addEntry({
-      text: "Second",
-      category: "note",
-      createdAt: "2026-01-02T00:00:00.000Z",
-    });
+    useEntriesStore.getState().addPersistedEntry(makeEntry({ text: "First" }));
+    useEntriesStore.getState().addPersistedEntry(makeEntry({ text: "Second" }));
     const latest = useEntriesStore.getState().getLatestEntry();
     expect(latest?.text).toBe("Second");
   });
@@ -42,27 +49,15 @@ describe("entriesStore", () => {
   });
 
   it("entries are ordered newest-first", () => {
-    useEntriesStore.getState().addEntry({
-      text: "First",
-      category: "note",
-      createdAt: "2026-01-01T00:00:00.000Z",
-    });
-    useEntriesStore.getState().addEntry({
-      text: "Second",
-      category: "note",
-      createdAt: "2026-01-02T00:00:00.000Z",
-    });
+    useEntriesStore.getState().addPersistedEntry(makeEntry({ text: "First" }));
+    useEntriesStore.getState().addPersistedEntry(makeEntry({ text: "Second" }));
     const entries = useEntriesStore.getState().entries;
     expect(entries[0].text).toBe("Second");
     expect(entries[1].text).toBe("First");
   });
 
   it("clearAll empties the entries array", () => {
-    useEntriesStore.getState().addEntry({
-      text: "Test",
-      category: "note",
-      createdAt: "2026-01-01T00:00:00.000Z",
-    });
+    useEntriesStore.getState().addPersistedEntry(makeEntry());
     useEntriesStore.getState().clearAll();
     expect(useEntriesStore.getState().entries).toEqual([]);
   });

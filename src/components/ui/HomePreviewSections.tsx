@@ -1,6 +1,15 @@
 import type { ReactElement } from 'react';
+import { useEffect } from 'react';
 import { Text, View } from 'react-native';
 import { SvgXml } from 'react-native-svg';
+import Animated, {
+  useAnimatedStyle,
+  useReducedMotion,
+  useSharedValue,
+  withDelay,
+  withSpring,
+} from 'react-native-reanimated';
+import { AnimatedEntrance } from '@/components/ui/AnimatedEntrance';
 import {
   BookBookmarkBold,
   BoxMinimalisticBoldDuotone,
@@ -10,6 +19,7 @@ import {
 import { useEntriesStore, type Entry, type EntryCategory } from '@/stores/entriesStore';
 import { colors } from '@/theme/colors';
 import { cn } from '@/utils/cn';
+import { springs, staggerMs } from '@/utils/motion';
 
 const categoryConfig: Record<EntryCategory, {
   badgeClassName: string;
@@ -93,27 +103,29 @@ function EntryCard({ entry, index }: EntryCardProps): ReactElement {
   const config = categoryConfig[entry.category];
 
   return (
-    <View
-      className={cn(
-        'bg-card border-4 border-border rounded-2xl p-4 shadow-paper relative',
-        index % 2 === 0 ? 'rotate-1' : '-rotate-1'
-      )}
-    >
-      <View className="absolute -top-3 -right-2">
-        <View className={cn('flex-row items-center gap-1 px-3 py-1.5 border-2 border-border rounded-full shadow-paper-sm', config.badgeClassName)}>
-          <SvgXml xml={config.icon} color={config.iconColor} width={14} height={14} />
-          <Text className="text-[10px] uppercase tracking-wider font-bold">
-            {config.label}
-          </Text>
+    <AnimatedEntrance delay={index * staggerMs}>
+      <View
+        className={cn(
+          'bg-card border-4 border-border rounded-2xl p-4 shadow-paper relative',
+          index % 2 === 0 ? 'rotate-1' : '-rotate-1'
+        )}
+      >
+        <View className="absolute -top-3 -right-2">
+          <View className={cn('flex-row items-center gap-1 px-3 py-1.5 border-2 border-border rounded-full shadow-paper-sm', config.badgeClassName)}>
+            <SvgXml xml={config.icon} color={config.iconColor} width={14} height={14} />
+            <Text className="text-[10px] uppercase tracking-wider font-bold">
+              {config.label}
+            </Text>
+          </View>
         </View>
+        <Text className="font-medium text-foreground pr-16 text-base">
+          {entry.text}
+        </Text>
+        <Text className="text-xs text-muted-foreground mt-3 font-bold">
+          {formatEntryTime(entry.createdAt)}
+        </Text>
       </View>
-      <Text className="font-medium text-foreground pr-16 text-base">
-        {entry.text}
-      </Text>
-      <Text className="text-xs text-muted-foreground mt-3 font-bold">
-        {formatEntryTime(entry.createdAt)}
-      </Text>
-    </View>
+    </AnimatedEntrance>
   );
 }
 
@@ -125,22 +137,44 @@ interface EmptyStateProps {
 }
 
 function EmptyState({ body, icon, iconColor, title }: EmptyStateProps): ReactElement {
+  const iconScale = useSharedValue(0);
+  const reducedMotion = useReducedMotion();
+
+  useEffect(() => {
+    if (reducedMotion) {
+      // Reduced motion: icon visible, no bounce.
+      iconScale.value = 1;
+      return;
+    }
+
+    iconScale.value = withDelay(120, withSpring(1, springs.elastic));
+  }, [iconScale, reducedMotion]);
+
+  const iconStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: iconScale.value }],
+  }));
+
   return (
-    <View className="bg-card border-4 border-border rounded-2xl p-5 shadow-paper">
-      <View className="flex-row items-start gap-3">
-        <View className="w-10 h-10 bg-muted rounded-xl border-2 border-border items-center justify-center">
-          <SvgXml xml={icon} color={iconColor} width={24} height={24} />
-        </View>
-        <View className="flex-1">
-          <Text className="font-heading text-lg text-foreground">
-            {title}
-          </Text>
-          <Text className="font-sans text-sm text-muted-foreground mt-1">
-            {body}
-          </Text>
+    <AnimatedEntrance delay={60}>
+      <View className="bg-card border-4 border-border rounded-2xl p-5 shadow-paper">
+        <View className="flex-row items-start gap-3">
+          <Animated.View
+            className="w-10 h-10 bg-muted rounded-xl border-2 border-border items-center justify-center"
+            style={iconStyle}
+          >
+            <SvgXml xml={icon} color={iconColor} width={24} height={24} />
+          </Animated.View>
+          <View className="flex-1">
+            <Text className="font-heading text-lg text-foreground">
+              {title}
+            </Text>
+            <Text className="font-sans text-sm text-muted-foreground mt-1">
+              {body}
+            </Text>
+          </View>
         </View>
       </View>
-    </View>
+    </AnimatedEntrance>
   );
 }
 
@@ -167,13 +201,15 @@ interface SectionHeaderProps {
 
 function SectionHeader({ color, icon, title }: SectionHeaderProps): ReactElement {
   return (
-    <View className="flex-row items-center justify-between mb-5">
-      <Text className="font-heading text-2xl tracking-wide text-foreground">
-        {title}
-      </Text>
-      <View className="bg-card border-2 border-border p-2 rounded-xl shadow-paper-sm">
-        <SvgXml xml={icon} color={color} width={24} height={24} />
+    <AnimatedEntrance className="mb-5">
+      <View className="flex-row items-center justify-between">
+        <Text className="font-heading text-2xl tracking-wide text-foreground">
+          {title}
+        </Text>
+        <View className="bg-card border-2 border-border p-2 rounded-xl shadow-paper-sm">
+          <SvgXml xml={icon} color={color} width={24} height={24} />
+        </View>
       </View>
-    </View>
+    </AnimatedEntrance>
   );
 }

@@ -1,12 +1,15 @@
 import type { ReactElement } from "react";
 import { useCallback, useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
+import Animated, { FadeInDown, ZoomIn } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
+import { AnimatedEntrance } from "@/components/ui/AnimatedEntrance";
 import { ShimmerView } from "@/components/ui/ShimmerView";
 import { entriesRepository } from "@/services/entriesRepository";
 import { useEntriesStore } from "@/stores/entriesStore";
 import type { EntryRecord } from "@/types/entry";
 import { cn } from "@/utils/cn";
+import { staggerMs } from "@/utils/motion";
 
 function formatTime(value: string): string {
   const date = new Date(value);
@@ -23,41 +26,48 @@ function formatTime(value: string): string {
 
 function TaskCard({
   entry,
+  index,
   onToggle,
 }: {
   entry: EntryRecord;
+  index: number;
   onToggle: (entryId: string) => Promise<void>;
 }): ReactElement {
   return (
-    <View className="bg-card border-4 border-border rounded-2xl p-4 mb-3">
-      <View className="flex-row items-start gap-3">
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`Toggle task ${entry.id}`}
-          className={cn(
-            "w-6 h-6 rounded-full border-2 border-border items-center justify-center",
-            entry.isCompleted && "bg-secondary border-secondary",
-          )}
-          onPress={() => {
-            void onToggle(entry.id);
-          }}
-        >
-          {entry.isCompleted ? (
-            <View className="w-3 h-3 rounded-full bg-secondary-foreground" />
-          ) : null}
-        </Pressable>
+    <AnimatedEntrance delay={index * staggerMs}>
+      <View className="bg-card border-4 border-border rounded-2xl p-4 mb-3">
+        <View className="flex-row items-start gap-3">
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Toggle task ${entry.id}`}
+            className={cn(
+              "w-6 h-6 rounded-full border-2 border-border items-center justify-center",
+              entry.isCompleted && "bg-secondary border-secondary",
+            )}
+            onPress={() => {
+              void onToggle(entry.id);
+            }}
+          >
+            {entry.isCompleted ? (
+              <Animated.View
+                entering={ZoomIn.springify().damping(12).stiffness(220)}
+                className="w-3 h-3 rounded-full bg-secondary-foreground"
+              />
+            ) : null}
+          </Pressable>
 
-        <View className="flex-1">
-          <Text className={cn("font-sans text-base font-bold text-foreground", entry.isCompleted && "line-through opacity-50")}>
-            {entry.title}
-          </Text>
-          <Text className={cn("font-sans text-sm text-muted-foreground mt-1", entry.isCompleted && "line-through opacity-50")} numberOfLines={1}>
-            {entry.previewText}
-          </Text>
-          <Text className="font-sans text-xs text-muted-foreground mt-2">{formatTime(entry.createdAt)}</Text>
+          <View className="flex-1">
+            <Text className={cn("font-sans text-base font-bold text-foreground", entry.isCompleted && "line-through opacity-50")}>
+              {entry.title}
+            </Text>
+            <Text className={cn("font-sans text-sm text-muted-foreground mt-1", entry.isCompleted && "line-through opacity-50")} numberOfLines={1}>
+              {entry.previewText}
+            </Text>
+            <Text className="font-sans text-xs text-muted-foreground mt-2">{formatTime(entry.createdAt)}</Text>
+          </View>
         </View>
       </View>
-    </View>
+    </AnimatedEntrance>
   );
 }
 
@@ -111,16 +121,19 @@ export default function TasksScreen(): ReactElement {
           <ShimmerView className="h-20" />
         </View>
       ) : taskEntries.length === 0 ? (
-        <View className="bg-card border-4 border-border rounded-2xl p-5">
+        <Animated.View
+          entering={FadeInDown.duration(250).springify().damping(16)}
+          className="bg-card border-4 border-border rounded-2xl p-5"
+        >
           <Text className="font-heading text-xl text-foreground">No tasks yet</Text>
           <Text className="font-sans text-sm text-muted-foreground mt-2">
             Record a thought and on-device classification will surface it here when it sounds like a task.
           </Text>
-        </View>
+        </Animated.View>
       ) : (
         <View>
-          {taskEntries.map((entry) => (
-            <TaskCard key={entry.id} entry={entry} onToggle={handleToggle} />
+          {taskEntries.map((entry, index) => (
+            <TaskCard key={entry.id} entry={entry} index={index} onToggle={handleToggle} />
           ))}
         </View>
       )}

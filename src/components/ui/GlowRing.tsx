@@ -29,8 +29,23 @@ export function GlowRing({ isActive }: GlowRingProps) {
       );
       scale.value = withTiming(1.0, { duration: 200 });
     } else {
-      opacity.value = withTiming(0, { duration: 300 });
-      scale.value = withTiming(0.95, { duration: 300 });
+      // Idle breathing — the recorder is alive, waiting. Very quiet.
+      opacity.value = withRepeat(
+        withSequence(
+          withTiming(0.05, { duration: 1400, easing: Easing.inOut(Easing.sin) }),
+          withTiming(0.14, { duration: 1400, easing: Easing.inOut(Easing.sin) })
+        ),
+        -1,
+        true
+      );
+      scale.value = withRepeat(
+        withSequence(
+          withTiming(0.95, { duration: 1400, easing: Easing.inOut(Easing.sin) }),
+          withTiming(1.02, { duration: 1400, easing: Easing.inOut(Easing.sin) })
+        ),
+        -1,
+        true
+      );
     }
   }, [isActive, opacity, scale]);
 

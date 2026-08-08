@@ -4,6 +4,18 @@ import { View, Text } from "react-native";
 
 const mockPrepareDefaultModel = jest.fn();
 
+const enteringChain = () => {
+  const chain: Record<string, () => unknown> = {
+    duration: () => chain,
+    springify: () => chain,
+    damping: () => chain,
+    stiffness: () => chain,
+    delay: () => chain,
+    mass: () => chain,
+  };
+  return chain;
+};
+
 jest.mock("react-native-reanimated", () => {
   const RN = require("react-native");
   return {
@@ -12,11 +24,18 @@ jest.mock("react-native-reanimated", () => {
     useAnimatedStyle: (fn: () => unknown) => fn(),
     useAnimatedProps: (fn: () => unknown) => fn(),
     useFrameCallback: () => ({}),
+    useReducedMotion: () => false,
+    withDelay: (_ms: number, value: unknown) => value,
     withTiming: (val: number) => val,
     withSpring: (val: number) => val,
     withRepeat: (val: unknown) => val,
     withSequence: (...vals: unknown[]) => vals[vals.length - 1],
     Easing: { inOut: () => "", sin: "", out: () => "", in: () => "", ease: "", back: () => "" },
+    FadeIn: enteringChain(),
+    FadeInDown: enteringChain(),
+    FadeInUp: enteringChain(),
+    FadeOut: enteringChain(),
+    ZoomIn: enteringChain(),
     default: { View: RN.View },
     View: RN.View,
     createAnimatedComponent: (comp: unknown) => comp,

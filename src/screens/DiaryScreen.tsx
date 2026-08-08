@@ -1,15 +1,21 @@
 import type { ReactElement } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
+import Animated, { FadeIn, FadeInDown, ZoomIn } from "react-native-reanimated";
 import { SvgXml } from "react-native-svg";
 import { BookBookmarkBoldDuotone, MagniferBoldDuotone } from "@/assets/icons/solar";
+import { AnimatedEntrance } from "@/components/ui/AnimatedEntrance";
 import { EntryDetailSheet } from "@/components/ui/EntryDetailSheet";
+import { PressableScale } from "@/components/ui/PressableScale";
 import { ShimmerView } from "@/components/ui/ShimmerView";
 import { useEntries } from "@/hooks/useEntries";
 import { entriesRepository } from "@/services/entriesRepository";
 import { useEntriesStore } from "@/stores/entriesStore";
 import type { EntryRecord } from "@/types/entry";
 import { cn } from "@/utils/cn";
+import { staggerMs } from "@/utils/motion";
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 const categoryBadgeClassMap = {
   diary: "bg-primary text-primary-foreground",
@@ -79,44 +85,45 @@ export default function DiaryScreen(): ReactElement {
     }
   }, [isSearchOpen]);
 
-  const renderEntryCard = (entry: EntryRecord): ReactElement => {
+  const renderEntryCard = (entry: EntryRecord, index: number): ReactElement => {
     return (
-      <Pressable
-        key={entry.id}
-        accessibilityRole="button"
-        accessibilityLabel={`Entry ${entry.id}`}
-        testID={`diary-entry-card-${entry.id}`}
-        className="bg-card border-4 border-border rounded-2xl p-4 shadow-paper mb-3"
-        onPress={() => {
-          setSheetEntry(entry);
-          setSheetMode("view");
-          setSheetVisible(true);
-        }}
-        onLongPress={() => {
-          setLongPressTarget(entry);
-        }}
-      >
-        <View className="flex-row items-start justify-between gap-3">
-          <View className="flex-1">
-            <View
-              className={cn(
-                "self-start px-2 py-1 rounded-full border-2 border-border",
-                categoryBadgeClassMap[entry.category],
-              )}
-            >
-              <Text className="font-sans text-[10px] uppercase font-bold">{entry.category}</Text>
-            </View>
+      <AnimatedEntrance delay={index * staggerMs} key={entry.id}>
+        <PressableScale
+          accessibilityRole="button"
+          accessibilityLabel={`Entry ${entry.id}`}
+          testID={`diary-entry-card-${entry.id}`}
+          className="bg-card border-4 border-border rounded-2xl p-4 shadow-paper mb-3"
+          onPress={() => {
+            setSheetEntry(entry);
+            setSheetMode("view");
+            setSheetVisible(true);
+          }}
+          onLongPress={() => {
+            setLongPressTarget(entry);
+          }}
+        >
+          <View className="flex-row items-start justify-between gap-3">
+            <View className="flex-1">
+              <View
+                className={cn(
+                  "self-start px-2 py-1 rounded-full border-2 border-border",
+                  categoryBadgeClassMap[entry.category],
+                )}
+              >
+                <Text className="font-sans text-[10px] uppercase font-bold">{entry.category}</Text>
+              </View>
 
-            <Text className="font-sans text-base font-bold text-foreground mt-2">{entry.title}</Text>
-            <Text className="font-sans text-sm text-muted-foreground mt-1" numberOfLines={1}>
-              {entry.previewText}
-            </Text>
-            <Text className="font-sans text-xs text-muted-foreground mt-2">
-              {formatTime(entry.createdAt)}
-            </Text>
+              <Text className="font-sans text-base font-bold text-foreground mt-2">{entry.title}</Text>
+              <Text className="font-sans text-sm text-muted-foreground mt-1" numberOfLines={1}>
+                {entry.previewText}
+              </Text>
+              <Text className="font-sans text-xs text-muted-foreground mt-2">
+                {formatTime(entry.createdAt)}
+              </Text>
+            </View>
           </View>
-        </View>
-      </Pressable>
+        </PressableScale>
+      </AnimatedEntrance>
     );
   };
 
@@ -150,20 +157,20 @@ export default function DiaryScreen(): ReactElement {
       </Text>
 
       {isSearchOpen ? (
-        <View className="mb-3">
-        <TextInput
-          ref={searchInputRef}
-          accessibilityLabel="Search entries"
-          testID="search-input"
-          className="bg-muted rounded-xl px-4 py-2 font-sans text-foreground text-sm"
-          placeholder="Search entries..."
-          placeholderTextColor="#8A828F"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          autoFocus={isSearchOpen}
-          editable={isSearchOpen}
-        />
-        </View>
+        <Animated.View entering={FadeInDown.duration(200)} className="mb-3">
+          <TextInput
+            ref={searchInputRef}
+            accessibilityLabel="Search entries"
+            testID="search-input"
+            className="bg-muted rounded-xl px-4 py-2 font-sans text-foreground text-sm"
+            placeholder="Search entries..."
+            placeholderTextColor="#8A828F"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            autoFocus={isSearchOpen}
+            editable={isSearchOpen}
+          />
+        </Animated.View>
       ) : null}
 
       <Pressable
@@ -182,29 +189,32 @@ export default function DiaryScreen(): ReactElement {
           <ShimmerView className="h-20" />
         </View>
       ) : searchResults !== null ? (
-        <View>{visibleEntries.map((entry) => renderEntryCard(entry))}</View>
+        <View>{visibleEntries.map((entry, index) => renderEntryCard(entry, index))}</View>
       ) : (
         <View>
-          {flatItems.map((item) => {
+          {flatItems.map((item, index) => {
             if (item.type === "header") {
               return (
-                <View className="mb-3 mt-2" key={item.key}>
-                  <Text className="font-heading text-xl text-foreground">{item.label}</Text>
-                </View>
+                <AnimatedEntrance key={item.key} delay={Math.min(index, 3) * staggerMs}>
+                  <View className="mb-3 mt-2">
+                    <Text className="font-heading text-xl text-foreground">{item.label}</Text>
+                  </View>
+                </AnimatedEntrance>
               );
             }
 
-            return renderEntryCard(item.entry);
+            return renderEntryCard(item.entry, index);
           })}
         </View>
       )}
 
       {longPressTarget ? (
-        <Pressable
+        <AnimatedPressable
+          entering={FadeIn.duration(120)}
           className="absolute inset-0 bg-black/20 items-center justify-center"
           onPress={() => setLongPressTarget(null)}
         >
-          <View className="flex-row">
+          <Animated.View entering={ZoomIn.springify().damping(15).stiffness(200)} className="flex-row">
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Edit entry"
@@ -230,13 +240,16 @@ export default function DiaryScreen(): ReactElement {
             >
               <Text className="font-sans text-white font-bold">X</Text>
             </Pressable>
-          </View>
-        </Pressable>
+          </Animated.View>
+        </AnimatedPressable>
       ) : null}
 
       {deleteTarget ? (
-        <View className="absolute inset-0 bg-black/40 items-center justify-center px-6">
-          <View className="bg-card border-4 border-border rounded-2xl p-5 shadow-paper w-full">
+        <Animated.View entering={FadeIn.duration(150)} className="absolute inset-0 bg-black/40 items-center justify-center px-6">
+          <Animated.View
+            entering={ZoomIn.springify().damping(16).stiffness(220)}
+            className="bg-card border-4 border-border rounded-2xl p-5 shadow-paper w-full"
+          >
             <Text className="font-heading text-xl text-foreground">Delete this entry?</Text>
             <Text className="font-sans text-sm text-muted-foreground mt-2">
               This removes only the selected entry.
@@ -271,13 +284,16 @@ export default function DiaryScreen(): ReactElement {
                 <Text className="font-sans text-center font-bold text-white">Delete</Text>
               </Pressable>
             </View>
-          </View>
-        </View>
+          </Animated.View>
+        </Animated.View>
       ) : null}
 
       {showWipeConfirmStepOne ? (
-        <View className="absolute inset-0 bg-black/40 items-center justify-center px-6">
-          <View className="bg-card border-4 border-border rounded-2xl p-5 shadow-paper w-full">
+        <Animated.View entering={FadeIn.duration(150)} className="absolute inset-0 bg-black/40 items-center justify-center px-6">
+          <Animated.View
+            entering={ZoomIn.springify().damping(16).stiffness(220)}
+            className="bg-card border-4 border-border rounded-2xl p-5 shadow-paper w-full"
+          >
             <Text className="font-heading text-xl text-foreground">Wipe all entries?</Text>
             <Text className="font-sans text-sm text-muted-foreground mt-2">
               Step 1 of 2 confirmation.
@@ -300,13 +316,16 @@ export default function DiaryScreen(): ReactElement {
                 <Text className="font-sans text-center font-bold text-white">Continue</Text>
               </Pressable>
             </View>
-          </View>
-        </View>
+          </Animated.View>
+        </Animated.View>
       ) : null}
 
       {showWipeConfirmStepTwo ? (
-        <View className="absolute inset-0 bg-black/40 items-center justify-center px-6">
-          <View className="bg-card border-4 border-border rounded-2xl p-5 shadow-paper w-full">
+        <Animated.View entering={FadeIn.duration(150)} className="absolute inset-0 bg-black/40 items-center justify-center px-6">
+          <Animated.View
+            entering={ZoomIn.springify().damping(16).stiffness(220)}
+            className="bg-card border-4 border-border rounded-2xl p-5 shadow-paper w-full"
+          >
             <Text className="font-heading text-xl text-foreground">Final wipe confirmation</Text>
             <Text className="font-sans text-sm text-muted-foreground mt-2">
               Step 2 of 2. Local device authentication is required (biometric or passcode fallback).
@@ -331,8 +350,8 @@ export default function DiaryScreen(): ReactElement {
                 <Text className="font-sans text-center font-bold text-white">Wipe all</Text>
               </Pressable>
             </View>
-          </View>
-        </View>
+          </Animated.View>
+        </Animated.View>
       ) : null}
 
       <EntryDetailSheet

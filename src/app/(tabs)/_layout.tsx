@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
-import { SvgXml } from "react-native-svg";
 import { Tabs } from "expo-router";
 import { useTheme } from "@/hooks/useTheme";
+import { AnimatedTabIcon } from "@/components/ui/AnimatedTabIcon";
 import {
   BookBookmarkBold,
   BookBookmarkBoldDuotone,
@@ -18,6 +18,8 @@ export default function TabLayout(): ReactElement {
     <Tabs
       screenOptions={{
         headerShown: false,
+        // Paper-fade scene transition between tabs.
+        animation: "fade",
         sceneStyle: { backgroundColor: isDark ? "#1E1A24" : "#FDF8F0" },
         tabBarActiveTintColor: "#FF6B9E",
         tabBarInactiveTintColor: "#8A828F",
@@ -50,8 +52,8 @@ export default function TabLayout(): ReactElement {
         name="index"
         options={{
           title: "Home",
-          tabBarIcon: ({ color }): ReactElement => (
-            <SvgXml xml={HomeSmileBoldDuotone} color={color} width={24} height={24} />
+          tabBarIcon: ({ color, focused }): ReactElement => (
+            <AnimatedTabIcon focused={focused} xml={HomeSmileBoldDuotone} color={color} />
           ),
         }}
       />
@@ -60,7 +62,11 @@ export default function TabLayout(): ReactElement {
         options={{
           title: "Diary",
           tabBarIcon: ({ focused, color }): ReactElement => (
-            <SvgXml xml={focused ? BookBookmarkBold : BookBookmarkBoldDuotone} color={color} width={24} height={24} />
+            <AnimatedTabIcon
+              focused={focused}
+              xml={focused ? BookBookmarkBold : BookBookmarkBoldDuotone}
+              color={color}
+            />
           ),
         }}
       />
@@ -69,7 +75,11 @@ export default function TabLayout(): ReactElement {
         options={{
           title: "Tasks",
           tabBarIcon: ({ focused, color }): ReactElement => (
-            <SvgXml xml={focused ? CheckSquareBold : CheckSquareBoldDuotone} color={color} width={24} height={24} />
+            <AnimatedTabIcon
+              focused={focused}
+              xml={focused ? CheckSquareBold : CheckSquareBoldDuotone}
+              color={color}
+            />
           ),
         }}
       />
@@ -77,8 +87,12 @@ export default function TabLayout(): ReactElement {
         name="digests"
         options={{
           title: "Digests",
-          tabBarIcon: ({ color }): ReactElement => (
-            <SvgXml xml={BoxMinimalisticBoldDuotone} color={color} width={24} height={24} />
+          tabBarIcon: ({ focused, color }): ReactElement => (
+            <AnimatedTabIcon
+              focused={focused}
+              xml={BoxMinimalisticBoldDuotone}
+              color={color}
+            />
           ),
         }}
       />

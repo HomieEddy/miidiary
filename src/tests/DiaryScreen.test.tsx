@@ -55,6 +55,12 @@ jest.mock("@shopify/flash-list", () => {
   };
 });
 
+jest.mock("@gorhom/bottom-sheet", () => ({
+  BottomSheetModal: () => null,
+  BottomSheetScrollView: ({ children }: { children: React.ReactNode }) => children,
+  BottomSheetBackdrop: () => null,
+}));
+
 jest.mock("@/hooks/useEntries", () => ({
   useEntries: () => mockUseEntriesState,
 }));

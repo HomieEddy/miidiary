@@ -11,6 +11,7 @@
     "e2e": "detox test -c android.emu.debug"
   },
   "dependencies": {
+    "@gorhom/bottom-sheet": "^5.2.14",
     "@realm/react": "^0.20.0",
     "@shopify/flash-list": "2.0.2",
     "@shopify/react-native-skia": "2.2.12",
@@ -44,6 +45,8 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-native": "0.81.5",
+    "react-native-gesture-handler": "~2.28.0",
+    "react-native-keyboard-controller": "^1.22.3",
     "react-native-keychain": "^10.0.0",
     "react-native-mmkv": "^4.3.1",
     "react-native-nitro-modules": "^0.35.6",
@@ -57,6 +60,7 @@
     "rive-react-native": "^9.8.3",
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^3.4.17",
+    "victory-native": "^41.26.0",
     "whisper.rn": "^0.6.0",
     "zustand": "^5.0.13"
   },

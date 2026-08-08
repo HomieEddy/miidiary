@@ -119,5 +119,12 @@
   },
   "result": {
     "tapAnother": "Tap to record another thought"
+  },
+  "stats": {
+    "title": "Your diary at a glance",
+    "total": "{count} entries",
+    "streak": "{count} day streak",
+    "today": "{count} today",
+    "empty": "Record thoughts to see your stats bloom."
   }
 }

@@ -119,5 +119,12 @@
   },
   "result": {
     "tapAnother": "Touchez pour enregistrer une autre pensée"
+  },
+  "stats": {
+    "title": "Votre journal en un coup d’œil",
+    "total": "{count} pensées",
+    "streak": "Série de {count} jours",
+    "today": "{count} aujourd’hui",
+    "empty": "Enregistrez des pensées pour voir vos statistiques fleurir."
   }
 }

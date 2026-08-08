@@ -15,8 +15,9 @@ import { AnimatedEntrance } from '@/components/ui/AnimatedEntrance';
 import { useAudioCapture } from '@/hooks/useAudioCapture';
 import { useTranscription } from '@/hooks/useTranscription';
 import { useShakeToReset } from '@/hooks/useShakeToReset';
+import { PerformanceMeasureView } from "@shopify/react-native-performance";
 import { useLocale } from '@/i18n';
-import { useEntriesStore } from '@/stores/entriesStore';
+import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';import { useEntriesStore } from '@/stores/entriesStore';
 import { useRecordingStore } from '@/stores/recordingStore';
 import {
   initializeBackgroundProcessing,
@@ -51,6 +52,16 @@ export default function HomeScreen(): ReactElement {
     isRecording, isProcessing, status,
     startRecording, stopRecording, retry,
   } = useAudioCapture();
+
+  // Keep the screen awake while recording — auto-lock must not kill a capture.
+  useEffect(() => {
+    if (isRecording) {
+      void activateKeepAwakeAsync("recording");
+      return () => {
+        void deactivateKeepAwake("recording");
+      };
+    }
+  }, [isRecording]);
 
   const { processRecording, processPendingRecordings } = useTranscription();
 

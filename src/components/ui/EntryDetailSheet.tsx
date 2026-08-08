@@ -33,6 +33,7 @@ export function EntryDetailSheet({ entry, mode, visible, onClose, onSave }: Entr
   const [textDraft, setTextDraft] = useState("");
   const [categoryDraft, setCategoryDraft] = useState<EntryCategory>("note");
   const slideY = useSharedValue(800);
+  const panelOpacity = useSharedValue(0);
 
   useEffect(() => {
     setInternalMode(mode);
@@ -51,12 +52,15 @@ export function EntryDetailSheet({ entry, mode, visible, onClose, onSave }: Entr
   useEffect(() => {
     if (visible) {
       slideY.value = withSpring(0, { damping: 20, stiffness: 180 });
+      panelOpacity.value = withTiming(1, { duration: 220 });
     } else {
       slideY.value = withTiming(800, { duration: 200 });
+      panelOpacity.value = withTiming(0, { duration: 150 });
     }
-  }, [slideY, visible]);
+  }, [panelOpacity, slideY, visible]);
 
   const panelStyle = useAnimatedStyle(() => ({
+    opacity: panelOpacity.value,
     transform: [{ translateY: slideY.value }],
   }));
 

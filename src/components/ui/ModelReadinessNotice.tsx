@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { SvgXml } from 'react-native-svg';
 import { colors } from '@/theme/colors';
 
@@ -20,7 +21,10 @@ export function ModelReadinessNotice({
 
   if (state === 'error') {
     return (
-      <View className="mx-6 bg-destructive/10 border-2 border-destructive rounded-2xl px-4 py-3 flex-row items-start gap-3">
+      <Animated.View
+        entering={FadeInDown.duration(250)}
+        className="mx-6 bg-destructive/10 border-2 border-destructive rounded-2xl px-4 py-3 flex-row items-start gap-3"
+      >
         <SvgXml xml={WARNING_ICON} width={22} height={22} color={colors.destructive} />
         <View className="flex-1">
           <Text className="font-sans text-sm font-bold text-destructive">
@@ -30,12 +34,15 @@ export function ModelReadinessNotice({
             {errorMessage ?? 'The transcription model could not be loaded.'}
           </Text>
         </View>
-      </View>
+      </Animated.View>
     );
   }
 
   return (
-    <View className="mx-6 bg-muted/50 border-2 border-border rounded-2xl px-4 py-3 flex-row items-center gap-3">
+    <Animated.View
+      entering={FadeInDown.duration(250)}
+      className="mx-6 bg-muted/50 border-2 border-border rounded-2xl px-4 py-3 flex-row items-center gap-3"
+    >
       <ActivityIndicator size="small" color={colors.primary} />
       <View className="flex-1">
         <Text className="font-sans text-sm font-bold text-foreground">
@@ -45,6 +52,6 @@ export function ModelReadinessNotice({
           Recording will unlock when offline transcription is ready.
         </Text>
       </View>
-    </View>
+    </Animated.View>
   );
 }

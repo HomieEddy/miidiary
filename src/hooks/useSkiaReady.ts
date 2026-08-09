@@ -36,6 +36,18 @@ export async function ensureSkiaWeb(): Promise<void> {
     return;
   }
 
+  let notified = false;
+  const notifyOnce = () => {
+    if (!notified) {
+      notified = true;
+      notify();
+    }
+  };
+
+  // A stalled wasm fetch must not leave the app on a permanent blank
+  // screen; degrade to the non-Skia UI after a bounded wait.
+  const timeout = setTimeout(notifyOnce, 10_000);
+
   try {
     // canvaskit.wasm is served from public/ (see public/canvaskit.wasm).
     const { LoadSkiaWeb } = await import("@shopify/react-native-skia/lib/module/web");
@@ -43,6 +55,7 @@ export async function ensureSkiaWeb(): Promise<void> {
   } catch {
     // Charts degrade gracefully if the wasm fails to load.
   } finally {
-    notify();
+    clearTimeout(timeout);
+    notifyOnce();
   }
 }

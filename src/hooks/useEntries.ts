@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { entriesRepository } from "@/services/entriesRepository";
 import { reauthenticateForDestructiveAction } from "@/services/localAuthService";
+import { useLocale } from "@/i18n";
+import { useEntriesStore } from "@/stores/entriesStore";
 import type { EntryCategory } from "@/types/entry";
 import { flattenEntrySections, groupEntriesByDay } from "@/utils/entryGrouping";
 import type { EntryRecord } from "@/types/entry";
@@ -26,6 +28,7 @@ interface UseEntriesOptions {
 }
 
 export function useEntries(options?: UseEntriesOptions): UseEntriesResult {
+  const { locale } = useLocale();
   const autoLoad = options?.autoLoad ?? true;
   const category = options?.category;
   const [entries, setEntries] = useState<EntryRecord[]>([]);
@@ -47,7 +50,7 @@ export function useEntries(options?: UseEntriesOptions): UseEntriesResult {
     void loadEntries();
   }, [autoLoad, loadEntries]);
 
-  const sections = useMemo(() => groupEntriesByDay(entries), [entries]);
+  const sections = useMemo(() => groupEntriesByDay(entries), [entries, locale]);
   const flatItems = useMemo(() => flattenEntrySections(sections), [sections]);
 
   const setSearchQuery = useCallback((query: string) => {
@@ -61,8 +64,13 @@ export function useEntries(options?: UseEntriesOptions): UseEntriesResult {
       return;
     }
 
+    let stale = false;
     const timeout = setTimeout(() => {
       void entriesRepository.searchEntries(trimmed).then((results) => {
+        if (stale) {
+          // A newer query (or a cleared one) superseded this request.
+          return;
+        }
         const scoped = category
           ? results.filter((item) => item.category === category)
           : results;
@@ -71,6 +79,7 @@ export function useEntries(options?: UseEntriesOptions): UseEntriesResult {
     }, 150);
 
     return () => {
+      stale = true;
       clearTimeout(timeout);
     };
   }, [category, searchQuery]);
@@ -106,6 +115,9 @@ export function useEntries(options?: UseEntriesOptions): UseEntriesResult {
 
     try {
       await entriesRepository.wipeAll();
+      // Invalidate the shared session cache so Home previews and every
+      // mounted tab observe the wipe (they reload via latestPersistedEntryId).
+      useEntriesStore.getState().clearAll();
       await loadEntries();
       setShowWipeConfirmStepOne(false);
       setShowWipeConfirmStepTwo(false);

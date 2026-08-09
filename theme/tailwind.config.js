@@ -26,7 +26,10 @@ module.exports = {
           DEFAULT: "rgb(var(--muted))",
           foreground: "rgb(var(--muted-foreground))",
         },
-        destructive: "rgb(var(--destructive))",
+        destructive: {
+          DEFAULT: "rgb(var(--destructive))",
+          foreground: "rgb(var(--destructive-foreground))",
+        },
         card: {
           DEFAULT: "rgb(var(--card))",
           foreground: "rgb(var(--card-foreground))",
@@ -63,8 +66,8 @@ module.exports = {
         "4xl": "48px",
       },
       boxShadow: {
-        paper: "4px 4px 0px #2A2631",
-        "paper-sm": "2px 2px 0px #2A2631",
+        paper: "4px 4px 0px rgb(var(--shadow))",
+        "paper-sm": "2px 2px 0px rgb(var(--shadow))",
       },
     },
   },

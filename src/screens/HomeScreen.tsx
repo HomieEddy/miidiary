@@ -15,7 +15,7 @@ import { AnimatedEntrance } from '@/components/ui/AnimatedEntrance';
 import { useAudioCapture } from '@/hooks/useAudioCapture';
 import { useTranscription } from '@/hooks/useTranscription';
 import { useShakeToReset } from '@/hooks/useShakeToReset';
-import { PerformanceMeasureView } from "@shopify/react-native-performance";
+import { useTabBarClearance } from '@/hooks/useTabBarClearance';
 import { useLocale } from '@/i18n';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';import { useEntriesStore } from '@/stores/entriesStore';
 import { useRecordingStore } from '@/stores/recordingStore';
@@ -48,10 +48,10 @@ export default function HomeScreen(): ReactElement {
   const [modelError, setModelError] = useState<string | null>(null);
   const latestEntry = useEntriesStore((state) => state.entries[0]);
   const resetRecording = useRecordingStore((state) => state.reset);
-  const {
-    isRecording, isProcessing, status,
+  const { isRecording, isProcessing, status,
     startRecording, stopRecording, retry,
   } = useAudioCapture();
+  const bottomClearance = useTabBarClearance();
 
   // Keep the screen awake while recording — auto-lock must not kill a capture.
   useEffect(() => {
@@ -121,6 +121,12 @@ export default function HomeScreen(): ReactElement {
     }
   }, [stopRecording, processRecording]);
 
+  // Stable so ThoughtShredder's effect (deps: onComplete) doesn't re-arm
+  // its 700ms/1300ms shredder delays on every HomeScreen re-render.
+  const handleShredderComplete = useCallback(() => {
+    resetRecording();
+  }, [resetRecording]);
+
   // UX-06: shake during recording to discard the buffer without saving.
   const handleShakeDiscard = useCallback(async () => {
     if (!isRecording) {
@@ -160,7 +166,11 @@ export default function HomeScreen(): ReactElement {
   }, [latestEntry?.category]);
 
   return (
-    <ScrollView className="min-h-screen bg-background text-foreground pb-32 font-sans">
+    <ScrollView
+      className="min-h-screen bg-background text-foreground font-sans"
+      contentContainerStyle={{ paddingBottom: bottomClearance }}
+      keyboardShouldPersistTaps="handled"
+    >
       <View className="px-6 pt-12">
         <AnimatedEntrance>
           <DailySparkCard />
@@ -209,9 +219,7 @@ export default function HomeScreen(): ReactElement {
           <TranscriptionResult
             visible={!isRecording && !isProcessing && status === 'idle'}
             tabTargetPosition={tabTargetPosition}
-            onShredderComplete={() => {
-              resetRecording();
-            }}
+            onShredderComplete={handleShredderComplete}
           />
         </View>
 

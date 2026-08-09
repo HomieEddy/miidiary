@@ -1,11 +1,13 @@
 import type { ReactElement } from "react";
 import { useCallback, useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import Animated, { FadeInDown, ZoomIn } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { AnimatedEntrance } from "@/components/ui/AnimatedEntrance";
 import { PerformanceMeasureView } from "@shopify/react-native-performance";
 import { ShimmerView } from "@/components/ui/ShimmerView";
+import { useScreenProfiler } from "@/hooks/useScreenProfiler";
+import { useTabBarClearance } from "@/hooks/useTabBarClearance";
 import { useLocale } from "@/i18n";
 import { entriesRepository } from "@/services/entriesRepository";
 import { useEntriesStore } from "@/stores/entriesStore";
@@ -75,7 +77,9 @@ function TaskCard({
 }
 
 export default function TasksScreen(): ReactElement {
+  useScreenProfiler();
   const { t } = useLocale();
+  const bottomClearance = useTabBarClearance();
   const latestPersistedEntryId = useEntriesStore((state) => state.entries[0]?.id);
   const [entries, setEntries] = useState<EntryRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -113,7 +117,16 @@ export default function TasksScreen(): ReactElement {
 
   return (
     <PerformanceMeasureView screenName="TasksScreen" interactive>
-      <View className="min-h-screen bg-background text-foreground pb-32 font-sans px-6 pt-10">
+      <View className="flex-1 bg-background font-sans">
+      <ScrollView
+        className="flex-1 text-foreground"
+        contentContainerStyle={{
+          paddingBottom: bottomClearance,
+          paddingHorizontal: 24,
+          paddingTop: 40,
+        }}
+        keyboardShouldPersistTaps="handled"
+      >
       <Text className="font-heading text-4xl text-foreground tracking-wide mb-2">{t("tasks.title")}</Text>
       <Text className="font-sans text-sm text-muted-foreground mb-5">
         {t("tasks.subtitle")}
@@ -142,6 +155,7 @@ export default function TasksScreen(): ReactElement {
           ))}
         </View>
       )}
+      </ScrollView>
     </View>
     </PerformanceMeasureView>
   );

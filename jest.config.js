@@ -11,5 +11,6 @@ module.exports = {
   },
   testPathIgnorePatterns: ["/node_modules/", "/android/", "/ios/"],
   testMatch: ["**/src/tests/**/*.test.{ts,tsx}"],
+  setupFiles: ["<rootDir>/jest.setup.js"],
   collectCoverage: false,
 };

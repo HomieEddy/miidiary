@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, Text, TextInput, View } from "react-native";
+import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import Animated, { FadeIn, FadeInDown, ZoomIn } from "react-native-reanimated";
 import { SvgXml } from "react-native-svg";
 import { BookBookmarkBoldDuotone, MagniferBoldDuotone } from "@/assets/icons/solar";
@@ -8,13 +8,15 @@ import { AnimatedEntrance } from "@/components/ui/AnimatedEntrance";
 import { EntryDetailSheet } from "@/components/ui/EntryDetailSheet";
 import { PressableScale } from "@/components/ui/PressableScale";
 import { ShimmerView } from "@/components/ui/ShimmerView";
-import { PerformanceMeasureView } from "@shopify/react-native-performance";
 import { useLocale } from "@/i18n";
 import { useEntries } from "@/hooks/useEntries";
+import { useTabBarClearance } from "@/hooks/useTabBarClearance";
+import { useTheme } from "@/hooks/useTheme";
 import { entriesRepository } from "@/services/entriesRepository";
 import { useEntriesStore } from "@/stores/entriesStore";
 import type { EntryRecord } from "@/types/entry";
 import { i18n } from "@/i18n";
+import { mutedForegroundHex } from "@/theme/colors";
 import { cn } from "@/utils/cn";
 import { staggerMs } from "@/utils/motion";
 
@@ -41,6 +43,8 @@ function formatTime(value: string): string {
 
 export default function DiaryScreen(): ReactElement {
   const { t } = useLocale();
+  const { isDark } = useTheme();
+  const bottomClearance = useTabBarClearance();
   const latestPersistedEntryId = useEntriesStore((state) => state.entries[0]?.id);
   const {
     entries,
@@ -114,7 +118,7 @@ export default function DiaryScreen(): ReactElement {
                   categoryBadgeClassMap[entry.category],
                 )}
               >
-                <Text className="font-sans text-[10px] uppercase font-bold">{entry.category}</Text>
+                <Text className="font-sans text-xs uppercase font-bold">{entry.category}</Text>
               </View>
 
               <Text className="font-sans text-base font-bold text-foreground mt-2">{entry.title}</Text>
@@ -140,19 +144,28 @@ export default function DiaryScreen(): ReactElement {
   }, [entries, searchResults]);
 
   return (
-    <View className="min-h-screen bg-background text-foreground pb-32 font-sans px-6 pt-10">
+    <View className="flex-1 bg-background font-sans">
+      <ScrollView
+        className="flex-1 text-foreground"
+        contentContainerStyle={{
+          paddingBottom: bottomClearance,
+          paddingHorizontal: 24,
+          paddingTop: 40,
+        }}
+        keyboardShouldPersistTaps="handled"
+      >
       <View className="flex-row items-center justify-between mb-2">
         <Text className="font-heading text-4xl text-foreground tracking-wide">{t("diary.title")}</Text>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Toggle search"
           testID="search-toggle-btn"
-          className="w-10 h-10 rounded-xl border-2 border-border bg-card items-center justify-center"
+          className="w-11 h-11 rounded-xl border-2 border-border bg-card items-center justify-center"
           onPress={() => {
             setIsSearchOpen((previous) => !previous);
           }}
         >
-          <SvgXml xml={MagniferBoldDuotone} width={20} height={20} color="#8A828F" />
+          <SvgXml xml={MagniferBoldDuotone} width={20} height={20} color={mutedForegroundHex(isDark)} />
         </Pressable>
       </View>
 
@@ -168,7 +181,7 @@ export default function DiaryScreen(): ReactElement {
             testID="search-input"
             className="bg-muted rounded-xl px-4 py-2 font-sans text-foreground text-sm"
             placeholder={t("diary.searchPlaceholder")}
-            placeholderTextColor="#8A828F"
+            placeholderTextColor={mutedForegroundHex(isDark)}
             value={searchQuery}
             onChangeText={setSearchQuery}
             autoFocus={isSearchOpen}
@@ -183,7 +196,7 @@ export default function DiaryScreen(): ReactElement {
         className="self-start mb-4 bg-destructive border-2 border-border rounded-xl px-3 py-2 active:translate-y-1 active:translate-x-1 active:shadow-none"
         onPress={requestWipeAll}
       >
-        <Text className="font-sans text-xs font-bold text-white">{t("diary.wipeAll")}</Text>
+        <Text className="font-sans text-xs font-bold text-destructive-foreground">{t("diary.wipeAll")}</Text>
       </Pressable>
 
       {isLoading ? (
@@ -211,6 +224,8 @@ export default function DiaryScreen(): ReactElement {
           })}
         </View>
       )}
+
+      </ScrollView>
 
       {longPressTarget ? (
         <AnimatedPressable
@@ -242,7 +257,7 @@ export default function DiaryScreen(): ReactElement {
                 setLongPressTarget(null);
               }}
             >
-              <Text className="font-sans text-white font-bold">X</Text>
+              <Text className="font-sans text-destructive-foreground font-bold">X</Text>
             </Pressable>
           </Animated.View>
         </AnimatedPressable>
@@ -280,12 +295,13 @@ export default function DiaryScreen(): ReactElement {
 
                   void (async () => {
                     await entriesRepository.deleteOne(deleteTarget.id);
+                    useEntriesStore.getState().removeEntry(deleteTarget.id);
                     await loadEntries();
                     setDeleteTarget(null);
                   })();
                 }}
               >
-                <Text className="font-sans text-center font-bold text-white">{t("diary.delete")}</Text>
+                <Text className="font-sans text-center font-bold text-destructive-foreground">{t("diary.delete")}</Text>
               </Pressable>
             </View>
           </Animated.View>
@@ -317,7 +333,7 @@ export default function DiaryScreen(): ReactElement {
                 className="flex-1 bg-destructive border-2 border-border rounded-xl p-3"
                 onPress={continueWipeAll}
               >
-                <Text className="font-sans text-center font-bold text-white">{t("diary.continue")}</Text>
+                <Text className="font-sans text-center font-bold text-destructive-foreground">{t("diary.continue")}</Text>
               </Pressable>
             </View>
           </Animated.View>
@@ -351,7 +367,7 @@ export default function DiaryScreen(): ReactElement {
                   void confirmWipeAll();
                 }}
               >
-                <Text className="font-sans text-center font-bold text-white">{t("diary.wipeConfirm")}</Text>
+                <Text className="font-sans text-center font-bold text-destructive-foreground">{t("diary.wipeConfirm")}</Text>
               </Pressable>
             </View>
           </Animated.View>

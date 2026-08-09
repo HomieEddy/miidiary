@@ -53,6 +53,9 @@ export function EntryDetailSheet({
   const [titleEdited, setTitleEdited] = useState(false);
   const [textDraft, setTextDraft] = useState("");
   const [categoryDraft, setCategoryDraft] = useState<EntryCategory>("note");
+  const [saveError, setSaveError] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const placeholderColor = isDark ? "#9B93A4" : "#6F6776";
   const sheetRef = useRef<BottomSheetModal>(null);
   const snapPoints = useMemo(() => ["48%", "88%"], []);
 
@@ -110,9 +113,14 @@ export function EntryDetailSheet({
     setTitleEdited(false);
     setTextDraft(entry.text);
     setCategoryDraft(entry.category);
+    setSaveError(false);
   };
 
   const handleSave = async (): Promise<void> => {
+    if (isSaving) {
+      return;
+    }
+
     const patch: UpdateEntryPatch = {
       text: textDraft,
       category: categoryDraft,
@@ -120,7 +128,17 @@ export function EntryDetailSheet({
       // re-derives it from the saved text otherwise (D-09 manual override).
       ...(titleEdited ? { title: titleDraft } : {}),
     };
-    await onSave(patch);
+
+    try {
+      setIsSaving(true);
+      await onSave(patch);
+      setSaveError(false);
+    } catch {
+      // Keep the sheet open in edit mode so the user can retry.
+      setSaveError(true);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (!entry) {
@@ -149,11 +167,13 @@ export function EntryDetailSheet({
                   categoryClassMap[entry.category],
                 )}
               >
-                <Text className="font-sans text-[10px] uppercase font-bold">
+                <Text className="font-sans text-xs uppercase font-bold">
                   {t(categoryKeyMap[entry.category])}
                 </Text>
               </View>
               <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t("sheet.close")}
                 className="px-3 py-2 rounded-xl border-2 border-border bg-muted"
                 onPress={onClose}
               >
@@ -165,6 +185,8 @@ export function EntryDetailSheet({
             <Text className="font-sans text-base text-foreground mt-2 leading-relaxed">{entry.text}</Text>
 
             <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t("sheet.edit")}
               className="mt-4 bg-primary border-2 border-border rounded-xl p-3 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all"
               onPress={() => setInternalMode("edit")}
             >
@@ -181,10 +203,13 @@ export function EntryDetailSheet({
                 setTitleDraft(next);
               }}
               placeholder={t("sheet.titlePlaceholder")}
-              placeholderTextColor="#8A828F"
+              placeholderTextColor={placeholderColor}
             />
 
             <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t(categoryKeyMap[categoryDraft])}
+              accessibilityHint={t("sheet.changeCategoryHint")}
               className={cn(
                 "self-start mt-3 px-3 py-2 rounded-full border-2 border-border",
                 categoryClassMap[categoryDraft],
@@ -201,12 +226,22 @@ export function EntryDetailSheet({
               multiline
               numberOfLines={6}
               placeholder={t("sheet.editTextPlaceholder")}
-              placeholderTextColor="#8A828F"
+              placeholderTextColor={placeholderColor}
+              accessibilityLabel={t("sheet.editTextPlaceholder")}
             />
+
+            {saveError ? (
+              <Text className="font-sans text-xs font-medium text-destructive mt-3">
+                {t("sheet.saveFailed")}
+              </Text>
+            ) : null}
 
             <View className="flex-row gap-2 mt-4">
               <Pressable
-                className="flex-1 bg-muted border-2 border-border rounded-xl p-3"
+                accessibilityRole="button"
+                accessibilityLabel={t("diary.cancel")}
+                disabled={isSaving}
+                className="flex-1 bg-muted border-2 border-border rounded-xl p-3 disabled:opacity-50"
                 onPress={() => {
                   resetDrafts();
                   setInternalMode("view");
@@ -215,7 +250,11 @@ export function EntryDetailSheet({
                 <Text className="font-sans text-center font-bold text-foreground">{t("diary.cancel")}</Text>
               </Pressable>
               <Pressable
-                className="flex-1 bg-primary border-2 border-border rounded-xl p-3 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all"
+                accessibilityRole="button"
+                accessibilityLabel={t("sheet.save")}
+                accessibilityState={{ disabled: isSaving, busy: isSaving }}
+                disabled={isSaving}
+                className="flex-1 bg-primary border-2 border-border rounded-xl p-3 active:translate-y-1 active:translate-x-1 active:shadow-none transition-all disabled:opacity-50"
                 onPress={() => {
                   void handleSave();
                 }}

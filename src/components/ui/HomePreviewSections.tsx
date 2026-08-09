@@ -103,7 +103,9 @@ interface EntryCardProps {
 
 function EntryCard({ entry, index }: EntryCardProps): ReactElement {
   const { t } = useLocale();
-  const config = categoryConfig[entry.category];
+  // Fall back to the note config so an unexpected/unmigrated category
+  // value renders instead of throwing on the deref below.
+  const config = categoryConfig[entry.category] ?? categoryConfig.note;
   const categoryLabel: Record<EntryCategory, string> = {
     diary: t("sheet.categoryDiary"),
     task: t("sheet.categoryTask"),
@@ -121,7 +123,7 @@ function EntryCard({ entry, index }: EntryCardProps): ReactElement {
         <View className="absolute -top-3 -right-2">
           <View className={cn('flex-row items-center gap-1 px-3 py-1.5 border-2 border-border rounded-full shadow-paper-sm', config.badgeClassName)}>
             <SvgXml xml={config.icon} color={config.iconColor} width={14} height={14} />
-            <Text className="text-[10px] uppercase tracking-wider font-bold">
+            <Text className="text-xs uppercase tracking-wider font-bold">
               {categoryLabel[entry.category]}
             </Text>
           </View>

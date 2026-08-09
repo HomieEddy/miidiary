@@ -26,6 +26,7 @@ jest.mock("react-native-reanimated", () => {
     useFrameCallback: () => ({}),
     useReducedMotion: () => false,
     withDelay: (_ms: number, value: unknown) => value,
+    cancelAnimation: () => {},
     withTiming: (val: number) => val,
     withSpring: (val: number) => val,
     withRepeat: (val: unknown) => val,

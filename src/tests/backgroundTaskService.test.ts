@@ -3,25 +3,24 @@ const mockUnregisterTaskAsync = jest.fn();
 const mockGetStatusAsync = jest.fn();
 const mockIsTaskRegisteredAsync = jest.fn();
 
-const mockTaskHandlers = new Map<string, () => Promise<string>>();
+const mockTaskHandlers = new Map<string, () => Promise<number>>();
 
-jest.mock("expo-background-fetch", () => ({
+jest.mock("expo-background-task", () => ({
   registerTaskAsync: (...args: unknown[]) => mockRegisterTaskAsync(...args),
   unregisterTaskAsync: (...args: unknown[]) => mockUnregisterTaskAsync(...args),
   getStatusAsync: (...args: unknown[]) => mockGetStatusAsync(...args),
-  BackgroundFetchStatus: {
+  BackgroundTaskStatus: {
     Restricted: 1,
     Available: 2,
   },
-  BackgroundFetchResult: {
-    NoData: "no-data",
-    NewData: "new-data",
-    Failed: "failed",
+  BackgroundTaskResult: {
+    Success: 1,
+    Failed: 2,
   },
 }));
 
 jest.mock("expo-task-manager", () => ({
-  defineTask: (name: string, handler: () => Promise<string>) => {
+  defineTask: (name: string, handler: () => Promise<number>) => {
     mockTaskHandlers.set(name, handler);
   },
   isTaskRegisteredAsync: (...args: unknown[]) => mockIsTaskRegisteredAsync(...args),
@@ -30,8 +29,10 @@ jest.mock("expo-task-manager", () => ({
 describe("backgroundTaskService", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockTaskHandlers.clear();
-    jest.resetModules();
+    mockIsTaskRegisteredAsync.mockResolvedValue(false);
+    mockGetStatusAsync.mockResolvedValue(2); // Available
+    const service = require("@/services/backgroundTaskService") as typeof import("@/services/backgroundTaskService");
+    service.__resetBackgroundTaskServiceForTests();
   });
 
   function loadService() {
@@ -40,25 +41,16 @@ describe("backgroundTaskService", () => {
 
   it("registers background task when available", async () => {
     const service = loadService();
-    mockGetStatusAsync.mockResolvedValue(2);
-    mockIsTaskRegisteredAsync.mockResolvedValue(false);
-
     await service.initializeBackgroundProcessing();
 
-    expect(mockRegisterTaskAsync).toHaveBeenCalledWith(
-      "miidiary.background.transcription",
-      expect.objectContaining({
-        minimumInterval: 15 * 60,
-        stopOnTerminate: false,
-        startOnBoot: true,
-      }),
-    );
+    expect(mockRegisterTaskAsync).toHaveBeenCalledWith("miidiary.background.transcription", {
+      minimumInterval: 15,
+    });
   });
 
-  it("does not register task when background fetch is restricted", async () => {
+  it("does not register task when background processing is restricted", async () => {
+    mockGetStatusAsync.mockResolvedValue(1); // Restricted
     const service = loadService();
-    mockGetStatusAsync.mockResolvedValue(1);
-
     await service.initializeBackgroundProcessing();
 
     expect(mockRegisterTaskAsync).not.toHaveBeenCalled();
@@ -66,44 +58,38 @@ describe("backgroundTaskService", () => {
 
   it("registers only once for repeated initialize calls", async () => {
     const service = loadService();
-    mockGetStatusAsync.mockResolvedValue(2);
-    mockIsTaskRegisteredAsync.mockResolvedValue(false);
-
     await service.initializeBackgroundProcessing();
     await service.initializeBackgroundProcessing();
 
     expect(mockRegisterTaskAsync).toHaveBeenCalledTimes(1);
   });
 
-  it("returns NewData when pending recordings processor runs", async () => {
+  it("returns Success when pending recordings processor runs", async () => {
     const service = loadService();
-    const mockProcessPendingRecordings = jest.fn().mockResolvedValue(undefined);
+    service.setBackgroundProcessors({ processPendingRecordings: async () => {} });
+    await service.initializeBackgroundProcessing();
 
-    service.setBackgroundProcessors({ processPendingRecordings: mockProcessPendingRecordings });
-
-    const task = mockTaskHandlers.get("miidiary.background.transcription");
-    const result = await task?.();
-
-    expect(mockProcessPendingRecordings).toHaveBeenCalled();
-    expect(result).toBe("new-data");
+    const handler = mockTaskHandlers.get("miidiary.background.transcription");
+    expect(handler).toBeDefined();
+    await expect(handler?.()).resolves.toBe(1); // Success
   });
 
   it("returns Failed when processor throws", async () => {
     const service = loadService();
     service.setBackgroundProcessors({
-      processPendingRecordings: jest.fn().mockRejectedValue(new Error("boom")),
+      processPendingRecordings: async () => {
+        throw new Error("boom");
+      },
     });
+    await service.initializeBackgroundProcessing();
 
-    const task = mockTaskHandlers.get("miidiary.background.transcription");
-    const result = await task?.();
-
-    expect(result).toBe("failed");
+    const handler = mockTaskHandlers.get("miidiary.background.transcription");
+    await expect(handler?.()).resolves.toBe(2); // Failed
   });
 
   it("unregisters when task is registered", async () => {
-    const service = loadService();
     mockIsTaskRegisteredAsync.mockResolvedValue(true);
-
+    const service = loadService();
     await service.unregisterBackgroundProcessing();
 
     expect(mockUnregisterTaskAsync).toHaveBeenCalledWith("miidiary.background.transcription");

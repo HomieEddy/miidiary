@@ -44,7 +44,8 @@
     "plugins": [
       "expo-router",
       "expo-localization",
-      "expo-notifications"
+      "expo-notifications",
+      "./plugins/withMainActivityPerfInit.js"
     ]
   }
 }

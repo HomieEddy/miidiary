@@ -6,6 +6,18 @@ jest.mock("@/services/entriesRepository", () => ({
   entriesRepository: { listChronological: (...args: unknown[]) => mockList(...args) },
 }));
 
+// Mutable store state so a test can drop a new entry in while the hook is mounted.
+let mockEntries: Array<{ id: string }> = [];
+const mockUseEntriesStore = jest.fn(
+  (selector: (state: { entries: Array<{ id: string }> }) => unknown) =>
+    selector({ entries: mockEntries }),
+);
+
+jest.mock("@/stores/entriesStore", () => ({
+  useEntriesStore: (...args: unknown[]) =>
+    (mockUseEntriesStore as (...a: unknown[]) => unknown)(...args),
+}));
+
 import { useStats } from "@/hooks/useStats";
 import type { EntryRecord } from "@/types/entry";
 
@@ -33,6 +45,7 @@ function daysAgo(days: number, hour = 10): string {
 describe("useStats", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockEntries = [];
   });
 
   it("counts entries, today's entries, and category distribution", async () => {
@@ -107,5 +120,23 @@ describe("useStats", () => {
     });
 
     expect(result.current.stats?.total).toBe(0);
+  });
+
+  it("reloads stats when a new entry is added while mounted", async () => {
+    const first = makeEntry({ createdAt: daysAgo(0) });
+    const second = makeEntry({ createdAt: daysAgo(0) });
+    mockList.mockResolvedValueOnce([first]).mockResolvedValueOnce([first, second]);
+
+    const { result, rerender } = renderHook(() => useStats());
+
+    await waitFor(() => expect(result.current.stats?.total).toBe(1));
+    expect(mockList).toHaveBeenCalledTimes(1);
+
+    // A new entry lands in the store while the hook stays mounted.
+    mockEntries = [second, ...mockEntries];
+    rerender(undefined);
+
+    await waitFor(() => expect(mockList).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(result.current.stats?.total).toBe(2));
   });
 });

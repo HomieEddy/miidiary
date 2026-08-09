@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { entriesRepository } from "@/services/entriesRepository";
+import { useEntriesStore } from "@/stores/entriesStore";
 import type { EntryCategory } from "@/types/entry";
 
 export interface DiaryStats {
@@ -56,6 +57,11 @@ export function useStats(): { stats: DiaryStats | null; loading: boolean; reload
   const [stats, setStats] = useState<DiaryStats | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // While the tab stays mounted, new entries land in the store without a fresh
+  // mount — reload whenever the entry list changes so the stats stay current.
+  const entryCount = useEntriesStore((state) => state.entries.length);
+  const latestEntryId = useEntriesStore((state) => state.entries[0]?.id ?? null);
+
   const reload = useCallback(async () => {
     setLoading(true);
     const entries = await entriesRepository.listChronological();
@@ -90,7 +96,7 @@ export function useStats(): { stats: DiaryStats | null; loading: boolean; reload
 
   useEffect(() => {
     void reload();
-  }, [reload]);
+  }, [reload, entryCount, latestEntryId]);
 
   return { stats, loading, reload };
 }

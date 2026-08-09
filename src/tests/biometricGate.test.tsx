@@ -86,4 +86,38 @@ describe("BiometricGate", () => {
       expect(queryByLabelText("Retry unlock")).toBeNull();
     });
   });
+
+  it("renders children without an auth prompt when hardware is missing", async () => {
+    mockHasHardwareAsync.mockResolvedValue(false);
+
+    const { queryByLabelText, queryByText } = render(
+      <Wrapper>
+        <Text>Protected content</Text>
+      </Wrapper>,
+    );
+
+    await waitFor(() => {
+      expect(queryByLabelText("Retry unlock")).toBeNull();
+    });
+
+    expect(queryByText("Protected content")).toBeTruthy();
+    expect(mockAuthenticateAsync).not.toHaveBeenCalled();
+  });
+
+  it("renders children without an auth prompt when nothing is enrolled", async () => {
+    mockIsEnrolledAsync.mockResolvedValue(false);
+
+    const { queryByLabelText, queryByText } = render(
+      <Wrapper>
+        <Text>Protected content</Text>
+      </Wrapper>,
+    );
+
+    await waitFor(() => {
+      expect(queryByLabelText("Retry unlock")).toBeNull();
+    });
+
+    expect(queryByText("Protected content")).toBeTruthy();
+    expect(mockAuthenticateAsync).not.toHaveBeenCalled();
+  });
 });

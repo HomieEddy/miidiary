@@ -168,12 +168,24 @@ export default function TasksScreen(): ReactElement {
   }, [latestPersistedEntryId, loadEntries]);
 
   const taskEntries = entries;
+  const completedCount = taskEntries.filter((entry) => entry.isCompleted).length;
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   const handleToggle = useCallback(async (entryId: string): Promise<void> => {
     await entriesRepository.toggleComplete(entryId);
     await loadEntries();
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   }, [loadEntries]);
+
+  const handleClearCompleted = useCallback(async (): Promise<void> => {
+    const completed = taskEntries.filter((entry) => entry.isCompleted);
+    for (const entry of completed) {
+      await entriesRepository.deleteOne(entry.id);
+      useEntriesStore.getState().removeEntry(entry.id);
+    }
+    setShowClearConfirm(false);
+    await loadEntries();
+  }, [taskEntries, loadEntries]);
 
   return (
     <PerformanceMeasureView screenName="TasksScreen" interactive>
@@ -229,6 +241,50 @@ export default function TasksScreen(): ReactElement {
           ))}
         </View>
       )}
+
+      {completedCount > 0 && !showClearConfirm ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("tasks.clearCompleted")}
+          className="self-end mt-5 bg-muted border-2 border-border rounded-xl px-3 py-2"
+          onPress={() => setShowClearConfirm(true)}
+        >
+          <Text className="font-sans text-xs font-bold text-muted-foreground">
+            {t("tasks.clearCompleted")}
+          </Text>
+        </Pressable>
+      ) : null}
+
+      {showClearConfirm ? (
+        <Animated.View
+          entering={FadeInDown.duration(200).springify().damping(16)}
+          className="bg-card border-4 border-border rounded-2xl p-4 shadow-paper mt-4"
+        >
+          <Text className="font-sans text-sm text-foreground">{t("tasks.clearCompletedBody")}</Text>
+          <View className="flex-row gap-2 mt-3">
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Cancel clear completed"
+              className="flex-1 bg-muted border-2 border-border rounded-xl p-3"
+              onPress={() => setShowClearConfirm(false)}
+            >
+              <Text className="font-sans text-center font-bold text-foreground">{t("diary.cancel")}</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Confirm clear completed"
+              className="flex-1 bg-destructive border-2 border-border rounded-xl p-3"
+              onPress={() => {
+                void handleClearCompleted();
+              }}
+            >
+              <Text className="font-sans text-center font-bold text-destructive-foreground">
+                {t("diary.wipeConfirm")}
+              </Text>
+            </Pressable>
+          </View>
+        </Animated.View>
+      ) : null}
       </ScrollView>
     </View>
     </PerformanceMeasureView>

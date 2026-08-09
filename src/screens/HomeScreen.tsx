@@ -15,6 +15,8 @@ import { AnimatedEntrance } from '@/components/ui/AnimatedEntrance';
 import { useAudioCapture } from '@/hooks/useAudioCapture';
 import { useTranscription } from '@/hooks/useTranscription';
 import { useShakeToReset } from '@/hooks/useShakeToReset';
+import { useTheme } from "@/hooks/useTheme";
+import { useStats } from "@/hooks/useStats";
 import { useTabBarClearance } from '@/hooks/useTabBarClearance';
 import { useLocale } from '@/i18n';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';import { useEntriesStore } from '@/stores/entriesStore';
@@ -44,6 +46,9 @@ function describeError(error: unknown): string {
 
 export default function HomeScreen(): ReactElement {
   const { t } = useLocale();
+  const { isDark } = useTheme();
+  const { stats } = useStats();
+  const streakDays = stats?.streakDays ?? 0;
   const [modelState, setModelState] = useState<ModelReadinessState>('loading');
   const [modelError, setModelError] = useState<string | null>(null);
   const latestEntry = useEntriesStore((state) => state.entries[0]);
@@ -121,6 +126,13 @@ export default function HomeScreen(): ReactElement {
     }
   }, [stopRecording, processRecording]);
 
+  // Tapping the error banner must actually reprocess the failed
+  // recording, not just clear the error state.
+  const handleRetryAfterError = useCallback(() => {
+    retry();
+    void processPendingRecordings();
+  }, [retry, processPendingRecordings]);
+
   // Stable so ThoughtShredder's effect (deps: onComplete) doesn't re-arm
   // its 700ms/1300ms shredder delays on every HomeScreen re-render.
   const handleShredderComplete = useCallback(() => {
@@ -175,6 +187,15 @@ export default function HomeScreen(): ReactElement {
         <AnimatedEntrance>
           <DailySparkCard />
         </AnimatedEntrance>
+        {streakDays >= 2 ? (
+          <AnimatedEntrance delay={60}>
+            <View className="mt-3 self-center bg-card border-2 border-border rounded-full px-4 py-1.5 shadow-paper-sm">
+              <Text className="font-sans text-xs font-bold" style={{ color: primaryTextHex(isDark) }}>
+                {t("home.streakNudge", { days: streakDays })}
+              </Text>
+            </View>
+          </AnimatedEntrance>
+        ) : null}
       </View>
 
       <AnimatedEntrance delay={100}>
@@ -224,7 +245,10 @@ export default function HomeScreen(): ReactElement {
         </View>
 
         <View className="mt-4 px-6 w-full">
-          <ErrorBanner visible={status === 'error'} onRetry={retry} />
+          <ErrorBanner
+            visible={status === 'error'}
+            onRetry={handleRetryAfterError}
+          />
         </View>
         </View>
       </AnimatedEntrance>

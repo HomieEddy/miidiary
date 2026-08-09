@@ -15,6 +15,7 @@ import {
   ReanimatedLogLevel,
 } from "react-native-reanimated";
 import { BiometricGate } from "@/components/ui/BiometricGate";
+import { OnboardingOverlay } from "@/components/ui/OnboardingOverlay";
 import { useTheme } from "@/hooks/useTheme";
 import { useSkiaReady, ensureSkiaWeb } from "@/hooks/useSkiaReady";
 import { useInterruptionHandler } from "@/services/interruptionService";
@@ -102,6 +103,7 @@ export default function RootLayout(): ReactElement | null {
       <View className={cn("flex-1 bg-background", isDark && "dark")}>
         <StatusBar style={isDark ? "light" : "dark"} />
         <Stack screenOptions={{ headerShown: false }} />
+        <OnboardingOverlay />
       </View>
     </BiometricGate>
   );

@@ -30,7 +30,8 @@
     "digestsTitle": "Digests will appear here",
     "digestsBody": "Weekly and monthly reflections unlock after browse and review features land.",
     "shakeHint": "Shake during recording to discard",
-    "shakeDiscarded": "Recording discarded"
+    "shakeDiscarded": "Recording discarded",
+    "streakNudge": "{{days}}-day streak — keep it going"
   },
   "diary": {
     "title": "Diary",
@@ -159,5 +160,15 @@
     "streak": "{{count}} day streak",
     "today": "{{count}} today",
     "empty": "Record thoughts to see your stats bloom."
+  },
+  "onboarding": {
+    "skip": "Skip",
+    "start": "Start capturing",
+    "slide1Title": "Capture in a tap",
+    "slide1Body": "Press the button, speak your mind, and let the app sort it out.",
+    "slide2Title": "Private by design",
+    "slide2Body": "Everything stays on your device — encrypted, offline, zero cloud.",
+    "slide3Title": "Organized automatically",
+    "slide3Body": "Thoughts become diary entries, tasks, and notes without lifting a finger."
   }
 }

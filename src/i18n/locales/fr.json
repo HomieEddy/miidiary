@@ -30,7 +30,8 @@
     "digestsTitle": "Les résumés apparaîtront ici",
     "digestsBody": "Les réflexions hebdomadaires et mensuelles seront disponibles après l'arrivée des fonctions de consultation.",
     "shakeHint": "Secouez pendant l'enregistrement pour annuler",
-    "shakeDiscarded": "Enregistrement annulé"
+    "shakeDiscarded": "Enregistrement annulé",
+    "streakNudge": "Série de {{days}} jours — continuez !"
   },
   "diary": {
     "title": "Journal",
@@ -159,5 +160,15 @@
     "streak": "Série de {{count}} jours",
     "today": "{{count}} aujourd’hui",
     "empty": "Enregistrez des pensées pour voir vos statistiques fleurir."
+  },
+  "onboarding": {
+    "skip": "Passer",
+    "start": "Commencer",
+    "slide1Title": "Capture en un geste",
+    "slide1Body": "Appuyez, parlez, et laissez l'application ranger vos pensées.",
+    "slide2Title": "Privé par conception",
+    "slide2Body": "Tout reste sur votre appareil — chiffré, hors ligne, zéro cloud.",
+    "slide3Title": "Organisé automatiquement",
+    "slide3Body": "Les pensées deviennent journal, tâches et notes sans effort."
   }
 }

@@ -169,4 +169,22 @@ describe("entriesRepository", () => {
     // Keep this as a bounded fast-path check to reduce CI timing flakiness.
     expect(elapsedMs).toBeLessThan(50);
   });
+
+  it("restoreEntry re-inserts a deleted record under its original id", async () => {
+    const created = await entriesRepository.createEntry({
+      text: "Undo me",
+      category: "note",
+    });
+
+    await entriesRepository.deleteOne(created.id);
+    expect(await entriesRepository.listChronological()).toHaveLength(0);
+
+    const restored = await entriesRepository.restoreEntry(created);
+    expect(restored.id).toBe(created.id);
+    expect(restored.text).toBe("Undo me");
+
+    const entries = await entriesRepository.listChronological();
+    expect(entries).toHaveLength(1);
+    expect(entries[0].id).toBe(created.id);
+  });
 });

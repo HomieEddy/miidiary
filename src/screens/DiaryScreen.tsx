@@ -92,12 +92,87 @@ export default function DiaryScreen(): ReactElement {
   const [newSheetVisible, setNewSheetVisible] = useState(false);
   const [longPressTarget, setLongPressTarget] = useState<EntryRecord | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<EntryRecord | null>(null);
+  const [undoEntry, setUndoEntry] = useState<EntryRecord | null>(null);
+  const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [sheetEntry, setSheetEntry] = useState<EntryRecord | null>(null);
   const [sheetMode, setSheetMode] = useState<"view" | "edit">("view");
   const [sheetVisible, setSheetVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const searchInputRef = useRef<TextInput | null>(null);
+  const [recentSearches, setRecentSearches] = useState<string[]>([]);
+
+  useEffect(() => {
+    const raw = getPref(RECENT_SEARCHES_KEY);
+    if (!raw) {
+      return;
+    }
+    try {
+      const parsed = JSON.parse(raw) as unknown;
+      if (Array.isArray(parsed)) {
+        setRecentSearches(parsed.filter((item): item is string => typeof item === "string"));
+      }
+    } catch {
+      // Corrupt prefs fall back to empty recents.
+    }
+  }, []);
+
+  useEffect(() => {
+    setPref(RECENT_SEARCHES_KEY, JSON.stringify(recentSearches));
+  }, [recentSearches]);
+
+  useEffect(() => {
+    // A resolved search (searchResults !== null) with a non-empty query
+    // becomes a recent search — newest first, capped at 5, unique.
+    const trimmed = searchQuery.trim();
+    if (searchResults !== null && trimmed) {
+      setRecentSearches((current) =>
+        [trimmed, ...current.filter((item) => item !== trimmed)].slice(0, 5),
+      );
+    }
+  }, [searchResults, searchQuery]);
+
+  const clearRecentSearches = useCallback(() => {
+    setRecentSearches([]);
+  }, []);
+
+  const offerUndo = useCallback((record: EntryRecord) => {
+    if (undoTimerRef.current) {
+      clearTimeout(undoTimerRef.current);
+    }
+    setUndoEntry(record);
+    undoTimerRef.current = setTimeout(() => {
+      setUndoEntry(null);
+      undoTimerRef.current = null;
+    }, 6000);
+  }, []);
+
+  const handleUndo = useCallback(async () => {
+    if (!undoEntry) {
+      return;
+    }
+    if (undoTimerRef.current) {
+      clearTimeout(undoTimerRef.current);
+      undoTimerRef.current = null;
+    }
+    const restored = await entriesRepository.restoreEntry(undoEntry);
+    useEntriesStore.getState().addPersistedEntry({
+      id: restored.id,
+      text: restored.text,
+      category: restored.category,
+      createdAt: restored.createdAt,
+    });
+    setUndoEntry(null);
+    await loadEntries();
+  }, [undoEntry, loadEntries]);
+
+  useEffect(() => {
+    return () => {
+      if (undoTimerRef.current) {
+        clearTimeout(undoTimerRef.current);
+      }
+    };
+  }, []);
 
   const loadWithState = useCallback(async () => {
     setIsLoading(true);
@@ -266,6 +341,38 @@ export default function DiaryScreen(): ReactElement {
             autoFocus={isSearchOpen}
             editable={isSearchOpen}
           />
+
+          {!searchQuery.trim() && recentSearches.length > 0 ? (
+            <View className="mt-3">
+              <View className="flex-row items-center justify-between mb-2">
+                <Text className="font-sans text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                  {t("diary.recentSearches")}
+                </Text>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t("diary.clearRecents")}
+                  onPress={clearRecentSearches}
+                >
+                  <Text className="font-sans text-xs font-bold text-muted-foreground">
+                    {t("diary.clearRecents")}
+                  </Text>
+                </Pressable>
+              </View>
+              <View className="flex-row flex-wrap gap-2">
+                {recentSearches.map((term) => (
+                  <Pressable
+                    key={term}
+                    accessibilityRole="button"
+                    accessibilityLabel={term}
+                    className="bg-card border-2 border-border rounded-full px-3 py-1"
+                    onPress={() => setSearchQuery(term)}
+                  >
+                    <Text className="font-sans text-xs font-bold text-foreground">{term}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            </View>
+          ) : null}
         </Animated.View>
       ) : null}
 
@@ -411,10 +518,12 @@ export default function DiaryScreen(): ReactElement {
                   }
 
                   void (async () => {
-                    await entriesRepository.deleteOne(deleteTarget.id);
-                    useEntriesStore.getState().removeEntry(deleteTarget.id);
+                    const deleted = deleteTarget;
+                    await entriesRepository.deleteOne(deleted.id);
+                    useEntriesStore.getState().removeEntry(deleted.id);
                     await loadEntries();
                     setDeleteTarget(null);
+                    offerUndo(deleted);
                   })();
                 }}
               >
@@ -501,6 +610,28 @@ export default function DiaryScreen(): ReactElement {
           void loadEntries();
         }}
       />
+      {undoEntry ? (
+        <Animated.View
+          entering={FadeIn.duration(150)}
+          className="absolute bottom-28 left-8 right-8 items-center"
+          pointerEvents="box-none"
+        >
+          <View className="bg-card border-2 border-border rounded-2xl px-4 py-3 shadow-paper flex-row items-center gap-3">
+            <Text className="font-sans text-sm font-medium text-foreground">
+              {t("diary.undoDelete")}
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t("diary.undo")}
+              onPress={() => {
+                void handleUndo();
+              }}
+            >
+              <Text className="font-sans text-sm font-bold text-primary">{t("diary.undo")}</Text>
+            </Pressable>
+          </View>
+        </Animated.View>
+      ) : null}
 
       <EntryDetailSheet
         entry={sheetEntry}

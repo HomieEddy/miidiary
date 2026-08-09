@@ -1,4 +1,5 @@
 import * as Crypto from "expo-crypto";
+import Realm from "realm";
 import { buildEntryQueryKey } from "@/models/EntryRealm";
 import { getRealmInstance } from "@/services/realmService";
 import type {
@@ -106,6 +107,34 @@ async function wipeAll(): Promise<void> {
   });
 }
 
+/** Re-insert a previously deleted record under its original id (undo). */
+async function restoreEntry(record: EntryRecord): Promise<EntryRecord> {
+  const realm = await getRealmInstance();
+  const payload: RealmEntry = {
+    id: record.id,
+    text: record.text,
+    category: record.category,
+    createdAt: new Date(record.createdAt),
+    updatedAt: new Date(record.updatedAt),
+    title: record.title,
+    previewText: record.previewText,
+    queryKey: record.queryKey,
+    isCompleted: record.isCompleted,
+    isFavorite: record.isFavorite,
+    dueDate: record.dueDate,
+    isUrgent: record.isUrgent,
+    classificationConfidence: record.classificationConfidence,
+    classificationRationale: record.classificationRationale,
+    classificationSource: record.classificationSource,
+  };
+
+  realm.write(() => {
+    realm.create("Entry", payload, true);
+  });
+
+  return toEntryRecord(payload);
+}
+
 async function count(): Promise<number> {
   const realm = await getRealmInstance();
   return realm.objects("Entry").length;
@@ -189,5 +218,6 @@ export const entriesRepository = {
   searchEntries,
   toggleComplete,
   toggleFavorite,
+  restoreEntry,
   updateEntry,
 };

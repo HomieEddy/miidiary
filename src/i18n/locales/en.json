@@ -31,7 +31,8 @@
     "digestsBody": "Weekly and monthly reflections unlock after browse and review features land.",
     "shakeHint": "Shake during recording to discard",
     "shakeDiscarded": "Recording discarded",
-    "streakNudge": "{{days}}-day streak — keep it going"
+    "streakNudge": "{{days}}-day streak — keep it going",
+    "webRecordingUnavailable": "Recording isn't available in the browser"
   },
   "diary": {
     "title": "Diary",

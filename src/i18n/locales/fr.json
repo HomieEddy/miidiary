@@ -31,7 +31,8 @@
     "digestsBody": "Les réflexions hebdomadaires et mensuelles seront disponibles après l'arrivée des fonctions de consultation.",
     "shakeHint": "Secouez pendant l'enregistrement pour annuler",
     "shakeDiscarded": "Enregistrement annulé",
-    "streakNudge": "Série de {{days}} jours — continuez !"
+    "streakNudge": "Série de {{days}} jours — continuez !",
+    "webRecordingUnavailable": "L'enregistrement n'est pas disponible dans le navigateur"
   },
   "diary": {
     "title": "Journal",

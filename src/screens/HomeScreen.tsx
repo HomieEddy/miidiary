@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { AppState, ScrollView, Text, View } from 'react-native';
+import { AppState, Platform, ScrollView, Text, View } from 'react-native';
 import { GlowRing } from '@/components/ui/GlowRing';
 import { HomePreviewSections } from '@/components/ui/HomePreviewSections';
 import { RecorderButton } from '@/components/ui/RecorderButton';
@@ -218,6 +218,14 @@ export default function HomeScreen(): ReactElement {
           <View className="mt-2">
             <Text className="font-sans text-xs font-medium text-muted-foreground text-center">
               {t("home.shakeHint")}
+            </Text>
+          </View>
+        ) : null}
+
+        {Platform.OS === "web" ? (
+          <View className="mt-2">
+            <Text className="font-sans text-xs font-medium text-muted-foreground text-center">
+              {t("home.webRecordingUnavailable")}
             </Text>
           </View>
         ) : null}

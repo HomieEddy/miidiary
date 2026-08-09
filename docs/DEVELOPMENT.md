@@ -120,6 +120,10 @@ All styling uses NativeWind v4 utility classes. The color palette and font token
 - `theme/colors.ts` — runtime-accessible color constants and themed helpers
 - `global.css` — CSS variable tokens (light + dark)
 
+## Web Preview
+
+`npm run web` (or opening `http://localhost:8081` while the dev server runs) serves the same codebase in the browser — useful for UI work. Known web limitations: entries are in-memory only (no persistence), recording is unavailable (the home screen shows an explanatory hint), and the biometric gate auto-unlocks. See README for the full caveat list.
+
 ## Branch Conventions
 
 This project follows a per-phase branch strategy:

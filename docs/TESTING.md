@@ -167,6 +167,10 @@ coverageThreshold: {
 },
 ```
 
+## E2E Strategy
+
+The original Detox scaffold (`e2e/` + `.detoxrc.js`) was removed: its flows were permanently disabled (`xit`) and targeted an AVD that is not part of the dev setup. The browse/review regression net is now a Jest integration test (`src/tests/diaryFlow.integration.test.tsx`) that drives the REAL repository (in-memory realm double) through the real `useEntries` hook and the entries store: capture → browse → search → wipe → restore, plus task-completion round-trips. Device-level E2E can be re-added later against a real AVD if the CI setup requires it.
+
 ## CI Integration
 
 No CI/CD pipeline is currently configured for this project. Test execution is manual via `npm test`.

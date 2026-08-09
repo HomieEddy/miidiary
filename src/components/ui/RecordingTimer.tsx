@@ -37,7 +37,8 @@ export function RecordingTimer(): React.ReactElement | null {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
-      useRecordingStore.getState().setDuration(0);
+      // Duration reset happens in the store's setRecording(true) so a late
+      // stopRecording completion cannot be overwritten with a stale 0.
     }
     return () => {
       if (intervalRef.current) {
@@ -66,7 +67,7 @@ export function RecordingTimer(): React.ReactElement | null {
         </Text>
       </View>
       <Text className={cn(
-        'font-sans text-4xl font-bold text-center tracking-wider',
+        'font-sans text-4xl font-bold text-center tracking-wider tabular-nums',
         isPaused ? 'text-muted-foreground' : 'text-foreground'
       )}>
         {formatTime(duration)}

@@ -7,6 +7,7 @@ const mockClassifyEntry = jest.fn();
 const mockCleanupTempFile = jest.fn();
 const mockGetTempFilePath = jest.fn();
 const mockGetPendingProcessingUris = jest.fn();
+const mockGetRecordingSessionId = jest.fn();
 const mockMarkProcessingComplete = jest.fn();
 const mockCreateEntry = jest.fn();
 
@@ -26,6 +27,7 @@ jest.mock("@/services/audioCaptureService", () => ({
   audioCaptureService: {
     getTempFilePath: (...args: unknown[]) => mockGetTempFilePath(...args),
     getPendingProcessingUris: (...args: unknown[]) => mockGetPendingProcessingUris(...args),
+    getRecordingSessionId: (...args: unknown[]) => mockGetRecordingSessionId(...args),
     cleanupTempFile: (...args: unknown[]) => mockCleanupTempFile(...args),
     markProcessingComplete: (...args: unknown[]) => mockMarkProcessingComplete(...args),
   },
@@ -41,6 +43,7 @@ describe("useTranscription", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetPendingProcessingUris.mockReturnValue([]);
+    mockGetRecordingSessionId.mockReturnValue(undefined);
     useRecordingStore.getState().reset();
   });
 
@@ -89,7 +92,8 @@ describe("useTranscription", () => {
     );
     expect(useRecordingStore.getState().isProcessing).toBe(false);
     expect(mockCreateEntry).not.toHaveBeenCalled();
-    expect(mockMarkProcessingComplete).toHaveBeenCalledWith("file:///test.wav");
+    // Failure keeps the URI pending so a later replay can retry it.
+    expect(mockMarkProcessingComplete).not.toHaveBeenCalled();
   });
 
   it("processRecording surfaces actionable install error guidance", async () => {
@@ -193,7 +197,7 @@ describe("useTranscription", () => {
     expect(useRecordingStore.getState().isProcessing).toBe(false);
   });
 
-  it("cleans up both audio URI and temp path when different", async () => {
+  it("cleans up only the recording's own URI, never the shared temp path", async () => {
     mockTranscribeAudio.mockResolvedValue({ text: "Cleanup text" });
     mockClassifyEntry.mockResolvedValue({
       category: "note",
@@ -210,8 +214,10 @@ describe("useTranscription", () => {
       await result.current.processRecording("file:///test.wav");
     });
 
+    // The shared temp path may already belong to a NEWER recording —
+    // cleanup must never touch it (that would delete a live recording).
+    expect(mockCleanupTempFile).toHaveBeenCalledTimes(1);
     expect(mockCleanupTempFile).toHaveBeenCalledWith("file:///test.wav");
-    expect(mockCleanupTempFile).toHaveBeenCalledWith("file:///temp.wav");
   });
 
   it("updates processing stage from transcription callbacks", async () => {
@@ -263,6 +269,62 @@ describe("useTranscription", () => {
     expect(mockTranscribeAudio).toHaveBeenCalledTimes(2);
     expect(mockMarkProcessingComplete).toHaveBeenCalledWith("file:///pending-1.wav");
     expect(mockMarkProcessingComplete).toHaveBeenCalledWith("file:///pending-2.wav");
+  });
+
+  it("does not clobber the live session when a stale recording completes", async () => {
+    // Session 1's recording finishes while session 2 is live.
+    mockGetRecordingSessionId.mockReturnValue(1);
+    useRecordingStore.getState().setRecording(true); // session 1
+    useRecordingStore.getState().setRecording(true); // session 2
+    useRecordingStore.getState().setProcessing(true); // live processing state
+    mockTranscribeAudio.mockResolvedValue({ text: "Old text" });
+    mockClassifyEntry.mockResolvedValue({
+      category: "note",
+      confidence: 0.72,
+      rationale: "Model matched 2 weighted feature(s) for note.",
+      source: "model",
+    });
+    mockCreateEntry.mockResolvedValue({ id: "entry-1" });
+
+    const { result } = renderHook(() => useTranscription());
+
+    await act(async () => {
+      await result.current.processRecording("file:///stale.wav");
+    });
+
+    // The stale completion must still persist (the audio was recorded),
+    // but it must not rewrite the live session's UI state.
+    expect(mockCreateEntry).toHaveBeenCalledTimes(1);
+    expect(useRecordingStore.getState().isProcessing).toBe(true);
+    expect(useRecordingStore.getState().errorMessage).toBeNull();
+    expect(useRecordingStore.getState().processingStage).toBe("preparing");
+  });
+
+  it("dedupes concurrent pending replays of the same URI", async () => {
+    mockGetPendingProcessingUris.mockReturnValue(["file:///dup.wav"]);
+    mockTranscribeAudio.mockResolvedValue({ text: "Once only" });
+    mockClassifyEntry.mockResolvedValue({
+      category: "note",
+      confidence: 0.72,
+      rationale: "Model matched 2 weighted feature(s) for note.",
+      source: "model",
+    });
+    mockGetTempFilePath.mockReturnValue(null);
+    mockCreateEntry.mockResolvedValue({ id: "entry-1" });
+
+    const { result } = renderHook(() => useTranscription());
+
+    await act(async () => {
+      // Simulate mount trigger + AppState-active trigger firing together.
+      await Promise.all([
+        result.current.processPendingRecordings(),
+        result.current.processPendingRecordings(),
+      ]);
+    });
+
+    expect(mockTranscribeAudio).toHaveBeenCalledTimes(1);
+    expect(mockCreateEntry).toHaveBeenCalledTimes(1);
+    expect(mockMarkProcessingComplete).toHaveBeenCalledWith("file:///dup.wav");
   });
 });
 

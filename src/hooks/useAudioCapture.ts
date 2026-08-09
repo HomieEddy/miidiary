@@ -79,26 +79,33 @@ export function useAudioCapture(): UseAudioCaptureResult {
   ]);
 
   const stopRecording = useCallback(async (): Promise<string | undefined> => {
+    // Capture the session BEFORE awaiting the native stop: a new recording
+    // started while we stop must not have its state clobbered by ours.
+    const sessionId = useRecordingStore.getState().sessionId;
     setRecording(false);
 
     const uri = await audioCaptureService.stopRecording();
 
-    if (durationRef.current) {
+    if (durationRef.current && useRecordingStore.getState().sessionId === sessionId) {
       const elapsed = Date.now() - durationRef.current;
       setDuration(elapsed);
     }
 
     if (!uri) {
-      setProcessing(false);
-      setProcessingStage('idle');
-      setError(`Recording failed: ${audioCaptureService.getLastError() ?? 'Unable to save recorded audio.'}`);
-      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      if (useRecordingStore.getState().sessionId === sessionId) {
+        setProcessing(false);
+        setProcessingStage('idle');
+        setError(`Recording failed: ${audioCaptureService.getLastError() ?? 'Unable to save recorded audio.'}`);
+        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      }
       return undefined;
     }
 
-    setProcessing(true);
-    setProcessingStage('preparing');
-    audioCaptureService.markPendingProcessing(uri);
+    if (useRecordingStore.getState().sessionId === sessionId) {
+      setProcessing(true);
+      setProcessingStage('preparing');
+    }
+    audioCaptureService.markPendingProcessing(uri, sessionId);
 
     return uri;
   }, [setRecording, setProcessing, setProcessingStage, setError, setDuration]);

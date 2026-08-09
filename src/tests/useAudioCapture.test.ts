@@ -105,7 +105,7 @@ describe("useAudioCapture", () => {
     expect(uri).toBe("file:///recording.wav");
     expect(useRecordingStore.getState().isRecording).toBe(false);
     expect(useRecordingStore.getState().isProcessing).toBe(true);
-    expect(mockMarkPendingProcessing).toHaveBeenCalledWith("file:///recording.wav");
+    expect(mockMarkPendingProcessing).toHaveBeenCalledWith("file:///recording.wav", 0);
   });
 
   it("stopRecording sets error when URI is null", async () => {

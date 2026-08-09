@@ -10,6 +10,7 @@ const mockGetPendingProcessingUris = jest.fn();
 const mockGetRecordingSessionId = jest.fn();
 const mockMarkProcessingComplete = jest.fn();
 const mockCreateEntry = jest.fn();
+const mockFindByText = jest.fn();
 
 jest.mock("@/services/transcriptionService", () => ({
   transcriptionService: {
@@ -36,6 +37,7 @@ jest.mock("@/services/audioCaptureService", () => ({
 jest.mock("@/services/entriesRepository", () => ({
   entriesRepository: {
     createEntry: (...args: unknown[]) => mockCreateEntry(...args),
+    findByText: (...args: unknown[]) => mockFindByText(...args),
   },
 }));
 
@@ -44,6 +46,7 @@ describe("useTranscription", () => {
     jest.clearAllMocks();
     mockGetPendingProcessingUris.mockReturnValue([]);
     mockGetRecordingSessionId.mockReturnValue(undefined);
+    mockFindByText.mockResolvedValue(null);
     useRecordingStore.getState().reset();
   });
 
@@ -325,6 +328,43 @@ describe("useTranscription", () => {
     expect(mockTranscribeAudio).toHaveBeenCalledTimes(1);
     expect(mockCreateEntry).toHaveBeenCalledTimes(1);
     expect(mockMarkProcessingComplete).toHaveBeenCalledWith("file:///dup.wav");
+  });
+
+  it("skips persisting when the exact text already exists (crash-window dedupe)", async () => {
+    mockTranscribeAudio.mockResolvedValue({ text: "Already saved" });
+    mockClassifyEntry.mockResolvedValue({
+      category: "note",
+      confidence: 0.72,
+      rationale: "Model matched 2 weighted feature(s) for note.",
+      source: "model",
+    });
+    mockFindByText.mockResolvedValue({
+      id: "entry-existing",
+      text: "Already saved",
+      category: "note",
+      createdAt: "2026-08-09T10:00:00.000Z",
+      updatedAt: "2026-08-09T10:00:00.000Z",
+      title: "Already saved",
+      previewText: "Already saved",
+      queryKey: "n|1|entry-existing",
+      isCompleted: false,
+      isFavorite: false,
+      dueDate: null,
+      isUrgent: false,
+      classificationConfidence: null,
+      classificationRationale: null,
+      classificationSource: null,
+    });
+
+    const { result } = renderHook(() => useTranscription());
+
+    await act(async () => {
+      await result.current.processRecording("file:///crash.wav");
+    });
+
+    expect(mockCreateEntry).not.toHaveBeenCalled();
+    // The URI is still cleared so the replay does not loop forever.
+    expect(mockMarkProcessingComplete).toHaveBeenCalledWith("file:///crash.wav");
   });
 });
 

@@ -110,12 +110,16 @@ export function useTranscription(): UseTranscriptionResult {
         setProcessingStage('persisting');
       }
       try {
-        const entry = await entriesRepository.createEntry({
+        // Crash-window dedupe: if a previous run persisted this exact
+        // text but died before clearing the pending URI, replaying it
+        // must not create a duplicate entry.
+        const existing = await entriesRepository.findByText(result.text);
+        const entry = existing ?? (await entriesRepository.createEntry({
           text: result.text,
           category: classification.category,
           classification,
           createdAt: new Date().toISOString(),
-        });
+        }));
         persisted = true;
         addPersistedEntry({
           id: entry.id,

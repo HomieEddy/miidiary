@@ -63,6 +63,11 @@ async function count(): Promise<number> {
   return store.size;
 }
 
+async function findByText(text: string): Promise<EntryRecord | null> {
+  const match = [...store.values()].find((entry) => entry.text === text);
+  return match ?? null;
+}
+
 async function searchEntries(query: string): Promise<EntryRecord[]> {
   const trimmed = query.trim().toLowerCase();
 

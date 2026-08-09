@@ -154,6 +154,17 @@ async function searchEntries(query: string): Promise<EntryRecord[]> {
     .map((item) => toEntryRecord(item));
 }
 
+/** First entry whose text matches exactly (replay dedupe). */
+async function findByText(text: string): Promise<EntryRecord | null> {
+  const realm = await getRealmInstance();
+  const exact = realm
+    .objects<RealmEntry>("Entry")
+    .filtered("text == $0", text)
+    .sorted("queryKey", true);
+  const first = exact[0];
+  return first ? toEntryRecord(first) : null;
+}
+
 async function toggleComplete(id: string): Promise<void> {
   const realm = await getRealmInstance();
   const entry = realm.objectForPrimaryKey<RealmEntry>("Entry", id);
@@ -218,6 +229,7 @@ export const entriesRepository = {
   searchEntries,
   toggleComplete,
   toggleFavorite,
+  findByText,
   restoreEntry,
   updateEntry,
 };

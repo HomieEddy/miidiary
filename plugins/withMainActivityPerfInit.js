@@ -17,7 +17,7 @@ module.exports = function withMainActivityPerfInit(config) {
 
     if (!modResults.contents.includes(PERF_IMPORT)) {
       modResults.contents = modResults.contents.replace(
-        /^package .*;$/m,
+        /^package [^\r\n]+;?$/m,
         (match) => `${match}\n\n${PERF_IMPORT}`,
       );
     }

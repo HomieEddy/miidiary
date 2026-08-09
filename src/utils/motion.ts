@@ -51,6 +51,7 @@ export function fadeUpStyle(
   progress: number,
   reducedMotion: boolean,
 ): { opacity: number; transform: { translateY: number }[] } {
+  "worklet";
   return {
     opacity: progress,
     transform: reducedMotion

@@ -44,12 +44,6 @@ jest.mock("react-native-reanimated", () => {
   };
 });
 
-jest.mock("rive-react-native", () => ({
-  default: "RiveMock",
-  RiveRef: {},
-  __esModule: true,
-}));
-
 jest.mock("react-native-svg", () => ({
   SvgXml: "SvgXmlMock",
   Svg: "SvgMock",

@@ -40,21 +40,6 @@ const mockUseEntriesState = {
   confirmWipeAll: (...args: unknown[]) => mockConfirmWipeAll(...args),
 };
 
-jest.mock("@shopify/flash-list", () => {
-  const ReactLocal = require("react");
-  const { View } = require("react-native");
-
-  return {
-    FlashList: ({ data, renderItem }: { data: unknown[]; renderItem: (props: { item: unknown }) => React.ReactNode }) => (
-      <View>
-        {data.map((item, index) => (
-          <ReactLocal.Fragment key={index}>{renderItem({ item })}</ReactLocal.Fragment>
-        ))}
-      </View>
-    ),
-  };
-});
-
 jest.mock("@gorhom/bottom-sheet", () => ({
   BottomSheetModal: () => null,
   BottomSheetScrollView: ({ children }: { children: React.ReactNode }) => children,

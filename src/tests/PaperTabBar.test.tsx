@@ -23,13 +23,6 @@ jest.mock("react-native-reanimated", () => {
   };
 });
 
-jest.mock("expo-blur", () => {
-  const { View: MockView } = require("react-native");
-  return {
-    BlurView: ({ style }: { style?: unknown }) => <MockView style={style as object} />,
-  };
-});
-
 const mockIcon = jest.fn(() => <View testID="tab-icon" />);
 
 function makeProps(activeIndex = 0): BottomTabBarProps {

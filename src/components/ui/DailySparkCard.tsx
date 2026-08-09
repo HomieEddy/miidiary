@@ -96,7 +96,7 @@ export function DailySparkCard(): ReactElement {
         style={floatStyle}
       >
         <Image
-          source={require('../../../ui-export-react/images/tjieNgrH5Ca.png')}
+          source={require('../../assets/images/spark-illustration.png')}
           style={{ width: '100%', height: '100%' }}
           contentFit="contain"
           transition={300}

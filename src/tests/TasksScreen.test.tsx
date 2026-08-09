@@ -33,21 +33,6 @@ jest.mock("@/services/entriesRepository", () => ({
   },
 }));
 
-jest.mock("@shopify/flash-list", () => {
-  const ReactLocal = require("react");
-  const { View } = require("react-native");
-
-  return {
-    FlashList: ({ data, renderItem }: { data: unknown[]; renderItem: (props: { item: unknown }) => React.ReactNode }) => (
-      <View>
-        {data.map((item, index) => (
-          <ReactLocal.Fragment key={index}>{renderItem({ item })}</ReactLocal.Fragment>
-        ))}
-      </View>
-    ),
-  };
-});
-
 import TasksScreen from "@/screens/TasksScreen";
 
 describe("TasksScreen", () => {

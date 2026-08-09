@@ -109,6 +109,7 @@ export function DailySparkCard(): ReactElement {
         <Text
           key={promptIndex}
           className="text-sm text-secondary-foreground font-medium"
+          style={{ fontFamily: "Playfair Display", fontStyle: "italic" }}
         >
           "{prompts[promptIndex]}"
         </Text>

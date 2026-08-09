@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
-import { Platform, Pressable, ScrollView, Text, View } from "react-native";
+import { Platform, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
 import { AnimatedEntrance } from "@/components/ui/AnimatedEntrance";
+import { DigestCards } from "@/components/ui/DigestCards";
 import { LazyStatsCard } from "@/components/ui/LazyStatsCard";
 import { PerformanceMeasureView } from "@shopify/react-native-performance";
 import { useEntries } from "@/hooks/useEntries";
+import { useStats } from "@/hooks/useStats";
 import { useScreenProfiler } from "@/hooks/useScreenProfiler";
 import { useTabBarClearance } from "@/hooks/useTabBarClearance";
 import { useSkiaReady } from "@/hooks/useSkiaReady";
@@ -31,17 +33,20 @@ export default function DigestsScreen() {
   const {
     showWipeConfirmStepOne,
     showWipeConfirmStepTwo,
+    loadEntries,
     requestWipeAll,
     cancelWipeAll,
     continueWipeAll,
     confirmWipeAll,
   } = useEntries({ autoLoad: false });
+  const { reload: reloadStats } = useStats();
 
   const [reminder, setReminder] = useState<ReminderSettings | null>(null);
   const [reminderBusy, setReminderBusy] = useState(false);
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [exportBusy, setExportBusy] = useState<"json" | "pdf" | null>(null);
   const [exportError, setExportError] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (!reminderSupported) {
@@ -103,6 +108,20 @@ export default function DigestsScreen() {
           paddingTop: 40,
         }}
         keyboardShouldPersistTaps="handled"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => {
+              void (async () => {
+                setRefreshing(true);
+                await Promise.all([loadEntries(), reloadStats()]);
+                setRefreshing(false);
+              })();
+            }}
+            tintColor={primaryTextHex(isDark)}
+            colors={[primaryTextHex(isDark)]}
+          />
+        }
       >
       <AnimatedEntrance>
         <Text className="font-heading text-4xl text-foreground tracking-wide">{t("digests.title")}</Text>
@@ -112,6 +131,8 @@ export default function DigestsScreen() {
           {t("digests.subtitle")}
         </Text>
       </AnimatedEntrance>
+
+      <DigestCards />
 
       <AnimatedEntrance delay={120}>
         <View className="bg-card border-4 border-border rounded-2xl p-5 shadow-paper mt-8">

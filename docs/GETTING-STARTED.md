@@ -34,7 +34,11 @@ Follow these steps to get the project running on your local machine.
    npm install
    ```
 
-3. **Prebuild native code:**
+3. **Install dependencies:**
+
+   `npm install` runs the `postinstall` script, which applies the committed `patch-package` patches automatically.
+
+4. **Prebuild native code:**
 
    Because the project uses Expo CNG (Continuous Native Generation) with the React Native New Architecture (Fabric), you must generate native project files before the first build:
 
@@ -42,7 +46,7 @@ Follow these steps to get the project running on your local machine.
    npx expo prebuild
    ```
 
-   This command creates `ios/` and `android/` directories from the Expo config in `app.json`. These directories are gitignored and regenerated on each build.
+   This command creates `ios/` and `android/` directories from the Expo config in `app.json`. These directories are gitignored and regenerated on each build. **After prebuild**, re-apply the one manual native edit in `android/app/src/main/java/com/anonymous/miidiaryexpoinit/MainActivity.kt`: call `ReactNativePerformance.onAppStarted()` in `onCreate` before `super.onCreate` (see ARCHITECTURE.md).
 
 4. **(Optional) Install CocoaPods for iOS:**
 
@@ -93,7 +97,7 @@ You should see Jest output indicating all existing tests pass.
 
 **Symptom:** The app fails to start with errors like `Native module cannot be null` or Metro bundler errors related to native dependencies.
 
-**Solution:** Ensure you have run `npx expo prebuild` after `npm install`. The project uses native modules (Realm, Skia, Rive, Reanimated, MMKV, Keychain) that require native project files to be generated. Run:
+**Solution:** Ensure you have run `npx expo prebuild` after `npm install`. The project uses native modules (Realm, Skia, Reanimated, whisper.rn, MMKV, Keychain) that require native project files to be generated. Run:
 
 ```bash
 npx expo prebuild --clean
@@ -118,7 +122,7 @@ npx expo prebuild
 - `src/assets/fonts/PlayfairDisplay.ttf`
 - `src/assets/fonts/JetBrainsMono.ttf`
 
-Verify that all four `.ttf` files exist in `src/assets/fonts/`. If they are missing, add the font files to that directory. The app will hide the splash screen even if fonts fail to load, but text will render with fallback fonts.
+Verify that all four `.ttf` files exist in `src/assets/fonts/`. If they are missing, add the font files to that directory. The app hides the splash screen and renders a recoverable error view instead of a blank screen.
 
 ### 3. iOS build fails with CocoaPods errors
 
@@ -154,6 +158,6 @@ Once the app is running, continue with these resources:
 
 - **[ARCHITECTURE.md](./ARCHITECTURE.md)** — Understand the system architecture, component diagram, and data flow.
 - **[CONFIGURATION.md](./CONFIGURATION.md)** — Learn about configuration files, theme tokens, and environment settings.
-- **DEVELOPMENT.md** (coming soon) — Local development setup, build commands, code style, and PR process.
-- **TESTING.md** (coming soon) — Test framework details, writing new tests, and CI integration.
+- **DEVELOPMENT.md** — Local development setup, build commands, code style, and PR process.
+- **TESTING.md** — Test framework details, writing new tests, and CI integration.
 - **README.md** (project root) — Quick overview, installation, and usage summary.

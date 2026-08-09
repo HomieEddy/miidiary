@@ -47,5 +47,3 @@ yarn-error.*
 
 #idea
 .idea/
-# Local release builds + web export
-/dist

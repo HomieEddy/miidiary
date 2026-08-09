@@ -14,6 +14,8 @@ const ThoughtShredder = lazy(() =>
   })),
 );
 import { useLocale } from '@/i18n';
+import { useTheme } from '@/hooks/useTheme';
+import { primaryTextHex } from '@/theme/colors';
 import { useEntriesStore } from '@/stores/entriesStore';
 import { useRecordingStore } from '@/stores/recordingStore';
 
@@ -29,6 +31,7 @@ export function TranscriptionResult({
   onShredderComplete,
 }: TranscriptionResultProps) {
   const { t } = useLocale();
+  const { isDark } = useTheme();
   const entry = useEntriesStore((state) => state.entries[0]);
   const setProcessing = useRecordingStore((s) => s.setProcessing);
   const [show, setShow] = useState(false);
@@ -44,6 +47,7 @@ export function TranscriptionResult({
       opacity.value = withSpring(1);
       translateY.value = withSpring(0);
 
+      let hideTimer: ReturnType<typeof setTimeout> | undefined;
       const timer = setTimeout(() => {
         if (onShredderComplete && tabTargetPosition && Platform.OS !== "web") {
           setShowShredder(true);
@@ -52,17 +56,22 @@ export function TranscriptionResult({
 
         opacity.value = withTiming(0, { duration: 300 });
         translateY.value = withTiming(20, { duration: 300 });
-        setTimeout(() => {
+        hideTimer = setTimeout(() => {
           setShow(false);
           setProcessing(false);
         }, 350);
       }, 4000);
 
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        if (hideTimer) {
+          clearTimeout(hideTimer);
+        }
+      };
     } else {
       setShow(false);
     }
-  }, [visible, entry, opacity, translateY, setProcessing]);
+  }, [visible, entry, opacity, translateY, setProcessing, onShredderComplete, tabTargetPosition]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
@@ -92,7 +101,7 @@ export function TranscriptionResult({
           </View>
         </View>
 
-        <Text className="font-sans text-xs font-medium text-primary text-center mt-1">
+        <Text className="font-sans text-xs font-medium text-center mt-1" style={{ color: primaryTextHex(isDark) }}>
           {t("result.tapAnother")}
         </Text>
       </View>

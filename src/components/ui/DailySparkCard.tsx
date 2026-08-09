@@ -2,6 +2,7 @@ import type { ReactElement } from "react";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import Animated, {
+  cancelAnimation,
   Easing,
   useAnimatedStyle,
   useReducedMotion,
@@ -50,10 +51,13 @@ export function DailySparkCard(): ReactElement {
     }, PROMPT_INTERVAL_MS);
 
     return () => clearInterval(timer);
-  }, [promptOffset, promptOpacity, prompts.length, reducedMotion]);
+  }, [promptOffset, promptOpacity, prompts, reducedMotion]);
 
   useEffect(() => {
     if (reducedMotion) {
+      // Reduced motion: stop any running float loop and rest the spark.
+      cancelAnimation(floatY);
+      floatY.value = 0;
       return;
     }
 
@@ -66,6 +70,8 @@ export function DailySparkCard(): ReactElement {
       -1,
       true,
     );
+
+    return () => cancelAnimation(floatY);
   }, [floatY, reducedMotion]);
 
   const promptStyle = useAnimatedStyle(() => ({

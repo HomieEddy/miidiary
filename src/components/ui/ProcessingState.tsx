@@ -2,6 +2,7 @@ import type { ReactElement } from 'react';
 import { useEffect } from 'react';
 import { View, Text } from 'react-native';
 import Animated, {
+  cancelAnimation,
   Easing,
   useAnimatedStyle,
   useReducedMotion,
@@ -59,6 +60,9 @@ function PulseDot({ index }: { index: number }): ReactElement {
 
   useEffect(() => {
     if (reducedMotion) {
+      // Reduced motion: stop any running pulse loop and rest the dot.
+      cancelAnimation(pulse);
+      pulse.value = 0.35;
       return;
     }
 
@@ -73,6 +77,8 @@ function PulseDot({ index }: { index: number }): ReactElement {
       -1,
       false,
     );
+
+    return () => cancelAnimation(pulse);
   }, [index, pulse, reducedMotion]);
 
   const style = useAnimatedStyle(() => ({

@@ -2,6 +2,7 @@ import type { ReactElement } from "react";
 import { useEffect } from "react";
 import { View } from "react-native";
 import Animated, {
+  cancelAnimation,
   Easing,
   useAnimatedStyle,
   useReducedMotion,
@@ -29,6 +30,9 @@ export function ShimmerView({ className }: ShimmerViewProps): ReactElement {
 
   useEffect(() => {
     if (reducedMotion) {
+      // Reduced motion: stop any running sweep and park the band off-canvas.
+      cancelAnimation(sweep);
+      sweep.value = -1;
       return;
     }
 
@@ -43,6 +47,8 @@ export function ShimmerView({ className }: ShimmerViewProps): ReactElement {
       -1,
       false,
     );
+
+    return () => cancelAnimation(sweep);
   }, [reducedMotion, sweep]);
 
   const sweepStyle = useAnimatedStyle(() => ({

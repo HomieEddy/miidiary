@@ -15,6 +15,7 @@ import { AnimatedEntrance } from '@/components/ui/AnimatedEntrance';
 import { useAudioCapture } from '@/hooks/useAudioCapture';
 import { useTranscription } from '@/hooks/useTranscription';
 import { useShakeToReset } from '@/hooks/useShakeToReset';
+import { primaryTextHex } from "@/theme/colors";
 import { useTheme } from "@/hooks/useTheme";
 import { useStats } from "@/hooks/useStats";
 import { useTabBarClearance } from '@/hooks/useTabBarClearance';

@@ -30,6 +30,9 @@ async function createEntry(input: CreateEntryInput): Promise<EntryRecord> {
     previewText: deriveEntryPreview(input.text),
     queryKey: buildEntryQueryKey(input.category, createdAtDate, id),
     isCompleted: false,
+    isFavorite: false,
+    dueDate: null,
+    isUrgent: false,
     classificationConfidence: input.classification?.confidence ?? null,
     classificationRationale: input.classification?.rationale ?? null,
     classificationSource: input.classification?.source ?? null,
@@ -70,6 +73,14 @@ async function searchEntries(query: string): Promise<EntryRecord[]> {
   const items = [...store.values()].filter((entry) => entry.text.toLowerCase().includes(trimmed));
 
   return toSortedEntries(items);
+}
+
+async function toggleFavorite(id: string): Promise<boolean> {
+  const entry = store.get(id);
+  if (!entry) return false;
+  const next = !entry.isFavorite;
+  store.set(id, { ...entry, isFavorite: next });
+  return next;
 }
 
 async function toggleComplete(id: string): Promise<void> {

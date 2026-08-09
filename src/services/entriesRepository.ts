@@ -19,6 +19,9 @@ type RealmEntry = {
   previewText: string;
   queryKey: string;
   isCompleted: boolean;
+  isFavorite: boolean;
+  dueDate: string | null;
+  isUrgent: boolean;
   classificationConfidence: number | null;
   classificationRationale: string | null;
   classificationSource: "model" | "heuristic" | null;
@@ -35,6 +38,9 @@ function toEntryRecord(item: RealmEntry): EntryRecord {
     previewText: item.previewText,
     queryKey: item.queryKey,
     isCompleted: item.isCompleted,
+    isFavorite: item.isFavorite,
+    dueDate: item.dueDate ?? null,
+    isUrgent: item.isUrgent,
     classificationConfidence: item.classificationConfidence,
     classificationRationale: item.classificationRationale,
     classificationSource: item.classificationSource,
@@ -58,6 +64,9 @@ async function createEntry(input: CreateEntryInput): Promise<EntryRecord> {
     previewText: deriveEntryPreview(input.text),
     queryKey: buildEntryQueryKey(input.category, createdAt, id),
     isCompleted: false,
+    isFavorite: false,
+    dueDate: null,
+    isUrgent: false,
     classificationConfidence: input.classification?.confidence ?? null,
     classificationRationale: input.classification?.rationale ?? null,
     classificationSource: input.classification?.source ?? null,
@@ -128,6 +137,20 @@ async function toggleComplete(id: string): Promise<void> {
   });
 }
 
+async function toggleFavorite(id: string): Promise<boolean> {
+  const realm = await getRealmInstance();
+  const entry = realm.objectForPrimaryKey<RealmEntry>("Entry", id);
+  if (!entry) {
+    return false;
+  }
+
+  realm.write(() => {
+    entry.isFavorite = !entry.isFavorite;
+  });
+
+  return entry.isFavorite;
+}
+
 async function updateEntry(id: string, patch: UpdateEntryPatch): Promise<EntryRecord> {
   const realm = await getRealmInstance();
   const entry = realm.objectForPrimaryKey<RealmEntry>("Entry", id);
@@ -141,6 +164,15 @@ async function updateEntry(id: string, patch: UpdateEntryPatch): Promise<EntryRe
     entry.category = patch.category ?? entry.category;
     entry.title = patch.title ?? deriveEntryTitle(nextText);
     entry.previewText = deriveEntryPreview(nextText);
+    if (patch.isFavorite !== undefined) {
+      entry.isFavorite = patch.isFavorite;
+    }
+    if (patch.dueDate !== undefined) {
+      entry.dueDate = patch.dueDate;
+    }
+    if (patch.isUrgent !== undefined) {
+      entry.isUrgent = patch.isUrgent;
+    }
     entry.updatedAt = new Date();
     entry.queryKey = buildEntryQueryKey(entry.category, entry.createdAt, entry.id);
   });
@@ -156,5 +188,6 @@ export const entriesRepository = {
   count,
   searchEntries,
   toggleComplete,
+  toggleFavorite,
   updateEntry,
 };

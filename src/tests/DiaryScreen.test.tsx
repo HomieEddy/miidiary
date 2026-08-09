@@ -1,9 +1,12 @@
 import React from "react";
-import { render, fireEvent, waitFor } from "@testing-library/react-native";
+import { act, render, fireEvent, waitFor } from "@testing-library/react-native";
 
 const mockConfirmWipeAll = jest.fn();
 const mockDeleteOne = jest.fn();
 const mockUpdateEntry = jest.fn();
+const mockListChronological = jest.fn();
+
+let mockUseEntriesOpts: { autoLoad?: boolean; category?: string } = {};
 
 const mockUseEntriesState = {
   flatItems: [
@@ -21,6 +24,9 @@ const mockUseEntriesState = {
         createdAt: "2026-05-18T10:00:00.000Z",
         queryKey: "note|entry-1",
         isCompleted: false,
+    isFavorite: false,
+    dueDate: null,
+    isUrgent: false,
         classificationConfidence: null,
         classificationRationale: null,
         classificationSource: null,
@@ -47,8 +53,22 @@ jest.mock("@gorhom/bottom-sheet", () => ({
 }));
 
 jest.mock("@/hooks/useEntries", () => ({
-  useEntries: () => mockUseEntriesState,
+  useEntries: (opts: { autoLoad?: boolean; category?: string }) => {
+    mockUseEntriesOpts = opts;
+    return mockUseEntriesState;
+  },
 }));
+
+jest.mock("@/components/ui/NewEntrySheet", () => {
+  const ReactLocal = require("react");
+  const { View: RNView } = require("react-native");
+  return {
+    NewEntrySheet: (props: { visible?: boolean }) =>
+      props.visible === false
+        ? null
+        : ReactLocal.createElement(RNView, { testID: "new-entry-sheet" }),
+  };
+});
 
 jest.mock("expo-router", () => ({
   useFocusEffect: (effect: () => void | (() => void)) => {
@@ -63,6 +83,7 @@ jest.mock("@/services/entriesRepository", () => ({
   entriesRepository: {
     deleteOne: (...args: unknown[]) => mockDeleteOne(...args),
     updateEntry: (...args: unknown[]) => mockUpdateEntry(...args),
+    listChronological: (...args: unknown[]) => mockListChronological(...args),
   },
 }));
 
@@ -102,5 +123,40 @@ describe("DiaryScreen", () => {
     await waitFor(() => {
       expect(mockConfirmWipeAll).toHaveBeenCalled();
     });
+  });
+
+  it("renders filter chips and switching calls listChronological with the chosen category", async () => {
+    // Simulate the hook contract: reloading queries the repository with the
+    // category option the screen fed into useEntries.
+    mockUseEntriesState.loadEntries.mockImplementation(async () => {
+      await mockListChronological(mockUseEntriesOpts.category);
+    });
+
+    const { getAllByText, getByText } = render(<DiaryScreen />);
+
+    expect(getByText("All")).toBeTruthy();
+    expect(getAllByText("Diary").length).toBeGreaterThan(0);
+    expect(getByText("Task")).toBeTruthy();
+    expect(getAllByText("Note").length).toBeGreaterThan(0);
+
+    fireEvent.press(getByText("Task"));
+
+    expect(mockUseEntriesOpts.category).toBe("task");
+
+    await act(async () => {
+      await mockUseEntriesState.loadEntries();
+    });
+
+    expect(mockListChronological).toHaveBeenCalledWith("task");
+  });
+
+  it("opens the new entry sheet from the header button", () => {
+    const { getByTestId, queryByTestId } = render(<DiaryScreen />);
+
+    expect(queryByTestId("new-entry-sheet")).toBeNull();
+
+    fireEvent.press(getByTestId("new-entry-btn"));
+
+    expect(getByTestId("new-entry-sheet")).toBeTruthy();
   });
 });

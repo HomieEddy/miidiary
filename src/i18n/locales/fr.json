@@ -80,7 +80,9 @@
     "edit": "Modifier",
     "categoryDiary": "Journal",
     "categoryTask": "Tâche",
-    "categoryNote": "Note"
+    "categoryNote": "Note",
+    "saveFailed": "Échec de l'enregistrement. Réessayez.",
+    "changeCategoryHint": "Modifie la catégorie de l'entrée"
   },
   "processing": {
     "idle": "Préparation de la transcription...",
@@ -98,7 +100,7 @@
     "presetMidday": "Midi (12 h 30)",
     "presetEvening": "Soir (19 h)",
     "permissionDenied": "Les notifications sont désactivées. Activez-les dans les réglages du système.",
-    "enabledAt": "Chaque jour à {time}"
+    "enabledAt": "Chaque jour à {{time}}"
   },
   "export": {
     "title": "Exporter votre journal",
@@ -122,9 +124,9 @@
   },
   "stats": {
     "title": "Votre journal en un coup d’œil",
-    "total": "{count} pensées",
-    "streak": "Série de {count} jours",
-    "today": "{count} aujourd’hui",
+    "total": "{{count}} pensées",
+    "streak": "Série de {{count}} jours",
+    "today": "{{count}} aujourd’hui",
     "empty": "Enregistrez des pensées pour voir vos statistiques fleurir."
   }
 }

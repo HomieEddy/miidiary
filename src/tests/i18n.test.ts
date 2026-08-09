@@ -48,6 +48,29 @@ describe("i18n", () => {
     i18n.locale = "en";
   });
 
+  it("interpolates count placeholders in stats strings", () => {
+    expect(i18n.t("stats.total", { count: 3 })).toBe("3 entries");
+    expect(i18n.t("stats.today", { count: 1 })).toBe("1 today");
+    expect(i18n.t("stats.streak", { count: 7 })).toBe("7 day streak");
+  });
+
+  it("interpolates time placeholders in reminder strings", () => {
+    expect(i18n.t("reminders.enabledAt", { time: "09:00" })).toBe("Daily at 09:00");
+  });
+
+  it("never leaks raw placeholder braces into rendered strings", () => {
+    // Guard against single-brace syntax, which i18n-js v4 does not parse.
+    const en = i18n.t("stats.total", { count: 5 });
+    const fr = (() => {
+      i18n.locale = "fr";
+      const value = i18n.t("stats.streak", { count: 5 });
+      i18n.locale = "en";
+      return value;
+    })();
+    expect(en).not.toContain("{count}");
+    expect(fr).not.toContain("{count}");
+  });
+
   it("exposes a hook API with locale switching", () => {
     // The hook is a thin useSyncExternalStore binding; verify its shape
     // by rendering it through a component-less call is not possible, so

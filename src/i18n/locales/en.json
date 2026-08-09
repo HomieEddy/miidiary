@@ -80,7 +80,9 @@
     "edit": "Edit",
     "categoryDiary": "Diary",
     "categoryTask": "Task",
-    "categoryNote": "Note"
+    "categoryNote": "Note",
+    "saveFailed": "Couldn't save. Please try again.",
+    "changeCategoryHint": "Changes the entry category"
   },
   "processing": {
     "idle": "Preparing transcription...",
@@ -98,7 +100,7 @@
     "presetMidday": "Midday (12:30)",
     "presetEvening": "Evening (19:00)",
     "permissionDenied": "Notifications are disabled. Enable them in system settings.",
-    "enabledAt": "Daily at {time}"
+    "enabledAt": "Daily at {{time}}"
   },
   "export": {
     "title": "Export your diary",
@@ -122,9 +124,9 @@
   },
   "stats": {
     "title": "Your diary at a glance",
-    "total": "{count} entries",
-    "streak": "{count} day streak",
-    "today": "{count} today",
+    "total": "{{count}} entries",
+    "streak": "{{count}} day streak",
+    "today": "{{count}} today",
     "empty": "Record thoughts to see your stats bloom."
   }
 }

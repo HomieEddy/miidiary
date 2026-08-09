@@ -41,6 +41,7 @@
     "today": "Today",
     "yesterday": "Yesterday",
     "justNow": "Just now",
+    "done": "Done",
     "deleteTitle": "Delete this entry?",
     "deleteBody": "This removes only the selected entry.",
     "cancel": "Cancel",
@@ -50,13 +51,24 @@
     "wipeFinalTitle": "Final wipe confirmation",
     "wipeStepTwo": "Step 2 of 2. Local device authentication is required (biometric or passcode fallback).",
     "continue": "Continue",
-    "wipeConfirm": "Wipe all"
+    "wipeConfirm": "Wipe all",
+    "filterAll": "All",
+    "recentSearches": "Recent searches",
+    "clearRecents": "Clear",
+    "undoDelete": "Entry deleted",
+    "undo": "Undo"
   },
   "tasks": {
     "title": "Tasks",
     "subtitle": "Entries auto-classified as tasks appear here.",
     "emptyTitle": "No tasks yet",
-    "emptyBody": "Record a thought and on-device classification will surface it here when it sounds like a task."
+    "emptyBody": "Record a thought and on-device classification will surface it here when it sounds like a task.",
+    "dueToday": "Due today",
+    "dueTomorrow": "Due tomorrow",
+    "dueWeek": "Due this week",
+    "urgent": "Urgent",
+    "clearCompleted": "Clear completed",
+    "clearCompletedBody": "Remove all completed tasks?"
   },
   "digests": {
     "title": "Digests",
@@ -70,7 +82,14 @@
     "language": "Language",
     "english": "English",
     "french": "Français",
-    "wipeAllData": "Wipe all data"
+    "wipeAllData": "Wipe all data",
+    "weeklyTitle": "Weekly Wrap-up",
+    "weeklyBody": "{{count}} thoughts this week",
+    "weeklyTop": "Mostly {{category}}",
+    "monthlyTitle": "Monthly Reflection",
+    "monthlyBody": "{{count}} thoughts this month",
+    "monthlyStreak": "Best streak: {{days}} days",
+    "viewDiary": "See entries"
   },
   "sheet": {
     "titlePlaceholder": "Title",
@@ -82,7 +101,19 @@
     "categoryTask": "Task",
     "categoryNote": "Note",
     "saveFailed": "Couldn't save. Please try again.",
-    "changeCategoryHint": "Changes the entry category"
+    "changeCategoryHint": "Changes the entry category",
+    "favorite": "Add to favorites",
+    "unfavorite": "Remove from favorites",
+    "dueLabel": "Due",
+    "dueNone": "No due date",
+    "dueToday": "Today",
+    "dueTomorrow": "Tomorrow",
+    "dueWeek": "This week",
+    "urgentLabel": "Mark as urgent",
+    "newEntryTitle": "New entry",
+    "newEntryBody": "What's on your mind?",
+    "newEntryText": "Write your thought",
+    "addEntry": "Add entry"
   },
   "processing": {
     "idle": "Preparing transcription...",

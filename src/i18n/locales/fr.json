@@ -41,6 +41,7 @@
     "today": "Aujourd'hui",
     "yesterday": "Hier",
     "justNow": "À l'instant",
+    "done": "Terminé",
     "deleteTitle": "Supprimer cette pensée ?",
     "deleteBody": "Seule la pensée sélectionnée sera supprimée.",
     "cancel": "Annuler",
@@ -50,13 +51,24 @@
     "wipeFinalTitle": "Confirmation finale de l'effacement",
     "wipeStepTwo": "Étape 2 de 2. Authentification locale requise (biométrie ou code de secours).",
     "continue": "Continuer",
-    "wipeConfirm": "Tout effacer"
+    "wipeConfirm": "Tout effacer",
+    "filterAll": "Tout",
+    "recentSearches": "Recherches récentes",
+    "clearRecents": "Effacer",
+    "undoDelete": "Entrée supprimée",
+    "undo": "Annuler"
   },
   "tasks": {
     "title": "Tâches",
     "subtitle": "Les pensées classées comme tâches apparaissent ici.",
     "emptyTitle": "Aucune tâche",
-    "emptyBody": "Enregistrez une pensée et la classification sur l'appareil l'affichera ici si elle ressemble à une tâche."
+    "emptyBody": "Enregistrez une pensée et la classification sur l'appareil l'affichera ici si elle ressemble à une tâche.",
+    "dueToday": "À faire aujourd'hui",
+    "dueTomorrow": "À faire demain",
+    "dueWeek": "À faire cette semaine",
+    "urgent": "Urgent",
+    "clearCompleted": "Effacer les terminées",
+    "clearCompletedBody": "Supprimer toutes les tâches terminées ?"
   },
   "digests": {
     "title": "Résumés",
@@ -70,7 +82,14 @@
     "language": "Langue",
     "english": "English",
     "french": "Français",
-    "wipeAllData": "Effacer toutes les données"
+    "wipeAllData": "Effacer toutes les données",
+    "weeklyTitle": "Récap hebdo",
+    "weeklyBody": "{{count}} pensées cette semaine",
+    "weeklyTop": "Surtout {{category}}",
+    "monthlyTitle": "Réflexion du mois",
+    "monthlyBody": "{{count}} pensées ce mois-ci",
+    "monthlyStreak": "Meilleure série : {{days}} jours",
+    "viewDiary": "Voir les entrées"
   },
   "sheet": {
     "titlePlaceholder": "Titre",
@@ -82,7 +101,19 @@
     "categoryTask": "Tâche",
     "categoryNote": "Note",
     "saveFailed": "Échec de l'enregistrement. Réessayez.",
-    "changeCategoryHint": "Modifie la catégorie de l'entrée"
+    "changeCategoryHint": "Modifie la catégorie de l'entrée",
+    "favorite": "Ajouter aux favoris",
+    "unfavorite": "Retirer des favoris",
+    "dueLabel": "Échéance",
+    "dueNone": "Aucune échéance",
+    "dueToday": "Aujourd'hui",
+    "dueTomorrow": "Demain",
+    "dueWeek": "Cette semaine",
+    "urgentLabel": "Marquer comme urgent",
+    "newEntryTitle": "Nouvelle entrée",
+    "newEntryBody": "À quoi pensez-vous ?",
+    "newEntryText": "Écrivez votre pensée",
+    "addEntry": "Ajouter"
   },
   "processing": {
     "idle": "Préparation de la transcription...",

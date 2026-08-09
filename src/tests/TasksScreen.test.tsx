@@ -2,6 +2,7 @@ import React from "react";
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
 
 const mockToggleComplete = jest.fn();
+const mockDeleteOne = jest.fn(async () => undefined);
 const mockListChronological = jest.fn();
 
 const mockEntries = [
@@ -43,6 +44,7 @@ jest.mock("@/services/entriesRepository", () => ({
   entriesRepository: {
     listChronological: (...args: unknown[]) => mockListChronological(...args),
     toggleComplete: (...args: unknown[]) => mockToggleComplete(...args),
+    deleteOne: (...args: unknown[]) => (mockDeleteOne as (...a: unknown[]) => unknown)(...args),
   },
 }));
 
@@ -84,6 +86,24 @@ describe("TasksScreen", () => {
     await waitFor(() => {
       expect(getAllByText("Urgent").length).toBeGreaterThan(0);
       expect(getAllByText("Due today").length).toBeGreaterThan(0);
+    });
+  });
+
+  it("clears completed tasks after confirmation", async () => {
+    const completedEntry = { ...mockEntries[0], id: "task-9", isCompleted: true };
+    mockListChronological.mockResolvedValue([...mockEntries, completedEntry]);
+
+    const { getByLabelText } = render(<TasksScreen />);
+
+    await waitFor(() => {
+      expect(getByLabelText("Clear completed")).toBeTruthy();
+    });
+
+    fireEvent.press(getByLabelText("Clear completed"));
+    fireEvent.press(getByLabelText("Confirm clear completed"));
+
+    await waitFor(() => {
+      expect(mockDeleteOne).toHaveBeenCalledWith("task-9");
     });
   });
 });

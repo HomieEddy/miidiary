@@ -24,6 +24,22 @@ describe("recordingStore", () => {
     expect(state.status).toBe("recording");
   });
 
+  it("setRecording(true) bumps sessionId and resets per-session fields", () => {
+    useRecordingStore.getState().setRecording(true);
+    useRecordingStore.getState().setPaused(true);
+    useRecordingStore.getState().setDuration(42_000);
+    useRecordingStore.getState().setError("Old error");
+
+    useRecordingStore.getState().setRecording(true);
+
+    const state = useRecordingStore.getState();
+    expect(state.sessionId).toBe(2);
+    expect(state.isPaused).toBe(false);
+    expect(state.duration).toBe(0);
+    expect(state.errorMessage).toBeNull();
+    expect(state.status).toBe("recording");
+  });
+
   it("setRecording(false) transitions back to idle", () => {
     useRecordingStore.getState().setRecording(true);
     useRecordingStore.getState().setRecording(false);

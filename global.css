@@ -6,18 +6,20 @@
 	--background: 253 248 240;
 	--foreground: 42 38 49;
 	--primary: 255 107 158;
-	--primary-foreground: 255 255 255;
+	--primary-foreground: 42 38 49;
 	--secondary: 255 209 102;
 	--secondary-foreground: 42 38 49;
 	--accent: 6 214 160;
-	--accent-foreground: 255 255 255;
+	--accent-foreground: 42 38 49;
 	--muted: 240 233 223;
-	--muted-foreground: 138 130 143;
-	--destructive: 239 71 111;
+	--muted-foreground: 111 103 118;
+	--destructive: 194 38 78;
+	--destructive-foreground: 255 255 255;
 	--card: 255 255 255;
 	--card-foreground: 42 38 49;
 	--border: 42 38 49;
 	--ring: 255 107 158;
+	--shadow: 42 38 49;
 }
 
 .dark {
@@ -25,7 +27,10 @@
 	--card: 42 38 49;
 	--foreground: 245 240 235;
 	--card-foreground: 245 240 235;
-	--border: 74 69 80;
+	--border: 122 114 128;
 	--muted: 48 44 56;
-	--muted-foreground: 138 130 143;
+	--muted-foreground: 155 147 164;
+	--destructive: 242 96 128;
+	--destructive-foreground: 42 38 49;
+	--shadow: 122 114 128;
 }

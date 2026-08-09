@@ -1,4 +1,5 @@
 import * as Crypto from "expo-crypto";
+import Realm from "realm";
 import { buildEntryQueryKey } from "@/models/EntryRealm";
 import { getRealmInstance } from "@/services/realmService";
 import type {
@@ -19,6 +20,9 @@ type RealmEntry = {
   previewText: string;
   queryKey: string;
   isCompleted: boolean;
+  isFavorite: boolean;
+  dueDate: string | null;
+  isUrgent: boolean;
   classificationConfidence: number | null;
   classificationRationale: string | null;
   classificationSource: "model" | "heuristic" | null;
@@ -35,6 +39,9 @@ function toEntryRecord(item: RealmEntry): EntryRecord {
     previewText: item.previewText,
     queryKey: item.queryKey,
     isCompleted: item.isCompleted,
+    isFavorite: item.isFavorite,
+    dueDate: item.dueDate ?? null,
+    isUrgent: item.isUrgent,
     classificationConfidence: item.classificationConfidence,
     classificationRationale: item.classificationRationale,
     classificationSource: item.classificationSource,
@@ -58,6 +65,9 @@ async function createEntry(input: CreateEntryInput): Promise<EntryRecord> {
     previewText: deriveEntryPreview(input.text),
     queryKey: buildEntryQueryKey(input.category, createdAt, id),
     isCompleted: false,
+    isFavorite: false,
+    dueDate: null,
+    isUrgent: false,
     classificationConfidence: input.classification?.confidence ?? null,
     classificationRationale: input.classification?.rationale ?? null,
     classificationSource: input.classification?.source ?? null,
@@ -97,6 +107,34 @@ async function wipeAll(): Promise<void> {
   });
 }
 
+/** Re-insert a previously deleted record under its original id (undo). */
+async function restoreEntry(record: EntryRecord): Promise<EntryRecord> {
+  const realm = await getRealmInstance();
+  const payload: RealmEntry = {
+    id: record.id,
+    text: record.text,
+    category: record.category,
+    createdAt: new Date(record.createdAt),
+    updatedAt: new Date(record.updatedAt),
+    title: record.title,
+    previewText: record.previewText,
+    queryKey: record.queryKey,
+    isCompleted: record.isCompleted,
+    isFavorite: record.isFavorite,
+    dueDate: record.dueDate,
+    isUrgent: record.isUrgent,
+    classificationConfidence: record.classificationConfidence,
+    classificationRationale: record.classificationRationale,
+    classificationSource: record.classificationSource,
+  };
+
+  realm.write(() => {
+    realm.create("Entry", payload, true);
+  });
+
+  return toEntryRecord(payload);
+}
+
 async function count(): Promise<number> {
   const realm = await getRealmInstance();
   return realm.objects("Entry").length;
@@ -116,6 +154,17 @@ async function searchEntries(query: string): Promise<EntryRecord[]> {
     .map((item) => toEntryRecord(item));
 }
 
+/** First entry whose text matches exactly (replay dedupe). */
+async function findByText(text: string): Promise<EntryRecord | null> {
+  const realm = await getRealmInstance();
+  const exact = realm
+    .objects<RealmEntry>("Entry")
+    .filtered("text == $0", text)
+    .sorted("queryKey", true);
+  const first = exact[0];
+  return first ? toEntryRecord(first) : null;
+}
+
 async function toggleComplete(id: string): Promise<void> {
   const realm = await getRealmInstance();
   const entry = realm.objectForPrimaryKey<RealmEntry>("Entry", id);
@@ -126,6 +175,20 @@ async function toggleComplete(id: string): Promise<void> {
   realm.write(() => {
     entry.isCompleted = !entry.isCompleted;
   });
+}
+
+async function toggleFavorite(id: string): Promise<boolean> {
+  const realm = await getRealmInstance();
+  const entry = realm.objectForPrimaryKey<RealmEntry>("Entry", id);
+  if (!entry) {
+    return false;
+  }
+
+  realm.write(() => {
+    entry.isFavorite = !entry.isFavorite;
+  });
+
+  return entry.isFavorite;
 }
 
 async function updateEntry(id: string, patch: UpdateEntryPatch): Promise<EntryRecord> {
@@ -141,6 +204,15 @@ async function updateEntry(id: string, patch: UpdateEntryPatch): Promise<EntryRe
     entry.category = patch.category ?? entry.category;
     entry.title = patch.title ?? deriveEntryTitle(nextText);
     entry.previewText = deriveEntryPreview(nextText);
+    if (patch.isFavorite !== undefined) {
+      entry.isFavorite = patch.isFavorite;
+    }
+    if (patch.dueDate !== undefined) {
+      entry.dueDate = patch.dueDate;
+    }
+    if (patch.isUrgent !== undefined) {
+      entry.isUrgent = patch.isUrgent;
+    }
     entry.updatedAt = new Date();
     entry.queryKey = buildEntryQueryKey(entry.category, entry.createdAt, entry.id);
   });
@@ -156,5 +228,8 @@ export const entriesRepository = {
   count,
   searchEntries,
   toggleComplete,
+  toggleFavorite,
+  findByText,
+  restoreEntry,
   updateEntry,
 };

@@ -12,16 +12,20 @@ export interface Entry {
 interface EntriesState {
   entries: Entry[];
   addPersistedEntry: (entry: Entry) => void;
-  getLatestEntry: () => Entry | undefined;
+  /** Replace the whole list (hydration after wipe / app start). */
+  setEntries: (entries: Entry[]) => void;
+  removeEntry: (id: string) => void;
   clearAll: () => void;
 }
 
-export const useEntriesStore = create<EntriesState>((set, get) => ({
+export const useEntriesStore = create<EntriesState>((set) => ({
   entries: [],
   addPersistedEntry: (entry) =>
     set((state) => ({
       entries: [entry, ...state.entries.filter((item) => item.id !== entry.id)],
     })),
-  getLatestEntry: () => get().entries[0],
+  setEntries: (entries) => set({ entries }),
+  removeEntry: (id) =>
+    set((state) => ({ entries: state.entries.filter((item) => item.id !== id) })),
   clearAll: () => set({ entries: [] }),
 }));

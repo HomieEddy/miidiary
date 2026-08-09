@@ -71,6 +71,7 @@ export function RecorderButton({
     <Pressable
       onPress={handlePress}
       hitSlop={12}
+      accessibilityRole="button"
       accessibilityState={{ disabled: disabled && !isRecording }}
       accessibilityLabel={isRecording ? 'Stop recording' : 'Record audio'}
       accessibilityHint={

@@ -22,8 +22,16 @@ export function BiometricGate({ children }: PropsWithChildren): ReactElement {
         return;
       }
 
-      await LocalAuthentication.hasHardwareAsync();
-      await LocalAuthentication.isEnrolledAsync();
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+
+      if (!hasHardware || !isEnrolled) {
+        // No usable biometrics on this device — don't trap the diary behind a
+        // gate that can never be satisfied; fall through to the unlocked state.
+        setIsUnlocked(true);
+        setMessage(t("gate.unlocked"));
+        return;
+      }
 
       const result = await LocalAuthentication.authenticateAsync({
         disableDeviceFallback: false,

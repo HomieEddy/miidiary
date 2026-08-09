@@ -15,13 +15,26 @@ function buildRealmConfig(encryptionKey: Uint8Array): Realm.Configuration {
   return {
     path: REALM_PATH,
     schema: [EntryRealmSchema],
-    schemaVersion: 3,
+    schemaVersion: 4,
     encryptionKey,
     onMigration: (oldRealm, newRealm) => {
       if (oldRealm.schemaVersion < 3) {
         const entries = newRealm.objects("Entry");
         for (const entry of entries) {
           (entry as unknown as { isCompleted: boolean }).isCompleted = false;
+        }
+      }
+      if (oldRealm.schemaVersion < 4) {
+        const entries = newRealm.objects("Entry");
+        for (const entry of entries) {
+          const mutable = entry as unknown as {
+            isFavorite: boolean;
+            dueDate: string | null;
+            isUrgent: boolean;
+          };
+          mutable.isFavorite = false;
+          mutable.dueDate = null;
+          mutable.isUrgent = false;
         }
       }
     },

@@ -9,6 +9,8 @@ import Animated, {
 import { SvgXml } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { useLocale } from '@/i18n';
+import { useTheme } from '@/hooks/useTheme';
+import { destructiveHex } from '@/theme/colors';
 import { useRecordingStore } from '@/stores/recordingStore';
 
 const WARNING_ICON = `<svg viewBox="0 0 24 24" fill="none"><path d="M12 7.75a.75.75 0 0 1 .75.75v4a.75.75 0 0 1-1.5 0v-4a.75.75 0 0 1 .75-.75zM12 16.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5z" fill="currentColor" opacity="0.5"/><path d="M1.745 20.418a1.5 1.5 0 0 1 1.317-2.272h17.876a1.5 1.5 0 0 1 1.317 2.272l-8.938 15.013a1.5 1.5 0 0 1-2.634 0L1.745 20.418z" fill="currentColor" opacity="0.3"/></svg>`;
@@ -33,6 +35,7 @@ function resolveErrorMessage(message: string | null, t: (key: string) => string)
 
 export function ErrorBanner({ visible, onRetry }: ErrorBannerProps): React.ReactElement | null {
   const { t } = useLocale();
+  const { isDark } = useTheme();
   const errorMessage = useRecordingStore((state) => state.errorMessage);
   const resolvedErrorMessage = resolveErrorMessage(errorMessage, t);
   const setError = useRecordingStore((state) => state.setError);
@@ -48,6 +51,11 @@ export function ErrorBanner({ visible, onRetry }: ErrorBannerProps): React.React
         easing: Easing.out(Easing.back(1.5)),
       });
       translateX.value = withTiming(0, { duration: 300 });
+    } else {
+      // Reset to the entrance state so the next showing animates in
+      // instead of re-animating from 1→1.
+      opacity.value = 0;
+      translateX.value = -20;
     }
   }, [visible, opacity, translateX, setError]);
 
@@ -59,10 +67,15 @@ export function ErrorBanner({ visible, onRetry }: ErrorBannerProps): React.React
   if (!visible) return null;
 
   return (
-    <Pressable className="w-full" onPress={() => { setError(null); onRetry?.(); }}>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${resolvedErrorMessage}. ${t("banner.tapToRetry")}`}
+      className="w-full"
+      onPress={() => { setError(null); onRetry?.(); }}
+    >
       <Animated.View style={animatedStyle}>
         <View className="bg-destructive/10 border-l-4 border-destructive rounded-xl px-4 py-3 mx-8 flex-row items-start gap-3">
-          <SvgXml xml={WARNING_ICON} width={20} height={20} color="#EF476F" />
+          <SvgXml xml={WARNING_ICON} width={20} height={20} color={destructiveHex(isDark)} />
           <View className="shrink min-w-[220px]">
             <Text className="font-sans text-xs font-bold text-destructive">
               {resolvedErrorMessage}

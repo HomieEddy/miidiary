@@ -37,15 +37,10 @@ describe("entriesStore", () => {
     expect(state.entries[0].text).toBe("Updated");
   });
 
-  it("getLatestEntry returns most recent entry", () => {
+  it("keeps the most recent entry first (prepend order)", () => {
     useEntriesStore.getState().addPersistedEntry(makeEntry({ text: "First" }));
     useEntriesStore.getState().addPersistedEntry(makeEntry({ text: "Second" }));
-    const latest = useEntriesStore.getState().getLatestEntry();
-    expect(latest?.text).toBe("Second");
-  });
-
-  it("getLatestEntry returns undefined when empty", () => {
-    expect(useEntriesStore.getState().getLatestEntry()).toBeUndefined();
+    expect(useEntriesStore.getState().entries[0].text).toBe("Second");
   });
 
   it("entries are ordered newest-first", () => {

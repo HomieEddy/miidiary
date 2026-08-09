@@ -72,7 +72,7 @@ jest.mock("expo-file-system", () => ({
   },
 }));
 
-import { modelManager } from "@/services/modelManager";
+import { modelManager, type SttLanguage } from "@/services/modelManager";
 
 function markValidModel(uri: string): void {
   mockFileExists.set(uri, true);
@@ -171,5 +171,75 @@ describe("modelManager", () => {
     await expect(modelManager.prepareDefaultModel()).rejects.toThrow(
       "download returned HTML instead of a model",
     );
+  });
+
+  it("deduplicates concurrent resolveModel calls into one download", async () => {
+    let releaseDownload: () => void = () => {};
+    const downloadGate = new Promise<void>((resolve) => {
+      releaseDownload = resolve;
+    });
+
+    mockDownloadFileAsync.mockImplementation(
+      async (_url: string, destination: { uri?: string } | string) => {
+        const uri = typeof destination === "string" ? destination : destination.uri ?? "";
+        await downloadGate;
+        mockFileExists.set(uri, true);
+        mockFileSizes.set(uri, 150_000_000);
+        mockFileHeaders.set(uri, "ggml");
+        return { uri };
+      },
+    );
+
+    // Two concurrent resolves (e.g. mount + AppState) while the download is
+    // still in flight must share a single download.
+    const first = modelManager.resolveModel("en");
+    const second = modelManager.resolveModel("en");
+
+    expect(mockDownloadFileAsync).toHaveBeenCalledTimes(1);
+
+    releaseDownload();
+    const [firstResult, secondResult] = await Promise.all([first, second]);
+
+    expect(mockDownloadFileAsync).toHaveBeenCalledTimes(1);
+    expect(secondResult).toEqual(firstResult);
+    expect(firstResult.modelPath).toBe("file:///docs/models/ggml-tiny.en.bin");
+  });
+
+  it("does not prune a model file that is currently being downloaded", async () => {
+    let releaseDownload: () => void = () => {};
+    const downloadGate = new Promise<void>((resolve) => {
+      releaseDownload = resolve;
+    });
+
+    mockDownloadFileAsync.mockImplementation(
+      async (_url: string, destination: { uri?: string } | string) => {
+        const uri = typeof destination === "string" ? destination : destination.uri ?? "";
+        // Simulate a partial file on disk while the download is still writing.
+        mockFileExists.set(uri, true);
+        mockFileSizes.set(uri, 50_000);
+        mockFileHeaders.set(uri, "ggml");
+        await downloadGate;
+        mockFileSizes.set(uri, 150_000_000);
+        mockFileHeaders.set(uri, "lmgg");
+        return { uri };
+      },
+    );
+
+    const inFlight = modelManager.resolveModel("auto");
+    const activeTarget = "file:///docs/models/ggml-small.bin";
+
+    // While that download is mid-write, a concurrent candidate scan for a
+    // language sharing the same candidate must not delete the active target.
+    const manager = modelManager as unknown as {
+      pickModelPath(language: SttLanguage): { path: string; index: number } | null;
+    };
+    expect(manager.pickModelPath("fr-CA")).toBeNull();
+    expect(mockFileExists.get(activeTarget)).toBe(true);
+
+    releaseDownload();
+    const result = await inFlight;
+
+    expect(result.modelPath).toBe(activeTarget);
+    expect(result.fallbackUsed).toBe(false);
   });
 });

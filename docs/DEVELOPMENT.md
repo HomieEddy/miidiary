@@ -44,6 +44,8 @@ This document covers how to set up, build, and contribute to the Dear Diary proj
    npm start
    ```
 
+   After heavy edits or cache weirdness, restart with `npx expo start --clear` so connected devices receive a full rebundle instead of stale deltas.
+
 5. **Run on a device or emulator:**
 
    ```bash
@@ -100,8 +102,9 @@ The project currently has **no separate linting or formatting tool** configured 
   - Import order (React/Expo → third-party → internal → assets)
   - Component rules (screens are thin, components are dumb, services are pure)
   - Export conventions (default export for screens only, named exports for everything else)
-  - NativeWind utility classes only — no `StyleSheet.create` or inline `style={}` props
-  - `cn()` utility from `clsx` + `tailwind-merge` for conditional classnames <!-- VERIFY: cn() utility and clsx/tailwind-merge are planned conventions (from AGENTS.md), not yet implemented in codebase -->
+  - NativeWind utility classes for styling; inline `style` for imperative/theme-dependent colors (via the helpers in `theme/colors.ts`)
+  - `cn()` utility from `clsx` + `tailwind-merge` for conditional classnames
+  - Exception: `PaperTabBar` uses `StyleSheet.create` deliberately — animated style arrays must not reference frozen StyleSheet objects (reanimated 4 limitation, see ARCHITECTURE.md)
 
 To check for TypeScript errors:
 
@@ -114,8 +117,12 @@ npx tsc --noEmit
 All styling uses NativeWind v4 utility classes. The color palette and font tokens are defined in:
 
 - `theme/tailwind.config.js` — design tokens (colors, fonts, shadows, radii)
-- `theme/colors.ts` — runtime-accessible color constants
-- `theme/typography.ts` — font name constants and weight presets
+- `theme/colors.ts` — runtime-accessible color constants and themed helpers
+- `global.css` — CSS variable tokens (light + dark)
+
+## Web Preview
+
+`npm run web` (or opening `http://localhost:8081` while the dev server runs) serves the same codebase in the browser — useful for UI work. Known web limitations: entries are in-memory only (no persistence), recording is unavailable (the home screen shows an explanatory hint), and the biometric gate auto-unlocks. See README for the full caveat list.
 
 ## Branch Conventions
 

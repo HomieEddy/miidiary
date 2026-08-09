@@ -5,14 +5,10 @@ import { useFont } from "@shopify/react-native-skia";
 import { AnimatedEntrance } from "@/components/ui/AnimatedEntrance";
 import { ShimmerView } from "@/components/ui/ShimmerView";
 import { useStats } from "@/hooks/useStats";
+import { useTheme } from "@/hooks/useTheme";
+import { accentTextHex, chartColorsHex, mutedForegroundHex, primaryTextHex, secondaryTextHex } from "@/theme/colors";
 import { useLocale } from "@/i18n";
 import type { EntryCategory } from "@/types/entry";
-
-const CATEGORY_COLORS: Record<EntryCategory, string> = {
-  diary: "#FF6B9E",
-  task: "#06D6A0",
-  note: "#118AB2",
-};
 
 const CATEGORY_LABEL_KEY: Record<EntryCategory, string> = {
   diary: "sheet.categoryDiary",
@@ -28,6 +24,7 @@ const CATEGORY_ORDER: EntryCategory[] = ["diary", "task", "note"];
  */
 export function StatsCard(): ReactElement {
   const { t } = useLocale();
+  const { isDark } = useTheme();
   const { stats, loading } = useStats();
   const axisFont = useFont(require("../../assets/fonts/Nunito.ttf"), 9);
 
@@ -68,19 +65,19 @@ export function StatsCard(): ReactElement {
 
         <View className="flex-row gap-2 mb-4">
           <View className="flex-1 bg-muted/50 rounded-xl px-3 py-2">
-            <Text className="font-sans text-xl font-bold text-primary">{stats.total}</Text>
+            <Text className="font-sans text-xl font-bold" style={{ color: primaryTextHex(isDark) }}>{stats.total}</Text>
             <Text className="font-sans text-xs text-muted-foreground">
               {t("stats.total", { count: stats.total })}
             </Text>
           </View>
           <View className="flex-1 bg-muted/50 rounded-xl px-3 py-2">
-            <Text className="font-sans text-xl font-bold text-secondary">{stats.streakDays}</Text>
+            <Text className="font-sans text-xl font-bold" style={{ color: secondaryTextHex(isDark) }}>{stats.streakDays}</Text>
             <Text className="font-sans text-xs text-muted-foreground">
               {t("stats.streak", { count: stats.streakDays })}
             </Text>
           </View>
           <View className="flex-1 bg-muted/50 rounded-xl px-3 py-2">
-            <Text className="font-sans text-xl font-bold text-accent">{stats.todayCount}</Text>
+            <Text className="font-sans text-xl font-bold" style={{ color: accentTextHex(isDark) }}>{stats.todayCount}</Text>
             <Text className="font-sans text-xs text-muted-foreground">
               {t("stats.today", { count: stats.todayCount })}
             </Text>
@@ -95,15 +92,15 @@ export function StatsCard(): ReactElement {
             domainPadding={{ left: 24, right: 24, top: 8, bottom: 4 }}
             axisOptions={{
               font: axisFont,
-              labelColor: "#8A828F",
-              lineColor: "#D8CCB8",
+              labelColor: mutedForegroundHex(isDark),
+              lineColor: isDark ? "#4A4550" : "#D8CCB8",
             }}
           >
             {({ points, chartBounds }) => (
               <>
-                <Bar points={points.diary} chartBounds={chartBounds} color={CATEGORY_COLORS.diary} roundedCorners={{ topLeft: 6, topRight: 6 }} barWidth={22} />
-                <Bar points={points.task} chartBounds={chartBounds} color={CATEGORY_COLORS.task} roundedCorners={{ topLeft: 6, topRight: 6 }} barWidth={22} />
-                <Bar points={points.note} chartBounds={chartBounds} color={CATEGORY_COLORS.note} roundedCorners={{ topLeft: 6, topRight: 6 }} barWidth={22} />
+                <Bar points={points.diary} chartBounds={chartBounds} color={chartColorsHex(isDark).diary} roundedCorners={{ topLeft: 6, topRight: 6 }} barWidth={22} />
+                <Bar points={points.task} chartBounds={chartBounds} color={chartColorsHex(isDark).task} roundedCorners={{ topLeft: 6, topRight: 6 }} barWidth={22} />
+                <Bar points={points.note} chartBounds={chartBounds} color={chartColorsHex(isDark).note} roundedCorners={{ topLeft: 6, topRight: 6 }} barWidth={22} />
               </>
             )}
           </CartesianChart>

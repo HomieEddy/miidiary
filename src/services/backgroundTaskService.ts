@@ -1,4 +1,4 @@
-import * as BackgroundFetch from "expo-background-fetch";
+import * as BackgroundTask from "expo-background-task";
 import * as TaskManager from "expo-task-manager";
 
 type BackgroundProcessors = {
@@ -13,23 +13,17 @@ let processors: BackgroundProcessors = {};
 
 TaskManager.defineTask(TRANSCRIPTION_TASK, async () => {
   try {
-    let hasNewData = false;
-
     if (processors.processPendingRecordings) {
       await processors.processPendingRecordings();
-      hasNewData = true;
     }
 
     if (processors.syncModels) {
-      const synced = await processors.syncModels();
-      hasNewData = hasNewData || synced;
+      await processors.syncModels();
     }
 
-    return hasNewData
-      ? BackgroundFetch.BackgroundFetchResult.NewData
-      : BackgroundFetch.BackgroundFetchResult.NoData;
+    return BackgroundTask.BackgroundTaskResult.Success;
   } catch {
-    return BackgroundFetch.BackgroundFetchResult.Failed;
+    return BackgroundTask.BackgroundTaskResult.Failed;
   }
 });
 
@@ -45,17 +39,15 @@ export async function initializeBackgroundProcessing(): Promise<void> {
     return;
   }
 
-  const status = await BackgroundFetch.getStatusAsync();
-  if (status === BackgroundFetch.BackgroundFetchStatus.Restricted) {
+  const status = await BackgroundTask.getStatusAsync();
+  if (status === BackgroundTask.BackgroundTaskStatus.Restricted) {
     return;
   }
 
   const isRegistered = await TaskManager.isTaskRegisteredAsync(TRANSCRIPTION_TASK);
   if (!isRegistered) {
-    await BackgroundFetch.registerTaskAsync(TRANSCRIPTION_TASK, {
-      minimumInterval: 15 * 60,
-      stopOnTerminate: false,
-      startOnBoot: true,
+    await BackgroundTask.registerTaskAsync(TRANSCRIPTION_TASK, {
+      minimumInterval: 15,
     });
   }
 
@@ -65,7 +57,7 @@ export async function initializeBackgroundProcessing(): Promise<void> {
 export async function unregisterBackgroundProcessing(): Promise<void> {
   const isRegistered = await TaskManager.isTaskRegisteredAsync(TRANSCRIPTION_TASK);
   if (isRegistered) {
-    await BackgroundFetch.unregisterTaskAsync(TRANSCRIPTION_TASK);
+    await BackgroundTask.unregisterTaskAsync(TRANSCRIPTION_TASK);
   }
   registered = false;
 }

@@ -1,6 +1,6 @@
 import type { ReactElement } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { AppState, ScrollView, Text, View } from 'react-native';
+import { AppState, Platform, ScrollView, Text, View } from 'react-native';
 import { GlowRing } from '@/components/ui/GlowRing';
 import { HomePreviewSections } from '@/components/ui/HomePreviewSections';
 import { RecorderButton } from '@/components/ui/RecorderButton';
@@ -15,7 +15,10 @@ import { AnimatedEntrance } from '@/components/ui/AnimatedEntrance';
 import { useAudioCapture } from '@/hooks/useAudioCapture';
 import { useTranscription } from '@/hooks/useTranscription';
 import { useShakeToReset } from '@/hooks/useShakeToReset';
-import { PerformanceMeasureView } from "@shopify/react-native-performance";
+import { primaryTextHex } from "@/theme/colors";
+import { useTheme } from "@/hooks/useTheme";
+import { useStats } from "@/hooks/useStats";
+import { useTabBarClearance } from '@/hooks/useTabBarClearance';
 import { useLocale } from '@/i18n';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';import { useEntriesStore } from '@/stores/entriesStore';
 import { useRecordingStore } from '@/stores/recordingStore';
@@ -44,14 +47,17 @@ function describeError(error: unknown): string {
 
 export default function HomeScreen(): ReactElement {
   const { t } = useLocale();
+  const { isDark } = useTheme();
+  const { stats } = useStats();
+  const streakDays = stats?.streakDays ?? 0;
   const [modelState, setModelState] = useState<ModelReadinessState>('loading');
   const [modelError, setModelError] = useState<string | null>(null);
   const latestEntry = useEntriesStore((state) => state.entries[0]);
   const resetRecording = useRecordingStore((state) => state.reset);
-  const {
-    isRecording, isProcessing, status,
+  const { isRecording, isProcessing, status,
     startRecording, stopRecording, retry,
   } = useAudioCapture();
+  const bottomClearance = useTabBarClearance();
 
   // Keep the screen awake while recording — auto-lock must not kill a capture.
   useEffect(() => {
@@ -121,6 +127,19 @@ export default function HomeScreen(): ReactElement {
     }
   }, [stopRecording, processRecording]);
 
+  // Tapping the error banner must actually reprocess the failed
+  // recording, not just clear the error state.
+  const handleRetryAfterError = useCallback(() => {
+    retry();
+    void processPendingRecordings();
+  }, [retry, processPendingRecordings]);
+
+  // Stable so ThoughtShredder's effect (deps: onComplete) doesn't re-arm
+  // its 700ms/1300ms shredder delays on every HomeScreen re-render.
+  const handleShredderComplete = useCallback(() => {
+    resetRecording();
+  }, [resetRecording]);
+
   // UX-06: shake during recording to discard the buffer without saving.
   const handleShakeDiscard = useCallback(async () => {
     if (!isRecording) {
@@ -160,11 +179,24 @@ export default function HomeScreen(): ReactElement {
   }, [latestEntry?.category]);
 
   return (
-    <ScrollView className="min-h-screen bg-background text-foreground pb-32 font-sans">
+    <ScrollView
+      className="min-h-screen bg-background text-foreground font-sans"
+      contentContainerStyle={{ paddingBottom: bottomClearance }}
+      keyboardShouldPersistTaps="handled"
+    >
       <View className="px-6 pt-12">
         <AnimatedEntrance>
           <DailySparkCard />
         </AnimatedEntrance>
+        {streakDays >= 2 ? (
+          <AnimatedEntrance delay={60}>
+            <View className="mt-3 self-center bg-card border-2 border-border rounded-full px-4 py-1.5 shadow-paper-sm">
+              <Text className="font-sans text-xs font-bold" style={{ color: primaryTextHex(isDark) }}>
+                {t("home.streakNudge", { days: streakDays })}
+              </Text>
+            </View>
+          </AnimatedEntrance>
+        ) : null}
       </View>
 
       <AnimatedEntrance delay={100}>
@@ -190,6 +222,14 @@ export default function HomeScreen(): ReactElement {
           </View>
         ) : null}
 
+        {Platform.OS === "web" ? (
+          <View className="mt-2">
+            <Text className="font-sans text-xs font-medium text-muted-foreground text-center">
+              {t("home.webRecordingUnavailable")}
+            </Text>
+          </View>
+        ) : null}
+
         <View className="mt-4">
           <RecordingTimer />
         </View>
@@ -209,14 +249,15 @@ export default function HomeScreen(): ReactElement {
           <TranscriptionResult
             visible={!isRecording && !isProcessing && status === 'idle'}
             tabTargetPosition={tabTargetPosition}
-            onShredderComplete={() => {
-              resetRecording();
-            }}
+            onShredderComplete={handleShredderComplete}
           />
         </View>
 
         <View className="mt-4 px-6 w-full">
-          <ErrorBanner visible={status === 'error'} onRetry={retry} />
+          <ErrorBanner
+            visible={status === 'error'}
+            onRetry={handleRetryAfterError}
+          />
         </View>
         </View>
       </AnimatedEntrance>

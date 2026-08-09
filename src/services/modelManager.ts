@@ -47,6 +47,8 @@ const MODELS_DIRECTORY_URI = `${Paths.document.uri}models`;
 
 export class ModelManager {
   private readonly selectionCache = new Map<SttLanguage, ModelSelection>();
+  private readonly inFlightResolutions = new Map<SttLanguage, Promise<ModelSelection>>();
+  private activeDownloadPath: string | null = null;
 
   async prepareDefaultModel(): Promise<ModelSelection> {
     return this.resolveModel(DEFAULT_LANGUAGE);
@@ -58,6 +60,28 @@ export class ModelManager {
       return cached;
     }
 
+    // Deduplicate concurrent resolves (e.g. mount + AppState): a second call
+    // while the first is still running shares the in-flight download/promise.
+    const inFlight = this.inFlightResolutions.get(language);
+    if (inFlight) {
+      return inFlight;
+    }
+
+    const resolution = this.resolveModelUncached(language);
+    this.inFlightResolutions.set(language, resolution);
+    resolution.then(
+      () => {
+        this.inFlightResolutions.delete(language);
+      },
+      () => {
+        this.inFlightResolutions.delete(language);
+      },
+    );
+
+    return resolution;
+  }
+
+  private async resolveModelUncached(language: SttLanguage): Promise<ModelSelection> {
     let selected = this.pickModelPath(language);
     if (!selected) {
       const downloadResult = await this.downloadBestCandidate(language);
@@ -126,7 +150,8 @@ export class ModelManager {
           return { path, index };
         }
 
-        if (file.exists) {
+        // Never prune the file a concurrent download is currently writing to.
+        if (file.exists && path !== this.activeDownloadPath) {
           file.delete();
         }
       } catch {
@@ -166,6 +191,7 @@ export class ModelManager {
       }
 
       const candidateFile = new File(candidatePath);
+      this.activeDownloadPath = candidatePath;
 
       try {
         // Delete any partial/corrupt file before downloading to avoid loading bad data.
@@ -186,6 +212,8 @@ export class ModelManager {
       } catch (error) {
         lastReason = `${fileName} download failed (${this.describeError(error)})`;
         // Continue trying lower-priority model candidates.
+      } finally {
+        this.activeDownloadPath = null;
       }
     }
 

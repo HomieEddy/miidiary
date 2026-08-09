@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { useEffect, useState } from "react";
-import { Platform, View } from "react-native";
+import { Platform, Text, View } from "react-native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import * as SplashScreen from "expo-splash-screen";
@@ -15,9 +15,12 @@ import {
   ReanimatedLogLevel,
 } from "react-native-reanimated";
 import { BiometricGate } from "@/components/ui/BiometricGate";
+import { OnboardingOverlay } from "@/components/ui/OnboardingOverlay";
 import { useTheme } from "@/hooks/useTheme";
-import { ensureSkiaWeb, useSkiaReady } from "@/hooks/useSkiaReady";
+import { useSkiaReady, ensureSkiaWeb } from "@/hooks/useSkiaReady";
 import { useInterruptionHandler } from "@/services/interruptionService";
+import { entriesRepository } from "@/services/entriesRepository";
+import { useEntriesStore } from "@/stores/entriesStore";
 import { cn } from "@/utils/cn";
 import "../../global.css";
 
@@ -46,6 +49,26 @@ export default function RootLayout(): ReactElement | null {
   }, []);
 
   useEffect(() => {
+    // Seed the shared session cache from Realm so Home previews are
+    // correct after a cold start (the store is not persisted).
+    void entriesRepository
+      .listChronological()
+      .then((records) => {
+        useEntriesStore.getState().setEntries(
+          records.map((record) => ({
+            id: record.id,
+            text: record.text,
+            category: record.category,
+            createdAt: record.createdAt,
+          })),
+        );
+      })
+      .catch(() => {
+        // Hydration is best-effort; screens still load from the repository.
+      });
+  }, []);
+
+  useEffect(() => {
     // Android system navigation bar follows the app theme.
     if (Platform.OS === "android") {
       void NavigationBar.setBackgroundColorAsync(isDark ? "#1E1A24" : "#FDF8F0");
@@ -59,6 +82,18 @@ export default function RootLayout(): ReactElement | null {
     }
   }, [loaded, error]);
 
+  if (error) {
+    // Font loading failed: render a recoverable error instead of a
+    // permanent blank screen (the splash already hid).
+    return (
+      <View className="flex-1 items-center justify-center bg-background px-8">
+        <Text className="font-sans text-center text-muted-foreground">
+          Failed to load app assets. Restart the app to try again.
+        </Text>
+      </View>
+    );
+  }
+
   if (!loaded || !skiaReady) {
     return null;
   }
@@ -68,6 +103,7 @@ export default function RootLayout(): ReactElement | null {
       <View className={cn("flex-1 bg-background", isDark && "dark")}>
         <StatusBar style={isDark ? "light" : "dark"} />
         <Stack screenOptions={{ headerShown: false }} />
+        <OnboardingOverlay />
       </View>
     </BiometricGate>
   );
@@ -79,7 +115,9 @@ export default function RootLayout(): ReactElement | null {
           content
         ) : (
           <KeyboardProvider>
-            <PerformanceProfiler>{content}</PerformanceProfiler>
+            <PerformanceProfiler useRenderTimeouts={false}>
+              {content}
+            </PerformanceProfiler>
           </KeyboardProvider>
         )}
       </BottomSheetModalProvider>

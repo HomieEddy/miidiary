@@ -1,10 +1,12 @@
 import { useEffect } from 'react';
 import Animated, {
-  useSharedValue,
+  cancelAnimation,
   useAnimatedStyle,
-  withTiming,
+  useReducedMotion,
+  useSharedValue,
   withRepeat,
   withSequence,
+  withTiming,
   Easing,
 } from 'react-native-reanimated';
 import { View } from 'react-native';
@@ -16,8 +18,18 @@ interface GlowRingProps {
 export function GlowRing({ isActive }: GlowRingProps) {
   const opacity = useSharedValue(0);
   const scale = useSharedValue(0.95);
+  const reducedMotion = useReducedMotion();
 
   useEffect(() => {
+    if (reducedMotion) {
+      // Reduced motion: static ring, no pulse loop.
+      cancelAnimation(opacity);
+      cancelAnimation(scale);
+      opacity.value = 0;
+      scale.value = 0.95;
+      return;
+    }
+
     if (isActive) {
       opacity.value = withRepeat(
         withSequence(
@@ -47,7 +59,7 @@ export function GlowRing({ isActive }: GlowRingProps) {
         true
       );
     }
-  }, [isActive, opacity, scale]);
+  }, [isActive, opacity, reducedMotion, scale]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,

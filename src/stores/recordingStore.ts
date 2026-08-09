@@ -10,6 +10,9 @@ export type ProcessingStage =
   | 'finalizing';
 
 interface RecordingState {
+  /** Monotonic session id; bumped on every startRecording so late async
+   *  completions from a previous session can be detected and ignored. */
+  sessionId: number;
   isRecording: boolean;
   isPaused: boolean;
   isProcessing: boolean;
@@ -34,6 +37,7 @@ interface RecordingState {
 }
 
 const initialState = {
+  sessionId: 0,
   isRecording: false,
   isPaused: false,
   isProcessing: false,
@@ -48,7 +52,16 @@ const initialState = {
 export const useRecordingStore = create<RecordingState>((set, get) => ({
   ...initialState,
 
-  setRecording: (val) => set({ isRecording: val, status: val ? 'recording' : 'idle' }),
+  setRecording: (val) => set((state) => (val
+    ? {
+        isRecording: true,
+        status: 'recording',
+        isPaused: false,
+        duration: 0,
+        errorMessage: null,
+        sessionId: state.sessionId + 1,
+      }
+    : { isRecording: false, status: 'idle' })),
 
   setPaused: (val) => set((state) => ({
     isPaused: val,

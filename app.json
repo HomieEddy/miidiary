@@ -17,8 +17,16 @@
     },
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.homieddy.miidiary",
+      "buildNumber": "1",
       "infoPlist": {
-        "UIViewControllerBasedStatusBarAppearance": false
+        "UIViewControllerBasedStatusBarAppearance": false,
+        "NSMicrophoneUsageDescription": "Dear Diary uses the microphone only while you record a voice note. Audio is processed on-device and deleted immediately after transcription.",
+        "NSFaceIDUsageDescription": "Dear Diary uses Face ID or Touch ID to lock your diary so only you can open it.",
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIBackgroundModes": [
+          "processing"
+        ]
       },
       "statusBar": {
         "backgroundColor": "#FDF8F0"
@@ -32,7 +40,12 @@
       "backgroundColor": "#FDF8F0",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.miidiaryexpoinit",
+      "package": "com.homieddy.miidiary",
+      "versionCode": 1,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.POST_NOTIFICATIONS"
+      ],
       "statusBar": {
         "backgroundColor": "#FDF8F0"
       }
@@ -42,9 +55,16 @@
       "bundler": "metro"
     },
     "plugins": [
+      "expo-system-ui",
       "expo-router",
       "expo-localization",
-      "expo-notifications"
+      [
+        "expo-notifications",
+        {
+          "color": "#FF6B9E"
+        }
+      ],
+      "./plugins/withMainActivityPerfInit.js"
     ]
   }
 }

@@ -2,6 +2,7 @@ import type { ReactElement } from "react";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import Animated, {
+  cancelAnimation,
   Easing,
   useAnimatedStyle,
   useReducedMotion,
@@ -50,10 +51,13 @@ export function DailySparkCard(): ReactElement {
     }, PROMPT_INTERVAL_MS);
 
     return () => clearInterval(timer);
-  }, [promptOffset, promptOpacity, prompts.length, reducedMotion]);
+  }, [promptOffset, promptOpacity, prompts, reducedMotion]);
 
   useEffect(() => {
     if (reducedMotion) {
+      // Reduced motion: stop any running float loop and rest the spark.
+      cancelAnimation(floatY);
+      floatY.value = 0;
       return;
     }
 
@@ -66,6 +70,8 @@ export function DailySparkCard(): ReactElement {
       -1,
       true,
     );
+
+    return () => cancelAnimation(floatY);
   }, [floatY, reducedMotion]);
 
   const promptStyle = useAnimatedStyle(() => ({
@@ -90,7 +96,7 @@ export function DailySparkCard(): ReactElement {
         style={floatStyle}
       >
         <Image
-          source={require('../../../ui-export-react/images/tjieNgrH5Ca.png')}
+          source={require('../../assets/images/spark-illustration.png')}
           style={{ width: '100%', height: '100%' }}
           contentFit="contain"
           transition={300}
@@ -103,6 +109,7 @@ export function DailySparkCard(): ReactElement {
         <Text
           key={promptIndex}
           className="text-sm text-secondary-foreground font-medium"
+          style={{ fontFamily: "Playfair Display", fontStyle: "italic" }}
         >
           "{prompts[promptIndex]}"
         </Text>

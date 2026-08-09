@@ -1,4 +1,5 @@
 import { AudioModule, requestRecordingPermissionsAsync, setAudioModeAsync } from 'expo-audio';
+import { Platform } from 'react-native';
 import { WHISPER_QUALITY } from '@/utils/recordingPresets';
 import { File } from 'expo-file-system';
 
@@ -19,7 +20,7 @@ export class AudioCaptureService {
   private tempFilePath: string | null = null;
   private lastError: string | null = null;
   private meteringCallback: ((value: number) => void) | null = null;
-  private readonly pendingProcessing = new Set<string>();
+  private readonly pendingProcessing = new Map<string, number>();
 
   onMetering(cb: (value: number) => void) {
     this.meteringCallback = cb;
@@ -47,6 +48,14 @@ export class AudioCaptureService {
   async startRecording(): Promise<boolean> {
     try {
       this.lastError = null;
+
+      if (Platform.OS === 'web' || typeof AudioModule.AudioRecorder === 'undefined') {
+        // expo-audio does not provide a web recorder; degrade gracefully
+        // instead of throwing a TypeError on tap.
+        this.lastError = 'Recording is not supported in this browser.';
+        return false;
+      }
+
       const granted = await this.requestPermissions();
       if (!granted) return false;
 
@@ -106,6 +115,29 @@ export class AudioCaptureService {
     } finally {
       this.clearPolling();
       this.recorder = null;
+      // The recorded file's lifecycle is owned by the caller via the
+      // returned uri; never leave a stale path that a later session's
+      // cleanup could mistake for its own file.
+      this.tempFilePath = null;
+    }
+  }
+
+  /** Pause the live recorder (interruption). No-op when idle. */
+  pause(): void {
+    try {
+      this.recorder?.pause();
+    } catch {
+      // Best-effort: the store still tracks the paused state.
+    }
+  }
+
+  /** Resume the live recorder after an interruption. No-op when idle. */
+  resume(): void {
+    try {
+      // expo-audio resumes a paused recorder through record().
+      this.recorder?.record();
+    } catch {
+      // Best-effort: the store still tracks the resumed state.
     }
   }
 
@@ -137,8 +169,8 @@ export class AudioCaptureService {
     return this.lastError;
   }
 
-  markPendingProcessing(uri: string): void {
-    this.pendingProcessing.add(uri);
+  markPendingProcessing(uri: string, sessionId: number): void {
+    this.pendingProcessing.set(uri, sessionId);
   }
 
   markProcessingComplete(uri: string): void {
@@ -146,7 +178,12 @@ export class AudioCaptureService {
   }
 
   getPendingProcessingUris(): string[] {
-    return [...this.pendingProcessing.values()];
+    return [...this.pendingProcessing.keys()];
+  }
+
+  /** Session that recorded `uri`, or undefined when no longer pending. */
+  getRecordingSessionId(uri: string): number | undefined {
+    return this.pendingProcessing.get(uri);
   }
 
   private clearPolling(): void {

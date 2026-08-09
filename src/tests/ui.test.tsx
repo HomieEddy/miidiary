@@ -26,6 +26,7 @@ jest.mock("react-native-reanimated", () => {
     useFrameCallback: () => ({}),
     useReducedMotion: () => false,
     withDelay: (_ms: number, value: unknown) => value,
+    cancelAnimation: () => {},
     withTiming: (val: number) => val,
     withSpring: (val: number) => val,
     withRepeat: (val: unknown) => val,
@@ -42,12 +43,6 @@ jest.mock("react-native-reanimated", () => {
     __esModule: true,
   };
 });
-
-jest.mock("rive-react-native", () => ({
-  default: "RiveMock",
-  RiveRef: {},
-  __esModule: true,
-}));
 
 jest.mock("react-native-svg", () => ({
   SvgXml: "SvgXmlMock",

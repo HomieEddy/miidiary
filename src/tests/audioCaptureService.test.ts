@@ -46,8 +46,8 @@ describe("AudioCaptureService pending processing", () => {
   it("tracks pending processing URIs", () => {
     const service = new AudioCaptureService();
 
-    service.markPendingProcessing("file:///a.wav");
-    service.markPendingProcessing("file:///b.wav");
+    service.markPendingProcessing("file:///a.wav", 1);
+    service.markPendingProcessing("file:///b.wav", 2);
 
     expect(service.getPendingProcessingUris()).toEqual([
       "file:///a.wav",
@@ -58,8 +58,8 @@ describe("AudioCaptureService pending processing", () => {
   it("removes URI when processing completes", () => {
     const service = new AudioCaptureService();
 
-    service.markPendingProcessing("file:///a.wav");
-    service.markPendingProcessing("file:///b.wav");
+    service.markPendingProcessing("file:///a.wav", 1);
+    service.markPendingProcessing("file:///b.wav", 2);
     service.markProcessingComplete("file:///a.wav");
 
     expect(service.getPendingProcessingUris()).toEqual(["file:///b.wav"]);
@@ -68,7 +68,7 @@ describe("AudioCaptureService pending processing", () => {
   it("is safe to mark complete for unknown URI", () => {
     const service = new AudioCaptureService();
 
-    service.markPendingProcessing("file:///a.wav");
+    service.markPendingProcessing("file:///a.wav", 1);
     service.markProcessingComplete("file:///missing.wav");
 
     expect(service.getPendingProcessingUris()).toEqual(["file:///a.wav"]);

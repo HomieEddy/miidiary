@@ -2,6 +2,7 @@ import React from "react";
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
 
 const mockToggleComplete = jest.fn();
+const mockDeleteOne = jest.fn(async () => undefined);
 const mockListChronological = jest.fn();
 
 const mockEntries = [
@@ -15,11 +16,24 @@ const mockEntries = [
     previewText: "Buy milk",
     queryKey: "task|1",
     isCompleted: false,
+    isFavorite: false,
+    dueDate: null,
+    isUrgent: false,
     classificationConfidence: null,
     classificationRationale: null,
     classificationSource: null,
   },
 ];
+
+/** Local yyyy-mm-dd for today + offsetDays (matches the repository's dueDate format). */
+function localYmd(offsetDays: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() + offsetDays);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 
 jest.mock("expo-haptics", () => ({
   impactAsync: jest.fn().mockResolvedValue(undefined),
@@ -30,23 +44,9 @@ jest.mock("@/services/entriesRepository", () => ({
   entriesRepository: {
     listChronological: (...args: unknown[]) => mockListChronological(...args),
     toggleComplete: (...args: unknown[]) => mockToggleComplete(...args),
+    deleteOne: (...args: unknown[]) => (mockDeleteOne as (...a: unknown[]) => unknown)(...args),
   },
 }));
-
-jest.mock("@shopify/flash-list", () => {
-  const ReactLocal = require("react");
-  const { View } = require("react-native");
-
-  return {
-    FlashList: ({ data, renderItem }: { data: unknown[]; renderItem: (props: { item: unknown }) => React.ReactNode }) => (
-      <View>
-        {data.map((item, index) => (
-          <ReactLocal.Fragment key={index}>{renderItem({ item })}</ReactLocal.Fragment>
-        ))}
-      </View>
-    ),
-  };
-});
 
 import TasksScreen from "@/screens/TasksScreen";
 
@@ -66,5 +66,44 @@ describe("TasksScreen", () => {
 
     fireEvent.press(getByLabelText("Toggle task task-1"));
     expect(mockToggleComplete).toHaveBeenCalledWith("task-1");
+  });
+
+  it("renders urgent chip and due label from fixture fields", async () => {
+    const urgentDueEntry = {
+      ...mockEntries[0],
+      id: "task-2",
+      title: "File taxes",
+      previewText: "File taxes",
+      text: "File taxes",
+      queryKey: "task|2",
+      isUrgent: true,
+      dueDate: localYmd(0),
+    };
+    mockListChronological.mockResolvedValue([...mockEntries, urgentDueEntry]);
+
+    const { getAllByText } = render(<TasksScreen />);
+
+    await waitFor(() => {
+      expect(getAllByText("Urgent").length).toBeGreaterThan(0);
+      expect(getAllByText("Due today").length).toBeGreaterThan(0);
+    });
+  });
+
+  it("clears completed tasks after confirmation", async () => {
+    const completedEntry = { ...mockEntries[0], id: "task-9", isCompleted: true };
+    mockListChronological.mockResolvedValue([...mockEntries, completedEntry]);
+
+    const { getByLabelText } = render(<TasksScreen />);
+
+    await waitFor(() => {
+      expect(getByLabelText("Clear completed")).toBeTruthy();
+    });
+
+    fireEvent.press(getByLabelText("Clear completed"));
+    fireEvent.press(getByLabelText("Confirm clear completed"));
+
+    await waitFor(() => {
+      expect(mockDeleteOne).toHaveBeenCalledWith("task-9");
+    });
   });
 });

@@ -1,12 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
-import { Platform, Pressable, Text, View } from "react-native";
+import { Platform, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
 import Animated, { FadeIn, ZoomIn } from "react-native-reanimated";
 import { AnimatedEntrance } from "@/components/ui/AnimatedEntrance";
+import { DigestCards } from "@/components/ui/DigestCards";
 import { LazyStatsCard } from "@/components/ui/LazyStatsCard";
 import { PerformanceMeasureView } from "@shopify/react-native-performance";
 import { useEntries } from "@/hooks/useEntries";
+import { useStats } from "@/hooks/useStats";
+import { useScreenProfiler } from "@/hooks/useScreenProfiler";
+import { useTabBarClearance } from "@/hooks/useTabBarClearance";
 import { useSkiaReady } from "@/hooks/useSkiaReady";
 import { useTheme } from "@/hooks/useTheme";
+import { primaryTextHex } from "@/theme/colors";
 import { useLocale, type AppLocale } from "@/i18n";
 import { exportJson, exportPdf } from "@/services/exportService";
 import {
@@ -21,22 +26,27 @@ import { cn } from "@/utils/cn";
 const reminderSupported = Platform.OS !== "web";
 
 export default function DigestsScreen() {
-  const { themeOverride, setThemeOverride } = useTheme();
+  useScreenProfiler();
+  const bottomClearance = useTabBarClearance();
+  const { isDark, themeOverride, setThemeOverride } = useTheme();
   const { locale, setLocale, t } = useLocale();
   const {
     showWipeConfirmStepOne,
     showWipeConfirmStepTwo,
+    loadEntries,
     requestWipeAll,
     cancelWipeAll,
     continueWipeAll,
     confirmWipeAll,
   } = useEntries({ autoLoad: false });
+  const { reload: reloadStats } = useStats();
 
   const [reminder, setReminder] = useState<ReminderSettings | null>(null);
   const [reminderBusy, setReminderBusy] = useState(false);
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [exportBusy, setExportBusy] = useState<"json" | "pdf" | null>(null);
   const [exportError, setExportError] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     if (!reminderSupported) {
@@ -89,7 +99,30 @@ export default function DigestsScreen() {
 
   return (
     <PerformanceMeasureView screenName="DigestsScreen" interactive>
-      <View className="min-h-screen bg-background text-foreground pb-32 font-sans p-6">
+      <View className="flex-1 bg-background font-sans">
+      <ScrollView
+        className="flex-1 text-foreground"
+        contentContainerStyle={{
+          paddingBottom: bottomClearance,
+          paddingHorizontal: 24,
+          paddingTop: 40,
+        }}
+        keyboardShouldPersistTaps="handled"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => {
+              void (async () => {
+                setRefreshing(true);
+                await Promise.all([loadEntries(), reloadStats()]);
+                setRefreshing(false);
+              })();
+            }}
+            tintColor={primaryTextHex(isDark)}
+            colors={[primaryTextHex(isDark)]}
+          />
+        }
+      >
       <AnimatedEntrance>
         <Text className="font-heading text-4xl text-foreground tracking-wide">{t("digests.title")}</Text>
       </AnimatedEntrance>
@@ -98,6 +131,8 @@ export default function DigestsScreen() {
           {t("digests.subtitle")}
         </Text>
       </AnimatedEntrance>
+
+      <DigestCards />
 
       <AnimatedEntrance delay={120}>
         <View className="bg-card border-4 border-border rounded-2xl p-5 shadow-paper mt-8">
@@ -111,6 +146,9 @@ export default function DigestsScreen() {
             {(["system", "light", "dark"] as const).map((mode) => (
               <Pressable
                 key={mode}
+                accessibilityRole="button"
+                accessibilityLabel={t(`digests.${mode}`)}
+                accessibilityState={{ selected: themeOverride === mode }}
                 onPress={() => setThemeOverride(mode)}
                 className={cn(
                   "flex-row items-center py-2",
@@ -142,6 +180,9 @@ export default function DigestsScreen() {
             {(["en", "fr"] as AppLocale[]).map((option) => (
               <Pressable
                 key={option}
+                accessibilityRole="button"
+                accessibilityLabel={t(`digests.${option}`)}
+                accessibilityState={{ selected: locale === option }}
                 onPress={() => setLocale(option)}
                 className={cn(
                   "flex-row items-center py-2",
@@ -175,7 +216,7 @@ export default function DigestsScreen() {
 
               {reminder ? (
                 <View className="flex-row items-center justify-between">
-                  <Text className="font-sans text-sm font-bold text-primary">{selectedReminderLabel}</Text>
+                  <Text className="font-sans text-sm font-bold" style={{ color: primaryTextHex(isDark) }}>{selectedReminderLabel}</Text>
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel="Disable daily reminder"
@@ -262,12 +303,14 @@ export default function DigestsScreen() {
             className="mt-4 bg-destructive border-2 border-border rounded-xl p-3 active:translate-y-1 active:translate-x-1 active:shadow-none"
             onPress={requestWipeAll}
           >
-            <Text className="font-sans text-center font-bold text-white">{t("digests.wipeAllData")}</Text>
+            <Text className="font-sans text-center font-bold text-destructive-foreground">{t("digests.wipeAllData")}</Text>
           </Pressable>
         </View>
       </AnimatedEntrance>
 
       {useSkiaReady() ? <LazyStatsCard /> : null}
+
+      </ScrollView>
 
       {showWipeConfirmStepOne ? (
         <Animated.View entering={FadeIn.duration(150)} className="absolute inset-0 bg-black/40 items-center justify-center px-6">
@@ -292,7 +335,7 @@ export default function DigestsScreen() {
                 className="flex-1 bg-destructive border-2 border-border rounded-xl p-3"
                 onPress={continueWipeAll}
               >
-                <Text className="font-sans text-center font-bold text-white">{t("diary.continue")}</Text>
+                <Text className="font-sans text-center font-bold text-destructive-foreground">{t("diary.continue")}</Text>
               </Pressable>
             </View>
           </Animated.View>
@@ -324,7 +367,7 @@ export default function DigestsScreen() {
                   void confirmWipeAll();
                 }}
               >
-                <Text className="font-sans text-center font-bold text-white">{t("diary.wipeConfirm")}</Text>
+                <Text className="font-sans text-center font-bold text-destructive-foreground">{t("diary.wipeConfirm")}</Text>
               </Pressable>
             </View>
           </Animated.View>

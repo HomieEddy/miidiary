@@ -3,6 +3,7 @@ import { act, render, fireEvent, waitFor } from "@testing-library/react-native";
 
 const mockConfirmWipeAll = jest.fn();
 const mockDeleteOne = jest.fn();
+const mockRestoreEntry = jest.fn(async (record: unknown) => record);
 const mockUpdateEntry = jest.fn();
 const mockListChronological = jest.fn();
 
@@ -81,7 +82,8 @@ jest.mock("expo-router", () => ({
 
 jest.mock("@/services/entriesRepository", () => ({
   entriesRepository: {
-    deleteOne: (...args: unknown[]) => mockDeleteOne(...args),
+    deleteOne: (...args: unknown[]) => (mockDeleteOne as (...a: unknown[]) => unknown)(...args),
+    restoreEntry: (...args: unknown[]) => (mockRestoreEntry as (...a: unknown[]) => unknown)(...args),
     updateEntry: (...args: unknown[]) => mockUpdateEntry(...args),
     listChronological: (...args: unknown[]) => mockListChronological(...args),
   },
@@ -158,5 +160,30 @@ describe("DiaryScreen", () => {
     fireEvent.press(getByTestId("new-entry-btn"));
 
     expect(getByTestId("new-entry-sheet")).toBeTruthy();
+  });
+
+  it("offers undo after deleting an entry and restores it", async () => {
+    mockDeleteOne.mockResolvedValue(undefined);
+
+    const { getByText, getByLabelText, findByText } = render(<DiaryScreen />);
+
+    await waitFor(() => {
+      expect(getByText("First title")).toBeTruthy();
+    });
+
+    fireEvent(getByText("First title"), "longPress");
+    fireEvent.press(getByLabelText("Delete entry"));
+    fireEvent.press(getByLabelText("Confirm delete"));
+
+    await waitFor(() => {
+      expect(mockDeleteOne).toHaveBeenCalled();
+    });
+
+    const undo = await findByText("Undo");
+    fireEvent.press(undo);
+
+    await waitFor(() => {
+      expect(mockRestoreEntry).toHaveBeenCalled();
+    });
   });
 });

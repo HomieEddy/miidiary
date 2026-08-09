@@ -14,6 +14,7 @@ import { NewEntrySheet } from "@/components/ui/NewEntrySheet";
 import { PressableScale } from "@/components/ui/PressableScale";
 import { ShimmerView } from "@/components/ui/ShimmerView";
 import { useLocale } from "@/i18n";
+import { getPref, setPref } from "@/services/appPrefsService";
 import { useEntries } from "@/hooks/useEntries";
 import { useTabBarClearance } from "@/hooks/useTabBarClearance";
 import { useTheme } from "@/hooks/useTheme";
@@ -99,6 +100,8 @@ export default function DiaryScreen(): ReactElement {
   const [sheetVisible, setSheetVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const RECENT_SEARCHES_KEY = "recent_searches";
+
   const searchInputRef = useRef<TextInput | null>(null);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
 

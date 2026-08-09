@@ -8,6 +8,7 @@ import {
   CheckSquareBoldDuotone,
   MagniferBoldDuotone,
 } from "@/assets/icons/solar";
+import { FlashList } from "@shopify/flash-list";
 import { AnimatedEntrance } from "@/components/ui/AnimatedEntrance";
 import { EntryDetailSheet } from "@/components/ui/EntryDetailSheet";
 import { NewEntrySheet } from "@/components/ui/NewEntrySheet";
@@ -273,9 +274,62 @@ export default function DiaryScreen(): ReactElement {
     return entries;
   }, [entries, searchResults]);
 
+  // Virtualized list items: grouped headers + entries, or flat search rows.
+  const listData = useMemo(() => {
+    if (searchResults !== null) {
+      return visibleEntries.map((entry) => ({
+        type: "entry" as const,
+        entry,
+        key: entry.id,
+      }));
+    }
+    return flatItems;
+  }, [searchResults, visibleEntries, flatItems]);
+
+  const renderListItem = ({
+    item,
+    index,
+  }: {
+    item: (typeof listData)[number];
+    index: number;
+  }): ReactElement => {
+    if (item.type === "header") {
+      return (
+        <AnimatedEntrance key={item.key} delay={Math.min(index, 3) * staggerMs}>
+          <View className="flex-row items-center mb-3 mt-2">
+            <View className="relative mr-3">
+              <View
+                pointerEvents="none"
+                className="absolute left-[15px] -top-2 bottom-0 w-1 bg-border/20 rounded-full"
+              />
+              <View
+                pointerEvents="none"
+                className="w-8 h-8 rounded-full bg-primary border-2 border-border"
+              />
+            </View>
+            <Text className="font-heading text-xl text-foreground">{item.label}</Text>
+          </View>
+        </AnimatedEntrance>
+      );
+    }
+
+    return (
+      <View key={item.key} className="relative">
+        <View
+          pointerEvents="none"
+          className="absolute left-[15px] top-0 bottom-0 w-1 bg-border/20 rounded-full"
+        />
+        {renderEntryCard(item.entry, index)}
+      </View>
+    );
+  };
+
   return (
     <View className="flex-1 bg-background font-sans">
-      <ScrollView
+      <FlashList
+        data={listData}
+        keyExtractor={(item) => item.key}
+        renderItem={renderListItem}
         className="flex-1 text-foreground"
         contentContainerStyle={{
           paddingBottom: bottomClearance,
@@ -297,7 +351,8 @@ export default function DiaryScreen(): ReactElement {
             colors={[primaryTextHex(isDark)]}
           />
         }
-      >
+        ListHeaderComponent={
+          <>
       <View className="flex-row items-center justify-between mb-2">
         <Text className="font-heading text-4xl text-foreground tracking-wide">{t("diary.title")}</Text>
         <View className="flex-row items-center gap-2">
@@ -417,42 +472,18 @@ export default function DiaryScreen(): ReactElement {
       >
         <Text className="font-sans text-xs font-bold text-destructive-foreground">{t("diary.wipeAll")}</Text>
       </Pressable>
-
-      {isLoading ? (
-        <View>
-          <ShimmerView className="h-20 mb-3" />
-          <ShimmerView className="h-20 mb-3" />
-          <ShimmerView className="h-20" />
-        </View>
-      ) : searchResults !== null ? (
-        <View>{visibleEntries.map((entry, index) => renderEntryCard(entry, index))}</View>
-      ) : (
-        <View className="relative">
-          <View
-            pointerEvents="none"
-            className="absolute left-10 top-0 bottom-0 w-1 bg-border/20 rounded-full"
-          />
-          {flatItems.map((item, index) => {
-            if (item.type === "header") {
-              return (
-                <AnimatedEntrance key={item.key} delay={Math.min(index, 3) * staggerMs}>
-                  <View className="flex-row items-center mb-3 mt-2">
-                    <View
-                      pointerEvents="none"
-                      className="w-8 h-8 rounded-full bg-primary border-2 border-border -left-2 mr-2"
-                    />
-                    <Text className="font-heading text-xl text-foreground">{item.label}</Text>
-                  </View>
-                </AnimatedEntrance>
-              );
-            }
-
-            return renderEntryCard(item.entry, index);
-          })}
-        </View>
-      )}
-
-      </ScrollView>
+          </>
+        }
+        ListEmptyComponent={
+          isLoading ? (
+            <View>
+              <ShimmerView className="h-20 mb-3" />
+              <ShimmerView className="h-20 mb-3" />
+              <ShimmerView className="h-20" />
+            </View>
+          ) : null
+        }
+      />
 
       {longPressTarget ? (
         <AnimatedPressable

@@ -40,6 +40,10 @@ jest.mock("expo-haptics", () => ({
   ImpactFeedbackStyle: { Medium: "medium" },
 }));
 
+jest.mock("expo-linear-gradient", () => ({
+  LinearGradient: "LinearGradient",
+}));
+
 jest.mock("@/services/entriesRepository", () => ({
   entriesRepository: {
     listChronological: (...args: unknown[]) => mockListChronological(...args),

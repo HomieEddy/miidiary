@@ -94,11 +94,16 @@ export function PaperTabBar({
 
 const styles = StyleSheet.create({
   bar: {
+    start: 0,
+    end: 0,
+    bottom: 0,
     flexDirection: "row",
+    alignSelf: "stretch",
+    width: "100%",
     borderTopWidth: 1,
   },
   item: {
-    width: "25%",
+    flex: 1,
     alignItems: "center",
     justifyContent: "center",
   },

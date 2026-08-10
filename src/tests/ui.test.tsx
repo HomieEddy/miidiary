@@ -103,6 +103,7 @@ jest.mock("@/services/transcriptionService", () => ({
 jest.mock("@/services/entriesRepository", () => ({
   entriesRepository: {
     createEntry: jest.fn(),
+    listChronological: jest.fn(async () => []),
   },
 }));
 
